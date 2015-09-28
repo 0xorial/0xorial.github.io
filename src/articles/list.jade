@@ -1,0 +1,4 @@
+div(flex='', ng-controller='ArticlesListCtrl', ng-repeat='article in articles')
+  .md-whiteframe-z2(layout-padding='', ng-click='viewArticle(article)')
+    .md-title {{article.title}}
+    .md-subhead {{article.description}}
