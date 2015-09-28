@@ -18,5 +18,6 @@ app = angular.module('StarterApp', [
       templateUrl: (stateParams) -> 'articles/content/' + stateParams.articleId + '.html'
       })
 
-app.controller 'AppCtrl', ($rootScope, $scope, $timeout, $mdUtil, $mdSidenav) ->
+app.controller 'AppCtrl', ($rootScope, $scope, $timeout) ->
+  $scope.title = 'My articles!'
 

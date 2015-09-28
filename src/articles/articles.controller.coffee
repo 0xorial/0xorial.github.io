@@ -8,5 +8,3 @@ angular
 
       $scope.viewArticle = (article) ->
         $state.go('view', {articleId: article.id})
-
-
