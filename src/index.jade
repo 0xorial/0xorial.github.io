@@ -3,7 +3,8 @@ html(lang='en', ng-app='StarterApp')
     link(rel='stylesheet', href='../bower_components/angular-material/angular-material.min.css')
     link(rel='stylesheet', href='../bower_components/animate.css/animate.min.css')
     link(rel='stylesheet', href='app.css')
-    link(href='https://fonts.googleapis.com/css?family=Roboto:400,400italic,500,500italic,700,700italic', rel='stylesheet', type='text/css')
+    link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,100,100italic,700italic,500italic,700,500,400italic', rel='stylesheet', type='text/css')
+    link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
   body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;')
       md-toolbar(md-scroll-shrink='')
@@ -11,12 +12,17 @@ html(lang='en', ng-app='StarterApp')
           h2
             span {{title}}
       md-content(layout='column', layout-align='start center')
-        md-content(ui-view='', layout-padding='', style="width: 100%; max-width: 960px;")
+        ui-view(layout-padding='', style="width: 100%; max-width: 960px;")
 
 
+
+    script.
+      var _globals = {}
 
     // Angular Material Dependencies
     script(src='./bower_components/lodash/lodash.js')
+    script(src='./bower_components/jquery/dist/jquery.min.js')
+    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js')
     script(src='./bower_components/angular/angular.js')
     script(src='./bower_components/angular-messages/angular-messages.js')
     script(src='./bower_components/angular-ui-router/release/angular-ui-router.min.js')
@@ -25,7 +31,9 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/angular-material/angular-material.min.js')
     script(src='./bower_components/angular-material-icons/angular-material-icons.min.js')
     script(src='./bower_components/bluebird/js/browser/bluebird.js')
+    script(src='./bower_components/EaselJS/lib/easeljs-0.8.1.combined.js')
     script(src='app.js')
+    script(src='articles/content/draw.js')
     script(src='articles/articles.module.js')
     script(src='articles/articles.service.js')
     script(src='articles/articles.controller.js')
