@@ -8,11 +8,37 @@ class MyStage
         @zoom *= 1.1
       else
         @zoom /= 1.1
-      @_stage.setTransform(0,0, @zoom, @zoom)
-      @_stage.update()
+      @_updateTransform()
+
+    @_lastMouseX = 0
+    @_lastMouseY = 0
+
+    @_offsetX = 0
+    @_offsetY = 0
+
+    @_stage.on 'stagemousedown', (event) =>
+      if event.nativeEvent.which == 2
+        @_lastMouseX = event.stageX
+        @_lastMouseY = event.stageY
+
+
+    @_stage.on 'stagemousemove', (event) =>
+      if event.nativeEvent.which == 2
+        dx = event.stageX - @_lastMouseX
+        dy = event.stageY - @_lastMouseY
+
+        @_offsetX += dx
+        @_offsetY += dy
+
+        @_lastMouseX = event.stageX
+        @_lastMouseY = event.stageY
+        @_updateTransform()
 
 
 
+  _updateTransform: ->
+    @_stage.setTransform(@_offsetX, @_offsetY, @zoom, @zoom)
+    @_stage.update()
 
 class MyStage1 extends MyStage
   constructor: (@id) ->
