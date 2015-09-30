@@ -7,10 +7,6 @@ html(lang='en', ng-app='StarterApp')
     link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
   body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;')
-      md-toolbar(md-scroll-shrink='')
-        .md-toolbar-tools(layout-align='center center')
-          h2
-            span {{title}}
       md-content(layout='column', layout-align='start center')
         ui-view(layout-padding='', style="width: 100%; max-width: 960px;")
 
@@ -35,6 +31,7 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/EaselJS/lib/easeljs-0.8.1.combined.js')
     script(src='app.js')
     script(src='articles/content/draw.js')
+    script(src='articles/content/stages.js')
     script(src='articles/articles.module.js')
     script(src='articles/articles.service.js')
     script(src='articles/articles.controller.js')
