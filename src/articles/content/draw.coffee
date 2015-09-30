@@ -1,3 +1,93 @@
+Victor.fromPoints = (start, end) ->
+  return Victor.fromObject(end).subtract(Victor.fromObject(start));
+
+Victor.prototype.multiplyScalar = (scalar) ->
+  @x *= scalar
+  @y *= scalar
+  return @
+
+epsilonEquals = (x, y, epsilon = 0.01) ->
+  return Math.abs(x - y) < epsilon
+
+class ShapeBase
+  getPosition: ->
+    return {x: @shape.x, y: @shape.y}
+
+  setPosition: (x, y) ->
+    if x.x
+      y = x.y
+      x = x.x
+    @shape.x = x
+    @shape.y = y
+    @update()
+
+
+class Shape extends ShapeBase
+  constructor: ->
+    @shape = new createjs.Shape()
+
+  _makeGraphics: () ->
+    g = @shape.graphics
+    if @stroke
+      g.beginStroke @stroke
+    if @fill
+      g.beginFill @fill
+    return g
+
+  setFill: (fill) ->
+    @fill = fill
+    @update()
+
+  setStroke: (stroke) ->
+    @stroke = stroke
+    @update()
+
+  update: ->
+    @shape.graphics.clear()
+    @_makeGraphics()
+
+  markMovable: (stage) ->
+    injectMovable stage, @shape
+
+class Circle extends Shape
+  _makeGraphics: ->
+    super().drawCircle(0, 0, @radius)
+
+class Rectangle extends Shape
+  _makeGraphics: ->
+    super().drawRect(0, 0, @width, @height)
+
+class Line extends Shape
+  _makeGraphics: ->
+    super().moveTo(@start.x, @start.y).lineTo(@end.x, @end.y)
+
+class Arrow extends Shape
+  _makeGraphics: ->
+    direction = Victor.fromPoints(@start, @end).normalize()
+    angle = 150
+    length = 10
+    leftArrow = direction.clone().rotateDeg(-angle).multiplyScalar(length).add(@end)
+    rightArrow = direction.clone().rotateDeg(angle).multiplyScalar(length).add(@end)
+
+    super().moveTo(@start.x, @start.y)
+      .lineTo(@end.x, @end.y)
+      .lineTo(leftArrow.x, leftArrow.y)
+      .lineTo(rightArrow.x, rightArrow.y)
+      .lineTo(@end.x, @end.y)
+
+class Text extends ShapeBase
+  constructor: (text, font) ->
+    @shape = new createjs.Text(text, font)
+
+  setText: (text) ->
+    @shape.text = text
+
+  setFont: (font) ->
+    @shape.font = font
+
+  update: ->
+
+
 injectMovable = (stage, shape) ->
 
   shape.alpha = 0.5
@@ -15,7 +105,7 @@ injectMovable = (stage, shape) ->
       shape.x += dx
       shape.y += dy
       lastPosition = stagePoint
-      stage.update()
+      # stage.update()
 
 
   shape.addEventListener 'mouseover', (event) ->
@@ -66,29 +156,73 @@ class MyStage
         @_lastMouseY = event.stageY
         @_updateTransform()
 
+      @onLogicUpdate()
+      @_stage.update()
+
+    update = =>
+      @onLogicUpdate()
+      @_stage.update()
+
+    # setInterval(update, 100)
+
 
   _updateTransform: ->
     @_stage.setTransform(@_offsetX, @_offsetY, @zoom, @zoom)
     @_stage.update()
 
+  addShape: (shape) ->
+    shape.update()
+    @_stage.addChild(shape.shape)
+
+  onLogicUpdate: ->
+
 
 class MyStage1 extends MyStage
   constructor: (@id) ->
     super(@id)
-    circle = new createjs.Shape()
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 30)
-    circle.x = 100
-    circle.y = 100
 
-    square = new createjs.Shape()
-    square.graphics.beginFill("red").drawRect(0,0, 20, 30)
-    injectMovable @_stage, circle
-    injectMovable @_stage, square
+    @start = {x: 30, y: 50}
 
-    @_stage.addChild(circle)
-    @_stage.addChild(square)
+    @line1 = new Line()
+    @line1.stroke = 'black'
+    @line1.start = @start
+    @line1.end = {x: @start.x + 100, y: @start.y}
+    @line2 = new Line()
+    @line2.stroke = 'black'
+    @line2.start = @start
+    @line2.end = {x: @start.x, y: @start.y + 100}
+
+    @square = new Rectangle()
+    @square.setPosition({x: @start.x + 20, y: @start.y + 20})
+    @square.width = 20
+    @square.height = 30
+    @square.fill = 'red'
+
+    @square.markMovable @_stage
+
+    @addShape @square
+    @addShape @line1
+    @addShape @line2
+
+    @text = new Text('Put square precisely here.\n it will become green when(if) you succeed', '20px Gochi Hand')
+    @_stage.addChild @text.shape
+
+    @arrow = new Arrow()
+    @arrow.start = {x: 10, y: 40}
+    @arrow.end = @start
+    @arrow.stroke = 'black'
+
+    @addShape @arrow
+
 
     @_stage.update()
+
+  onLogicUpdate: ->
+    position = @square.getPosition()
+    if epsilonEquals(position.x, @start.x, 1) and epsilonEquals(position.y, @start.y, 1)
+      @square.setFill('green')
+    else
+      @square.setFill('red')
 
 
 
