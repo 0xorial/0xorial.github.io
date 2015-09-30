@@ -1,3 +1,6 @@
+if !exports
+  exports = {}
+
 Victor.fromPoints = (start, end) ->
   return Victor.fromObject(end).subtract(Victor.fromObject(start));
 
@@ -6,10 +9,10 @@ Victor.prototype.multiplyScalar = (scalar) ->
   @y *= scalar
   return @
 
-epsilonEquals = (x, y, epsilon = 0.01) ->
+exports.epsilonEquals = (x, y, epsilon = 0.01) ->
   return Math.abs(x - y) < epsilon
 
-class ShapeBase
+class exports.ShapeBase
   getPosition: ->
     return {x: @shape.x, y: @shape.y}
 
@@ -22,7 +25,7 @@ class ShapeBase
     @update()
 
 
-class Shape extends ShapeBase
+class exports.Shape extends exports.ShapeBase
   constructor: ->
     @shape = new createjs.Shape()
 
@@ -47,21 +50,21 @@ class Shape extends ShapeBase
     @_makeGraphics()
 
   markMovable: (stage) ->
-    injectMovable stage, @shape
+    exports.injectMovable stage, @shape
 
-class Circle extends Shape
+class exports.Circle extends exports.Shape
   _makeGraphics: ->
     super().drawCircle(0, 0, @radius)
 
-class Rectangle extends Shape
+class exports.Rectangle extends exports.Shape
   _makeGraphics: ->
     super().drawRect(0, 0, @width, @height)
 
-class Line extends Shape
+class exports.Line extends exports.Shape
   _makeGraphics: ->
     super().moveTo(@start.x, @start.y).lineTo(@end.x, @end.y)
 
-class Arrow extends Shape
+class exports.Arrow extends exports.Shape
   _makeGraphics: ->
     direction = Victor.fromPoints(@start, @end).normalize()
     angle = 150
@@ -75,7 +78,7 @@ class Arrow extends Shape
       .lineTo(rightArrow.x, rightArrow.y)
       .lineTo(@end.x, @end.y)
 
-class Text extends ShapeBase
+class exports.Text extends exports.ShapeBase
   constructor: (text, font) ->
     @shape = new createjs.Text(text, font)
 
@@ -88,7 +91,7 @@ class Text extends ShapeBase
   update: ->
 
 
-injectMovable = (stage, shape) ->
+exports.injectMovable = (stage, shape) ->
 
   shape.alpha = 0.5
 
@@ -117,13 +120,14 @@ injectMovable = (stage, shape) ->
     stage.update()
 
 
-class MyStage
+class exports.MyStage
   constructor: (@id) ->
     @_stage = new createjs.Stage(@id)
     @_stage.enableMouseOver(60)
     @zoom = 1
 
     $("#" + @id).on 'mousewheel', (event) =>
+      event.preventDefault()
       oldZoom = @zoom
       if (event.deltaY > 0)
         @zoom *= 1.1
@@ -184,62 +188,4 @@ class MyStage
 
   onLogicUpdate: ->
 
-
-class MyStage1 extends MyStage
-  constructor: (@id) ->
-    super(@id)
-
-    @start = {x: 30, y: 50}
-
-    @line1 = new Line()
-    @line1.stroke = 'black'
-    @line1.start = @start
-    @line1.end = {x: @start.x + 100, y: @start.y}
-    @line2 = new Line()
-    @line2.stroke = 'black'
-    @line2.start = @start
-    @line2.end = {x: @start.x, y: @start.y + 100}
-
-    @square = new Rectangle()
-    @square.setPosition({x: @start.x + 20, y: @start.y + 20})
-    @square.width = 20
-    @square.height = 30
-    @square.fill = 'red'
-
-    @square.markMovable @_stage
-
-    @addShape @square
-    @addShape @line1
-    @addShape @line2
-
-    @text = new Text('Put square precisely here.\n it will become green when(if) you succeed', '20px Gochi Hand')
-    @_stage.addChild @text.shape
-
-    @arrow = new Arrow()
-    @arrow.start = {x: 10, y: 40}
-    @arrow.end = @start
-    @arrow.stroke = 'black'
-
-    @addShape @arrow
-
-
-    @_stage.update()
-
-  onLogicUpdate: ->
-    position = @square.getPosition()
-    if epsilonEquals(position.x, @start.x, 1) and epsilonEquals(position.y, @start.y, 1)
-      @square.setFill('green')
-    else
-      @square.setFill('red')
-
-
-
-
-_globals.do = ->
-  new MyStage1("demo1")
-
-
-
-class _globals.Class1
-  do: ->
-    alert('')
+_globals.draw = exports
