@@ -124,10 +124,18 @@ class MyStage
     @zoom = 1
 
     $("#" + @id).on 'mousewheel', (event) =>
+      oldZoom = @zoom
       if (event.deltaY > 0)
         @zoom *= 1.1
       else
         @zoom /= 1.1
+
+      pointX = @_stage.mouseX
+      pointY = @_stage.mouseY
+      zoom = @zoom/oldZoom
+      @_offsetX = @_offsetX * zoom - pointX * zoom + pointX
+      @_offsetY = @_offsetY * zoom - pointY * zoom + pointY
+
       @_updateTransform()
 
     @_lastMouseX = 0
