@@ -1,28 +1,8 @@
 if !exports
   exports = {}
+_globals.draw = exports
 
-class exports.Num2
-  constructor: (@x, @y) ->
-
-  add: (x, y) ->
-    if x.x != undefined
-      y = x.y
-      x = x.x
-
-    if y == undefined
-      y = x
-    return new exports.Num2(@x + x, @y + y)
-
-Victor.fromPoints = (start, end) ->
-  return Victor.fromObject(end).subtract(Victor.fromObject(start));
-
-Victor.prototype.multiplyScalar = (scalar) ->
-  @x *= scalar
-  @y *= scalar
-  return @
-
-exports.epsilonEquals = (x, y, epsilon = 0.01) ->
-  return Math.abs(x - y) < epsilon
+num = _globals.num
 
 class exports.ShapeBase
 
@@ -30,7 +10,7 @@ class exports.ShapeBase
     return [@getPosition()]
 
   getPosition: ->
-    return {x: @shape.x, y: @shape.y}
+    return new num.Num2(@shape.x, @shape.y)
 
   setPosition: (x, y) ->
     if x.x
@@ -44,6 +24,7 @@ class exports.ShapeBase
 class exports.Shape extends exports.ShapeBase
   constructor: ->
     @shape = new createjs.Shape()
+    @shape.wrapper = this
 
   _makeGraphics: () ->
     g = @shape.graphics
@@ -121,49 +102,59 @@ class exports.MyStage
       else
         @zoom /= 1.1
 
-      pointX = @_stage.mouseX
-      pointY = @_stage.mouseY
+      point = new num.Num2(@_stage.mouseX, @_stage.mouseY)
       zoom = @zoom/oldZoom
-      @_offsetX = @_offsetX * zoom - pointX * zoom + pointX
-      @_offsetY = @_offsetY * zoom - pointY * zoom + pointY
+      @_offset = @_offset.multiply(zoom).subtract(point.multiply(zoom)).add(point)
 
       @_updateTransform()
 
-    @_lastMouseX = 0
-    @_lastMouseY = 0
-
-    @_offsetX = 0
-    @_offsetY = 0
+    @_offset = new num.Num2(0, 0)
 
     @_stage.on 'stagemouseup', (e) => @onMouseUp(e)
     @_stage.on 'stagemousedown', (e) => @onMouseDown(e)
     @_stage.on 'stagemousemove', (e) => @onMouseMove(e)
 
   onMouseDown: (event) ->
-    if event.nativeEvent.which == 2
-      @_lastMouseX = event.stageX
-      @_lastMouseY = event.stageY
+    @_dragStartPosition = {x: event.stageX, y: event.stageY}
+    @_dragStartOffset = @_offset.clone()
 
     if event.nativeEvent.which == 1
       shape = @_pickShape(event.stageX, event.stageY)
       if shape and shape.isMovable
         @_currentMovingShape = shape
+        @_shapeStartPosition = new num.Num2(shape.x, shape.y)
+
 
   onMouseUp: (event) ->
     @_currentMovingShape = null
+    @_dragStartPosition = null
+    @_dragStartOffset = null
 
   onMouseMove: (event) ->
-    dx = event.stageX - @_lastMouseX
-    dy = event.stageY - @_lastMouseY
+    mouse = new num.Num2(event.stageX, event.stageY)
+    if @_dragStartPosition
+      delta = num.Num2.subtract(mouse, @_dragStartPosition)
 
     if event.nativeEvent.which == 2
-      @_offsetX += dx
-      @_offsetY += dy
+      @_offset = @_dragStartOffset.add(delta)
       @_updateTransform()
 
     if @_currentMovingShape
-      @_currentMovingShape.x += dx / @zoom
-      @_currentMovingShape.y += dy / @zoom
+      zoomedDelta = delta.multiply(1/@zoom)
+      newPosition = @_shapeStartPosition.add(zoomedDelta)
+      console.log 'position' + newPosition.toString()
+      @_currentMovingShape.x = newPosition.x
+      @_currentMovingShape.y = newPosition.y
+
+      snappingDelta = @snap()
+
+      console.log 'snapping delta' + snappingDelta.toString()
+
+      newPosition.addThis(snappingDelta)
+      console.log 'new position' + newPosition.toString()
+      @_currentMovingShape.x = newPosition.x
+      @_currentMovingShape.y = newPosition.y
+
     else
       shape = @_pickShape(event.stageX, event.stageY)
       if shape != @_currentHighlightShape
@@ -175,8 +166,9 @@ class exports.MyStage
 
     @onLogicUpdate()
     @_stage.update()
-    @_lastMouseX = event.stageX
-    @_lastMouseY = event.stageY
+
+  snap: () ->
+    return num.Num2.zero
 
   _pickShape: (x, y, onlyMovable = true) ->
     for i in [@_stage.children.length - 1..0] by -1
@@ -190,7 +182,7 @@ class exports.MyStage
 
 
   _updateTransform: ->
-    @_stage.setTransform(@_offsetX, @_offsetY, @zoom, @zoom)
+    @_stage.setTransform(@_offset.x, @_offset.y, @zoom, @zoom)
     @_stage.update()
 
   addShape: (shape) ->
@@ -199,4 +191,3 @@ class exports.MyStage
 
   onLogicUpdate: ->
 
-_globals.draw = exports

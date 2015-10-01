@@ -13,8 +13,9 @@ div.article-content
     div(flex='')
       pre
         code(class='language-coffeescript')
-          | if mouse
-          |   do -> alert()
+          |    position = @square.getPosition()
+          |    if position.distanceTo(@start) < 10
+          |        return @start.subtract(position)
     div(flex='')
       canvas#demo2(width='400px', height='300px')
 

@@ -1,4 +1,5 @@
 draw = _globals.draw
+num = _globals.num
 
 class MyStage1 extends draw.MyStage
   constructor: (@id) ->
@@ -9,7 +10,7 @@ class MyStage1 extends draw.MyStage
     @zoom = 2
     @_updateTransform()
 
-    @start = new draw.Num2(30, 50)
+    @start = new num.Num2(30, 50)
     startLine = @start.add -0.5
 
     @line1 = new draw.Line()
@@ -42,16 +43,27 @@ class MyStage1 extends draw.MyStage
     @arrow.stroke = 'black'
 
     @addShape @arrow
-
-
     @_stage.update()
 
   onLogicUpdate: ->
     position = @square.getPosition()
-    if draw.epsilonEquals(position.x, @start.x, 0.1) and draw.epsilonEquals(position.y, @start.y, 0.1)
+    if num.epsilonEquals(position.x, @start.x, 0.1) and num.epsilonEquals(position.y, @start.y, 0.1)
       @square.setFill('green')
     else
       @square.setFill('red')
 
+class MyStage2 extends MyStage1
+  constructor: ->
+    super('demo2')
+
+  snap: ->
+    position = @square.getPosition()
+    if position.distanceTo(@start) < 10
+        return @start.subtract(position)
+
+    return num.Num2.zero
+
+
 _globals.do = ->
-  new MyStage1("demo1")
+  new MyStage1('demo1')
+  new MyStage2('demo2')
