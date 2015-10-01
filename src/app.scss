@@ -29,6 +29,10 @@ canvas {
   border: 1px solid black;
 }
 
+.article-content {
+  max-width: 960px;
+}
+
 // $time: 0.1s;
 
 // [ui-view].ng-enter,ng-leave {
