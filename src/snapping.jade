@@ -6,9 +6,9 @@ html(lang='en', ng-app='StarterApp')
     link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,100,100italic,700italic,500italic,700,500,400italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Gochi+Hand' rel='stylesheet' type='text/css')
-  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%' layout-padding='')
+  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;')
-      md-content(layout='column', layout-align='start center')
+      md-content(layout='column', layout-align='start center' layout-padding='')
         div.article-content
 
           p.md-display-2 Snapping. The nerdy way.
@@ -30,7 +30,8 @@ html(lang='en', ng-app='StarterApp')
               canvas#demo2(width='400px', height='300px')
 
           p Okay, that is much better, but this totally does not seem like a programmer's approach. Let's start generalizing!
-          p.md-subhead Generailzation 1
+          p.md-title Level 1
+          p.md-subhead#generalizations Generailzation 1
           p Any numbers of 'sticky' points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
           p.md-subhead Generailzation 2
           p Arbitrary objects to which we could snap. In above examples we might want to be able to snap also to lines, not only in the corner.
@@ -38,6 +39,83 @@ html(lang='en', ng-app='StarterApp')
           p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some placement assistance, i.e. snaping?
           br
           p First two generalizations are not that difficult to implement, so we are going to do it right away. Third one is a little bit more tricky, so let's put it away for a while.
+          p For multiple points all we need is an array of points instead of one point associated with object we are moving. Like so:
+            pre
+              code(class='language-coffeescript')
+                | class Rectangle
+                |   getSnappingPoints: ->
+                |     point1 = getPosition()
+                |     point2 = point1.add(@width, 0)
+                |     point3 = point1.add(0, @height)
+                |     point4 = point1.add(@width, @height)
+                |     return [point1, point2, point3, point4]
+          p And here is what we can have for snapping 'target'
+            pre
+              code(class='language-coffeescript')
+                | class SnappingPrimitive
+                |   getNearestPoint: (point) ->
+                | class LineSnappingPrimitive
+                |   constructor: (@start, @end) ->
+                |   getNearestPoint: (point) ->
+                |     l2 = @end.distanceToSquared(@start)
+                |     if l2 < 0.01
+                |       return @start.lerpTo(@end)
+                |     t = point.subtract(@start).dot(@end.subtract(@start)) / l2
+                |     return @start if t < 0
+                |     return @end if t > 1
+                |     return @start.lerpTo(@end, t)
+
+          p Which naturally brings us to snapping algorithm which looks like this:
+            pre
+              code(class='language-coffeescript')
+                |     minDistance = 10
+                |     points = @square.getSnappingPoints()
+                |     snaps = []
+                |     for point in points
+                |       for p in @snapTo
+                |         nearest = p.getNearestPoint(point)
+                |         distance = nearest.distanceTo point
+                |         if distance < minDistance
+                |           snaps.push({nearest: nearest, point: point, distance: distance})
+                |     nearestSnap = _.min(snaps, (snap) -> snap.distance)
+                |     if nearestSnap == Infinity
+                |       return num.Num2.zero
+                |     return nearestSnap.nearest.subtract(nearestSnap.point)
+
+          p Let's see how it performs.
+          canvas#demo3(width='900px', height='400px')
+          p Now our snapping works really nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
+          p Your first instinct to solve this problem may be to find pairwise intersections of all different snapping primitives and snap points not only to primitives, but to those intersections also. Sure, let's go for it!
+            pre
+              code(class='language-coffeescript')
+                |     minDistance = 10
+                |     points = @square.getSnappingPoints()
+                |     snaps = []
+                |     for point in points
+                |       for p in @snapTo
+                |         nearest = p.getNearestPoint(point)
+                |         distance = nearest.distanceTo point
+                |         if distance < minDistance
+                |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
+                |     intersections = []
+                |     for i in [0..@snapTo.length - 1] by 1
+                |       for j in [i+1..@snapTo.length - 1] by 1
+                |         intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
+                |         intersections.push(intersection) if intersection
+                |     for point in points
+                |       for p in intersections
+                |         nearest = p
+                |         distance = nearest.distanceTo point
+                |         if distance < minDistance
+                |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
+                |     nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
+                |     if nearestSnap == Infinity or nearestSnap == -Infinity
+                |       return num.Num2.zero
+                |     return nearestSnap.nearest.subtract(nearestSnap.point)
+          canvas#demo4(width='900px', height='400px')
+          p So far so good! But prepare, big trouble coming...
+
+          canvas#demo5(width='900px', height='400px')
 
 
 

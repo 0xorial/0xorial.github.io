@@ -59,6 +59,13 @@ class exports.Rectangle extends exports.Shape
   _makeGraphics: ->
     super().drawRect(0, 0, @width, @height)
 
+  getSnappingPoints: ->
+    point1 = @getPosition()
+    point2 = point1.add(@width, 0)
+    point3 = point1.add(0, @height)
+    point4 = point1.add(@width, @height)
+    return [point1, point2, point3, point4]
+
 class exports.Line extends exports.Shape
   _makeGraphics: ->
     super().moveTo(@start.x, @start.y).lineTo(@end.x, @end.y)
@@ -93,6 +100,8 @@ class exports.MyStage
   constructor: (@id) ->
     @_stage = new createjs.Stage(@id)
     @zoom = 1
+
+    setInterval((() => @_stage.update()), 300)
 
     $("#" + @id).on 'mousewheel', (event) =>
       event.preventDefault()
@@ -157,6 +166,7 @@ class exports.MyStage
 
     else
       shape = @_pickShape(event.stageX, event.stageY)
+      shape = null if !shape.isPickable
       if shape != @_currentHighlightShape
         if @_currentHighlightShape
           @_currentHighlightShape.alpha = 0.6

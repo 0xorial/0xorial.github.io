@@ -1,12 +1,49 @@
 draw = _globals.draw
 num = _globals.num
 
+class Line
+  constructor: (@start, @end) ->
+    @shape = new draw.Line()
+    @shape.stroke = 'black'
+    @shape.start = @start
+    @shape.end = @end
+    @primitive = new LineSnappingPrimitive()
+    @primitive.start = @start
+    @primitive.end = @end
+
+
+class SnappingPrimitive
+  getNearestPoint: (point) ->
+
+class LineSnappingPrimitive
+  constructor: (@start, @end) ->
+
+  getNearestPoint: (point) ->
+    l2 = @end.distanceToSquared(@start)
+    if l2 < 0.01
+      return @start.lerpTo(@end)
+    t = point.subtract(@start).dot(@end.subtract(@start)) / l2
+    return @start if t < 0
+    return @end if t > 1
+    return @start.lerpTo(@end, t)
+
+  findIntersectionPoint: (p2) ->
+    # http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+    p = @start
+    q = p2.start
+    r = @end.subtract @start
+    s = p2.end.subtract p2.start
+
+    t = q.subtract(p).cross(s) / r.cross(s)
+
+    return null if t < 0 or t > 1
+    return @start.lerpTo(@end, t)
+
+
 class MyStage1 extends draw.MyStage
   constructor: (@id) ->
     super(@id)
 
-    @_offsetX = 150
-    @_offsetY = 70
     @zoom = 2
     @_updateTransform()
 
@@ -53,8 +90,9 @@ class MyStage1 extends draw.MyStage
       @square.setFill('red')
 
 class MyStage2 extends MyStage1
-  constructor: ->
-    super('demo2')
+  constructor: (id) ->
+    super(id)
+    @snapTo = []
 
   snap: ->
     position = @square.getPosition()
@@ -63,7 +101,130 @@ class MyStage2 extends MyStage1
 
     return num.Num2.zero
 
+class MyStage3 extends MyStage1
+  constructor: (id) ->
+    super(id)
+    p = new LineSnappingPrimitive()
+    p.start = @start
+    p.end = @start.add(100, 0)
+
+    p1 = new LineSnappingPrimitive()
+    p1.start = @start
+    p1.end = @start.add(0, 100)
+
+    @snapTo = [p, p1]
+
+  snap: ->
+    minDistance = 10
+    points = @square.getSnappingPoints()
+    snaps = []
+    for point in points
+      for p in @snapTo
+        nearest = p.getNearestPoint(point)
+        distance = nearest.distanceTo point
+        if distance < minDistance
+          snaps.push({nearest: nearest, point: point, distance: distance})
+
+    nearestSnap = _.min(snaps, (snap) -> snap.distance)
+    if nearestSnap == Infinity
+      return num.Num2.zero
+    return nearestSnap.nearest.subtract(nearestSnap.point)
+
+class MyStage4 extends draw.MyStage
+  constructor: (id, suppressShapes = false) ->
+    super(id)
+
+    if !suppressShapes
+
+      line1 = new Line(new num.Num2(0,0), new num.Num2(100, 0))
+      line2 = new Line(new num.Num2(0,0), new num.Num2(0, 100))
+
+      @snapTo = [line1.primitive, line2.primitive]
+
+      pt = line1.primitive.findIntersectionPoint(line2.primitive)
+
+      @square = new draw.Rectangle()
+      @square.setPosition(new num.Num2(0,0).add(20))
+      @square.width = 20
+      @square.height = 30
+      @square.fill = 'red'
+      @square.markMovable @_stage
+
+      @addShape line1.shape
+      @addShape line2.shape
+      @addShape @square
+
+    @_offset = new num.Num2(80, 50)
+    @zoom = 2
+    @_updateTransform()
+
+
+  snap: ->
+    minDistance = 10
+    points = @square.getSnappingPoints()
+    snaps = []
+    for point in points
+      for p in @snapTo
+        nearest = p.getNearestPoint(point)
+        distance = nearest.distanceTo point
+        if distance < minDistance
+          snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
+    intersections = []
+    for i in [0..@snapTo.length - 1] by 1
+      for j in [i+1..@snapTo.length - 1] by 1
+        intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
+        intersections.push(intersection) if intersection
+
+    for point in points
+      for p in intersections
+        nearest = p
+        distance = nearest.distanceTo point
+        if distance < minDistance
+          snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
+
+    nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
+    if nearestSnap == Infinity or nearestSnap == -Infinity
+      return num.Num2.zero
+    return nearestSnap.nearest.subtract(nearestSnap.point)
+
+class MyStage5 extends MyStage4
+  constructor: (id) ->
+    super(id, true)
+
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 100))
+    line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
+
+    @snapTo = [line1.primitive, line2.primitive]
+
+    pt = line1.primitive.findIntersectionPoint(line2.primitive)
+
+    @square0 = new draw.Rectangle()
+    @square0.setPosition(new num.Num2(65, 35))
+    @square0.width = 20
+    @square0.height = 30
+    @square0.fill = 'green'
+    @square0.shape.alpha = 0.3
+
+    @text = new draw.Text('Naturally you would like to put it as green square shows...', '11px Gochi Hand')
+    @text.setPosition(new num.Num2(90, 40))
+
+    @square = new draw.Rectangle()
+    @square.setPosition(new num.Num2(0,0).add(20))
+    @square.width = 20
+    @square.height = 30
+    @square.fill = 'red'
+    @square.markMovable @_stage
+
+    @addShape line1.shape
+    @addShape line2.shape
+    @addShape @square0
+    @addShape @square
+    @addShape @text
+
 
 _globals.do = ->
   new MyStage1('demo1')
   new MyStage2('demo2')
+  new MyStage3('demo3')
+  new MyStage4('demo4')
+  new MyStage5('demo5')
