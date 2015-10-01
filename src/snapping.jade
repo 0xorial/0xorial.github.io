@@ -1,0 +1,50 @@
+html(lang='en', ng-app='StarterApp')
+  head
+    link(rel='stylesheet', href='../bower_components/angular-material/angular-material.min.css')
+    link(rel='stylesheet', href='app.css')
+    link(href="../bower_components/prism/themes/prism.css" rel="stylesheet")
+    link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,100,100italic,700italic,500italic,700,500,400italic', rel='stylesheet', type='text/css')
+    link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
+    link(href='https://fonts.googleapis.com/css?family=Gochi+Hand' rel='stylesheet' type='text/css')
+  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
+    md-content(style='width: 100%;')
+      md-content(layout='column', layout-align='start center')
+        div.article-content
+
+          p.md-display-2 Snapping. The nerdy way.
+          p.md-title Introduction
+          p
+            i NOTE. You can use middle-button for panning and wheel for zooming.
+          canvas#demo1(width='900px', height='400px')
+          p You should have noticed that placing square into corner was not easy, and definitely not user-friendly.
+          p Let's see what we can do to make it better...
+          div(layout='row')
+            div(flex='')
+              pre
+                code(class='language-coffeescript')
+                  |    position = @square.getPosition()
+                  |    if position.distanceTo(@start) < 10
+                  |        return @start.subtract(position)
+            div(flex='')
+              canvas#demo2(width='400px', height='300px')
+
+    script.
+      var _globals = {}
+
+    script(src="./bower_components/prism/prism.js")
+    script(src="./bower_components/prism/components/prism-coffeescript.js")
+    script(src='./bower_components/victor/build/victor.js')
+    script(src='./bower_components/lodash/lodash.js')
+    script(src='./bower_components/jquery/dist/jquery.min.js')
+    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js')
+    script(src='./bower_components/bluebird/js/browser/bluebird.js')
+    script(src='./bower_components/EaselJS/lib/easeljs-0.8.1.combined.js')
+    script(src='snapping/num.js')
+    script(src='snapping/draw.js')
+    script(src='snapping/stages.js')
+
+    script.
+      _globals.do()
+
+
+
