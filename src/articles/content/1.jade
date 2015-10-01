@@ -1,9 +1,23 @@
 div.article-content
-  p.md-display-2 Snapping. The nerdy way.
-  p.md-title Introduction
-  p *You can use middle-button for panning and wheel for zooming.
-  canvas#demo1(width='900px', height='400px', style='border:1px solid black')
-  p.md Hello World
-  //- script(src='articles/content/draw.js')
   script.
     _globals.do()
+
+  p.md-display-2 Snapping. The nerdy way.
+  p.md-title Introduction
+  p
+    i NOTE. You can use middle-button for panning and wheel for zooming.
+  canvas#demo1(width='900px', height='400px')
+  p You should have noticed that placing square into corner was not easy, and definitely not user-friendly.
+  p Let's see what we can do to make it better...
+  div(layout='row')
+    div(flex='')
+      pre
+        code(class='language-coffeescript')
+          | if mouse
+          |   do -> alert()
+    div(flex='')
+      canvas#demo2(width='400px', height='300px')
+
+  script.
+    Prism.highlightAll()
+

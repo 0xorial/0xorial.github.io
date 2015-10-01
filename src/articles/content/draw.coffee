@@ -1,6 +1,18 @@
 if !exports
   exports = {}
 
+class exports.Num2
+  constructor: (@x, @y) ->
+
+  add: (x, y) ->
+    if x.x != undefined
+      y = x.y
+      x = x.x
+
+    if y == undefined
+      y = x
+    return new exports.Num2(@x + x, @y + y)
+
 Victor.fromPoints = (start, end) ->
   return Victor.fromObject(end).subtract(Victor.fromObject(start));
 
@@ -13,6 +25,10 @@ exports.epsilonEquals = (x, y, epsilon = 0.01) ->
   return Math.abs(x - y) < epsilon
 
 class exports.ShapeBase
+
+  getSnappingPoints: ->
+    return [@getPosition()]
+
   getPosition: ->
     return {x: @shape.x, y: @shape.y}
 
@@ -50,7 +66,9 @@ class exports.Shape extends exports.ShapeBase
     @_makeGraphics()
 
   markMovable: (stage) ->
-    exports.injectMovable stage, @shape
+    @shape.alpha = 0.6
+    @shape.isPickable = true
+    @shape.isMovable = true
 
 class exports.Circle extends exports.Shape
   _makeGraphics: ->
@@ -90,40 +108,9 @@ class exports.Text extends exports.ShapeBase
 
   update: ->
 
-
-exports.injectMovable = (stage, shape) ->
-
-  shape.alpha = 0.5
-
-  lastPosition = {x: 0, y: 0}
-  shape.addEventListener 'mousedown', (event) ->
-    if event.nativeEvent.which == 1
-      lastPosition = stage.globalToLocal(event.stageX, event.stageY)
-
-  shape.addEventListener 'pressmove', (event) ->
-    if event.nativeEvent.which == 1
-      stagePoint = stage.globalToLocal(event.stageX, event.stageY)
-      dx = stagePoint.x - lastPosition.x
-      dy = stagePoint.y - lastPosition.y
-      shape.x += dx
-      shape.y += dy
-      lastPosition = stagePoint
-      # stage.update()
-
-
-  shape.addEventListener 'mouseover', (event) ->
-    shape.alpha = 1
-    stage.update()
-
-  shape.addEventListener 'mouseout', (event) ->
-    shape.alpha = 0.5
-    stage.update()
-
-
 class exports.MyStage
   constructor: (@id) ->
     @_stage = new createjs.Stage(@id)
-    @_stage.enableMouseOver(60)
     @zoom = 1
 
     $("#" + @id).on 'mousewheel', (event) =>
@@ -148,34 +135,58 @@ class exports.MyStage
     @_offsetX = 0
     @_offsetY = 0
 
-    @_stage.on 'stagemousedown', (event) =>
-      if event.nativeEvent.which == 2
-        @_lastMouseX = event.stageX
-        @_lastMouseY = event.stageY
+    @_stage.on 'stagemouseup', (e) => @onMouseUp(e)
+    @_stage.on 'stagemousedown', (e) => @onMouseDown(e)
+    @_stage.on 'stagemousemove', (e) => @onMouseMove(e)
 
-      # if event.nativeEvent.which == 1
-      #   shape = @_pickShape(event.stageX, event.stageY)
+  onMouseDown: (event) ->
+    if event.nativeEvent.which == 2
+      @_lastMouseX = event.stageX
+      @_lastMouseY = event.stageY
 
-    @_stage.on 'stagemousemove', (event) =>
-      if event.nativeEvent.which == 2
-        dx = event.stageX - @_lastMouseX
-        dy = event.stageY - @_lastMouseY
+    if event.nativeEvent.which == 1
+      shape = @_pickShape(event.stageX, event.stageY)
+      if shape and shape.isMovable
+        @_currentMovingShape = shape
 
-        @_offsetX += dx
-        @_offsetY += dy
+  onMouseUp: (event) ->
+    @_currentMovingShape = null
 
-        @_lastMouseX = event.stageX
-        @_lastMouseY = event.stageY
-        @_updateTransform()
+  onMouseMove: (event) ->
+    dx = event.stageX - @_lastMouseX
+    dy = event.stageY - @_lastMouseY
 
-      @onLogicUpdate()
-      @_stage.update()
+    if event.nativeEvent.which == 2
+      @_offsetX += dx
+      @_offsetY += dy
+      @_updateTransform()
 
-    update = =>
-      @onLogicUpdate()
-      @_stage.update()
+    if @_currentMovingShape
+      @_currentMovingShape.x += dx / @zoom
+      @_currentMovingShape.y += dy / @zoom
+    else
+      shape = @_pickShape(event.stageX, event.stageY)
+      if shape != @_currentHighlightShape
+        if @_currentHighlightShape
+          @_currentHighlightShape.alpha = 0.6
+        if shape
+          shape.alpha = 1
+        @_currentHighlightShape = shape
 
-    # setInterval(update, 100)
+    @onLogicUpdate()
+    @_stage.update()
+    @_lastMouseX = event.stageX
+    @_lastMouseY = event.stageY
+
+  _pickShape: (x, y, onlyMovable = true) ->
+    for i in [@_stage.children.length - 1..0] by -1
+      child = @_stage.children[i]
+      if !onlyMovable or child.isPickable
+        point = child.globalToLocal(x,y)
+        if child.hitTest(point.x, point.y)
+          return child
+    return null
+
 
 
   _updateTransform: ->
