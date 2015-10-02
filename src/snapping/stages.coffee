@@ -14,6 +14,9 @@ class Line
 
 class SnappingPrimitive
   getNearestPoint: (point) ->
+    throw new Error('abstract')
+  moveBy: (delta) ->
+    throw new Error('abstract')
 
 class LineSnappingPrimitive
   constructor: (@start, @end) ->
@@ -38,6 +41,9 @@ class LineSnappingPrimitive
 
     return null if t < 0 or t > 1
     return @start.lerpTo(@end, t)
+
+  moveBy: (delta) ->
+    return new LineSnappingPrimitive(@start.add(delta), @end.add(delta))
 
 
 class MyStage1 extends draw.MyStage
@@ -233,6 +239,11 @@ class MyStage6 extends draw.MyStage
     @arrow3 = new draw.Arrow(squarePoints[0], squarePoints[0].subtract(24, 0), 'green')
     @arrow4 = new draw.Arrow(squarePoints[2], squarePoints[2].subtract(24, 0), 'green')
 
+    intersection = line2.primitive.findIntersectionPoint(line1.primitive)
+    @arrow5 = new draw.Arrow(squarePoints[0], intersection)
+    @arrow6 = new draw.Arrow(squarePoints[2], intersection)
+
+
     @text = new draw.Text('Black arrows show how current algorithm can snap the points', '10px Gochi Hand')
     @text.setPosition(new num.Num2(90, 20))
 
@@ -244,12 +255,153 @@ class MyStage6 extends draw.MyStage
     @addShape @arrow2
     @addShape @arrow3
     @addShape @arrow4
+    @addShape @arrow5
+    @addShape @arrow6
 
     @addShape line1.shape
     @addShape line2.shape
     @addShape @square0
     @addShape @text
     @addShape @text2
+
+class MyStage7 extends draw.MyStage
+  constructor: (id) ->
+    super(id, true)
+
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 100))
+    line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
+
+    @square0 = new draw.Rectangle()
+    @square0.setPosition(new num.Num2(90, 35))
+    @square0.width = 20
+    @square0.height = 30
+    @square0.fill = 'red'
+
+    squarePoints = @square0.getSnappingPoints()
+    @arrow1 = new draw.Arrow(squarePoints[0], line2.primitive.getNearestPoint(squarePoints[0]))
+    @arrow2 = new draw.Arrow(squarePoints[2], line1.primitive.getNearestPoint(squarePoints[2]))
+
+    @arrow3 = new draw.Arrow(squarePoints[0], squarePoints[0].subtract(24, 0), 'green')
+    @arrow4 = new draw.Arrow(squarePoints[2], squarePoints[2].subtract(24, 0), 'green')
+
+    @text = new draw.Text('Move point, together with line, to which it is snapped to another point!', '10px Gochi Hand')
+    @text.setPosition(new num.Num2(90, 20))
+
+    TweenMax.ticker.addEventListener 'tick', (e) =>
+      @_stage.update()
+
+    time = 3
+    tl = new TimelineMax()
+
+    tl.to(@arrow1.shape, time, {y: 30}, 'g')
+    tl.to(@arrow3.shape, time, {y: 30}, 'g')
+    tl.to(line2.shape.shape, time, {y: 30}, 'g')
+    tl.delay(0.5)
+    tl.repeat(-1)
+    tl.repeatDelay(0.5)
+
+    @addShape @arrow1
+    @addShape @arrow2
+    @addShape @arrow3
+    @addShape @arrow4
+
+    @addShape line1.shape
+    @addShape line2.shape
+    @addShape @square0
+    @addShape @text
+
+class SnapsDictionary
+  constructor: ->
+    @items = []
+
+  getByDelta: (delta) ->
+    item = _.find(@items, (item) -> item.delta.epsilonEquals(delta))
+    if item
+      return item
+    return null
+
+  add: (singleSnapping) ->
+    existing = @getByDelta(singleSnapping.delta)
+    if !existing
+      existing = new MultiSnapping(singleSnapping.delta)
+      @items.push existing
+    existing.addSnapping(singleSnapping)
+
+class MultiSnapping
+  constructor: (@delta) ->
+    @snappings = []
+
+  addSnapping: (snapping) ->
+    existing = _.find(@snappings, (s) -> s.primitive == snapping.primitive and s.point == snapping.point)
+    if !existing
+      @snappings.push snapping
+
+  getValue: ->
+    return @snappings.length * 10000000 / Math.max(@delta.length(), 1)
+
+
+class MyStage8 extends MyStage4
+  constructor: (id) ->
+    super(id, true)
+
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 100))
+    line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
+    line3 = new Line(new num.Num2(0,0), new num.Num2(100, 0))
+    line4 = new Line(new num.Num2(0,0), new num.Num2(0, 100))
+
+    @snapTo = [line1.primitive, line2.primitive, line3.primitive, line4.primitive]
+
+    @text = new draw.Text('Now you can put it anywhere!', '11px Gochi Hand')
+    @text.setPosition(new num.Num2(90, 40))
+
+    @square = new draw.Rectangle()
+    @square.setPosition(new num.Num2(0,0).add(20))
+    @square.width = 20
+    @square.height = 30
+    @square.fill = 'red'
+    @square.markMovable @_stage
+
+    @addShape line1.shape
+    @addShape line2.shape
+    @addShape line3.shape
+    @addShape line4.shape
+    @addShape @square
+    @addShape @text
+
+
+  snap: ->
+    minDistance = 20
+    points = @square.getSnappingPoints()
+    singleSnaps = []
+    for point in points
+      for p in @snapTo
+        nearest = p.getNearestPoint(point)
+        delta = nearest.subtract(point)
+        if delta.length() < minDistance
+          singleSnaps.push({point: point, delta: delta, primitive: p})
+    snaps = new SnapsDictionary()
+    for snap in singleSnaps
+      snaps.add(snap)
+
+    for i in [0..singleSnaps.length - 1] by 1
+      firstSnap = singleSnaps[i]
+      for j in [i+1..singleSnaps.length - 1] by 1
+        secondSnap = singleSnaps[j]
+
+        if !firstSnap.delta.epsilonEquals(secondSnap.delta)
+          pointsDelta = firstSnap.point.subtract(secondSnap.point)
+          movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
+          intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+          if intersection
+            delta = intersection.subtract(firstSnap.point)
+            snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+            snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+
+    nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+    if nearestSnap == Infinity or nearestSnap == -Infinity
+      return num.Num2.zero
+    return nearestSnap.delta
+
 
 
 _globals.do = ->
@@ -259,3 +411,5 @@ _globals.do = ->
   new MyStage4('demo4')
   new MyStage5('demo5')
   new MyStage6('demo6')
+  new MyStage7('demo7')
+  new MyStage8('demo8')

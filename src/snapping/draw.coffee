@@ -174,7 +174,7 @@ class exports.MyStage
 
     else
       shape = @_pickShape(event.stageX, event.stageY)
-      shape = null if !shape.isPickable
+      shape = null if shape and !shape.isPickable
       if shape != @_currentHighlightShape
         if @_currentHighlightShape
           @_currentHighlightShape.alpha = 0.6

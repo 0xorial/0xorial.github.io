@@ -56,6 +56,9 @@ class exports.Num2
     delta = this.subtract(x, y)
     return delta.x * delta.x + delta.y * delta.y
 
+  length: ->
+    return @distanceTo(0, 0)
+
   lerpTo: (x, y, t) ->
     if x.x != undefined
       t = y
@@ -73,6 +76,9 @@ class exports.Num2
 
   clone: ->
     return new exports.Num2(@x, @y)
+
+  epsilonEquals: (other, epsilon = 0.01) ->
+    return exports.epsilonEquals(@x, other.x, epsilon) and exports.epsilonEquals(@y, other.y, epsilon)
 
   @subtract: (num1, num2) ->
     return new exports.Num2(num1.x - num2.x, num1.y - num2.y)

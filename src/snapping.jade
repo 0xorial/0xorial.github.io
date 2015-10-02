@@ -86,32 +86,32 @@ html(lang='en', ng-app='StarterApp')
           canvas#demo3(width='900px', height='400px')
           p Now our snapping works really nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
           p Your first instinct to solve this problem may be to find pairwise intersections of all different snapping primitives and snap points not only to primitives, but to those intersections also. Sure, let's go for it!
-            pre
-              code(class='language-coffeescript')
-                |     minDistance = 10
-                |     points = @square.getSnappingPoints()
-                |     snaps = []
-                |     for point in points
-                |       for p in @snapTo
-                |         nearest = p.getNearestPoint(point)
-                |         distance = nearest.distanceTo point
-                |         if distance < minDistance
-                |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
-                |     intersections = []
-                |     for i in [0..@snapTo.length - 1] by 1
-                |       for j in [i+1..@snapTo.length - 1] by 1
-                |         intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
-                |         intersections.push(intersection) if intersection
-                |     for point in points
-                |       for p in intersections
-                |         nearest = p
-                |         distance = nearest.distanceTo point
-                |         if distance < minDistance
-                |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
-                |     nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
-                |     if nearestSnap == Infinity or nearestSnap == -Infinity
-                |       return num.Num2.zero
-                |     return nearestSnap.nearest.subtract(nearestSnap.point)
+          pre
+            code(class='language-coffeescript')
+              |     minDistance = 10
+              |     points = @square.getSnappingPoints()
+              |     snaps = []
+              |     for point in points
+              |       for p in @snapTo
+              |         nearest = p.getNearestPoint(point)
+              |         distance = nearest.distanceTo point
+              |         if distance < minDistance
+              |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
+              |     intersections = []
+              |     for i in [0..@snapTo.length - 1] by 1
+              |       for j in [i+1..@snapTo.length - 1] by 1
+              |         intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
+              |         intersections.push(intersection) if intersection
+              |     for point in points
+              |       for p in intersections
+              |         nearest = p
+              |         distance = nearest.distanceTo point
+              |         if distance < minDistance
+              |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
+              |     nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
+              |     if nearestSnap == Infinity or nearestSnap == -Infinity
+              |       return num.Num2.zero
+              |     return nearestSnap.nearest.subtract(nearestSnap.point)
           canvas#demo4(width='900px', height='400px')
           p So far so good! But prepare, big trouble coming...
           canvas#demo5(width='900px', height='400px')
@@ -120,8 +120,85 @@ html(lang='en', ng-app='StarterApp')
           p Now, how on Earth can we figure out that we should move points together to the left, instead of snapping them separately to single lines...
           p The following demo shows the key idea...
           canvas#demo7(width='900px', height='400px')
+          p Implementation is going to be pretty complicated, so I will try to describe a little further what we are going to do.
+          ol
+            li Create a list of 'multi' snappings. Multi-snapping is an object, which hase specified delta, and multiple points snapped to multiple lines.
+            li Find 'direct' snappings. That is, for each point find all lines to which we can snap it.
+            li Add 'direct' snappings to our multi-snapping list.
+            li Go through all pairs of 'direct' snappings and for each pair do the following
+              ol
+                li Transform line of second snapping in such a way that points of two snappings coincide (as shown on previous demo)
+                li Check if this new transformed line intersects line of first 'direct' snapping.
+                li If it does, create 2 new snappings, with delta coresponding to path from first point to intersection point, and having point and line of first and second 'direct' snappings. At this point we have to be careful to avoid duplicates.
+            li Go through the list of 'multi' snappings and find the best one, for example, this could be one with most snappings included.
+          p To implement this algorithm, first we are going to need couple of helper classes:
+          pre
+            code(class='language-coffeescript').
+              class MultiSnapping
+                constructor: (@delta) ->
+                  @snappings = []
 
+                addSnapping: (snapping) ->
+                  existing = _.find(@snappings, (s) -> s.primitive == snapping.primitive and s.point == snapping.point)
+                  if !existing
+                    @snappings.push snapping
 
+                getValue: ->
+                  return @snappings.length * 1000000 / Math.max(@delta.length(), 1)
+          pre
+            code(class='language-coffeescript').
+              class SnapsDictionary
+                constructor: ->
+                  @items = []
+
+                getByDelta: (delta) ->
+                  item = _.find(@items, (item) -> item.delta.epsilonEquals(delta))
+                  if item
+                    return item
+                  return null
+
+                add: (singleSnapping) ->
+                  existing = @getByDelta(singleSnapping.delta)
+                  if !existing
+                    existing = new MultiSnapping(singleSnapping.delta)
+                    @items.push existing
+                  existing.addSnapping(singleSnapping)
+          p And finally the snapping logic itself
+          pre
+            code(class='language-coffeescript').
+              minDistance = 10
+              points = @square.getSnappingPoints()
+              singleSnaps = []
+              for point in points
+                for p in @snapTo
+                  nearest = p.getNearestPoint(point)
+                  delta = nearest.subtract(point)
+                  if delta.length() < minDistance
+                    singleSnaps.push({point: point, delta: delta, primitive: p})
+              snaps = new SnapsDictionary()
+              for snap in singleSnaps
+                snaps.add(snap)
+
+              for i in [0..singleSnaps.length - 1] by 1
+                firstSnap = singleSnaps[i]
+                for j in [i+1..singleSnaps.length - 1] by 1
+                  secondSnap = singleSnaps[j]
+
+                  if !firstSnap.delta.epsilonEquals(secondSnap.delta)
+                    pointsDelta = firstSnap.point.subtract(secondSnap.point)
+                    movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
+                    intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+                    if intersection
+                      delta = intersection.subtract(firstSnap.point)
+                      snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+                      snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+
+              nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+              if nearestSnap == Infinity or nearestSnap == -Infinity
+                return num.Num2.zero
+              return nearestSnap.delta
+          p Viola!
+          canvas#demo8(width='900px', height='400px')
 
 
     script.
@@ -135,6 +212,8 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js')
     script(src='./bower_components/bluebird/js/browser/bluebird.js')
     script(src='./bower_components/EaselJS/lib/easeljs-0.8.1.combined.js')
+    script(src='vendor/gsap/TweenMax.js')
+    script(src='vendor/gsap/TimelineMax.js')
     script(src='snapping/num.js')
     script(src='snapping/draw.js')
     script(src='snapping/stages.js')
