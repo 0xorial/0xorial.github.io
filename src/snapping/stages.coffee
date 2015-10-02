@@ -74,9 +74,7 @@ class MyStage1 extends draw.MyStage
     @text = new draw.Text('Put square precisely in the corner.\n it will become green when(if) you succeed', '20px Gochi Hand')
     @_stage.addChild @text.shape
 
-    @arrow = new draw.Arrow()
-    @arrow.start = {x: 10, y: 40}
-    @arrow.end = @start
+    @arrow = new draw.Arrow({x: 10, y: 40}, @start)
     @arrow.stroke = 'black'
 
     @addShape @arrow
@@ -154,10 +152,6 @@ class MyStage4 extends draw.MyStage
       @addShape line2.shape
       @addShape @square
 
-    @_offset = new num.Num2(80, 50)
-    @zoom = 2
-    @_updateTransform()
-
 
   snap: ->
     minDistance = 10
@@ -196,8 +190,6 @@ class MyStage5 extends MyStage4
 
     @snapTo = [line1.primitive, line2.primitive]
 
-    pt = line1.primitive.findIntersectionPoint(line2.primitive)
-
     @square0 = new draw.Rectangle()
     @square0.setPosition(new num.Num2(65, 35))
     @square0.width = 20
@@ -205,7 +197,7 @@ class MyStage5 extends MyStage4
     @square0.fill = 'green'
     @square0.shape.alpha = 0.3
 
-    @text = new draw.Text('Naturally you would like to put it as green square shows...', '11px Gochi Hand')
+    @text = new draw.Text('Ideally you would like to put it as green square shows...', '11px Gochi Hand')
     @text.setPosition(new num.Num2(90, 40))
 
     @square = new draw.Rectangle()
@@ -221,6 +213,44 @@ class MyStage5 extends MyStage4
     @addShape @square
     @addShape @text
 
+class MyStage6 extends draw.MyStage
+  constructor: (id) ->
+    super(id, true)
+
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 100))
+    line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
+
+    @square0 = new draw.Rectangle()
+    @square0.setPosition(new num.Num2(90, 35))
+    @square0.width = 20
+    @square0.height = 30
+    @square0.fill = 'red'
+
+    squarePoints = @square0.getSnappingPoints()
+    @arrow1 = new draw.Arrow(squarePoints[0], line2.primitive.getNearestPoint(squarePoints[0]))
+    @arrow2 = new draw.Arrow(squarePoints[2], line1.primitive.getNearestPoint(squarePoints[2]))
+
+    @arrow3 = new draw.Arrow(squarePoints[0], squarePoints[0].subtract(24, 0), 'green')
+    @arrow4 = new draw.Arrow(squarePoints[2], squarePoints[2].subtract(24, 0), 'green')
+
+    @text = new draw.Text('Black arrows show how current algorithm can snap the points', '10px Gochi Hand')
+    @text.setPosition(new num.Num2(90, 20))
+
+    @text2 = new draw.Text('Green arrows show how we want to snap them.', '10px Gochi Hand')
+    @text2.setPosition(new num.Num2(90, 30))
+
+
+    @addShape @arrow1
+    @addShape @arrow2
+    @addShape @arrow3
+    @addShape @arrow4
+
+    @addShape line1.shape
+    @addShape line2.shape
+    @addShape @square0
+    @addShape @text
+    @addShape @text2
+
 
 _globals.do = ->
   new MyStage1('demo1')
@@ -228,3 +258,4 @@ _globals.do = ->
   new MyStage3('demo3')
   new MyStage4('demo4')
   new MyStage5('demo5')
+  new MyStage6('demo6')

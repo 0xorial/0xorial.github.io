@@ -71,6 +71,11 @@ class exports.Line extends exports.Shape
     super().moveTo(@start.x, @start.y).lineTo(@end.x, @end.y)
 
 class exports.Arrow extends exports.Shape
+  constructor: (@start, @end, stroke) ->
+    super()
+    @stroke = 'black'
+    @stroke = stroke if stroke
+
   _makeGraphics: ->
     direction = Victor.fromPoints(@start, @end).normalize()
     angle = 150
@@ -99,7 +104,10 @@ class exports.Text extends exports.ShapeBase
 class exports.MyStage
   constructor: (@id) ->
     @_stage = new createjs.Stage(@id)
-    @zoom = 1
+
+    @_offset = new num.Num2(80, 50)
+    @zoom = 2
+    @_updateTransform()
 
     setInterval((() => @_stage.update()), 300)
 
