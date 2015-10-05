@@ -114,6 +114,7 @@ html(lang='en', ng-app='StarterApp')
               |     return nearestSnap.nearest.subtract(nearestSnap.point)
           canvas#demo4(width='900px', height='400px')
           p So far so good! But prepare, big trouble coming...
+          p.md-title Level 2
           canvas#demo5(width='900px', height='400px')
           p That is what happenning
           canvas#demo6(width='900px', height='400px')
@@ -197,8 +198,11 @@ html(lang='en', ng-app='StarterApp')
               if nearestSnap == Infinity or nearestSnap == -Infinity
                 return num.Num2.zero
               return nearestSnap.delta
-          p Viola!
+          p Voila!
           canvas#demo8(width='900px', height='400px')
+          p.md-title Level 2
+          p Now it is time for a mind-blowing part. So, we have an algorithm which snaps a set of points to a set of some objects on 2d plane(we used only line segments, but it is possible to have anything for which we can find projection and intersection points with other objects). However, imagine if you are rotating object. It really feels that there should be something in common between snapping panning object and snapping rotating object. And there is!
+          p First, here is an idea that will help. When we snap and object, we do not have to find the vector by which we move the object. It would be sufficient to know the delta by which we 'correct' the mouse cursor position, that is such delta, that, when added to cursor position, would result in such cursor position that the moving object would be placed snapped. Every time the object is moved we are going to use such 'corrected' cursor position and will result in object being snapped.
 
 
     script.

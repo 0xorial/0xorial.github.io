@@ -8,6 +8,9 @@ lerp = (a, b, t) ->
 class exports.Num2
   constructor: (@x, @y) ->
 
+  @vectorFromPoints: (start, end) ->
+    return exports.Num2.subtract(end, start)
+
   toString: ->
     return 'x ' + @x + '; y:' + @y
 
@@ -73,6 +76,12 @@ class exports.Num2
   cross: (other) ->
     # http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
     return @x * other.y - @y * other.x
+
+  angleTo: (other) ->
+    return Math.atan2(other.y, other.x) - Math.atan2(@y, @x);
+
+  angleToDeg: (other) ->
+    return @angleTo(other) * 180 / Math.PI
 
   clone: ->
     return new exports.Num2(@x, @y)
