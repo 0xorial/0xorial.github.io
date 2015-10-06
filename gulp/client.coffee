@@ -2,6 +2,7 @@ del = require 'del'
 browserSync = require 'browser-sync'
 sequence = require 'run-sequence'
 fs = require('fs')
+inlinesource = require('gulp-inline-source')
 
 
 module.exports = (gulp, $) ->
@@ -41,6 +42,7 @@ module.exports = (gulp, $) ->
       .pipe($.changed(dst))
       .pipe($.plumber())
       .pipe($.jade())
+      .pipe(inlinesource())
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-jade-watch', ->

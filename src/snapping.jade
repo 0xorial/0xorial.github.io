@@ -1,8 +1,11 @@
 html(lang='en', ng-app='StarterApp')
   head
-    link(rel='stylesheet', href='../bower_components/angular-material/angular-material.min.css')
-    link(rel='stylesheet', href='app.css')
-    link(href="../bower_components/prism/themes/prism.css" rel="stylesheet")
+    // inline ../bower_components/angular-material/angular-material.min.css
+    link(rel='stylesheet', href='../bower_components/angular-material/angular-material.min.css', inline='')
+    // inline ../app.css
+    link(rel='stylesheet', href='../app.css', inline='')
+    // inline ../bower_components/prism/themes/prism.css
+    link(href="../bower_components/prism/themes/prism.css" rel="stylesheet", inline='')
     link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,100,100italic,700italic,500italic,700,500,400italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Gochi+Hand' rel='stylesheet' type='text/css')
@@ -315,19 +318,32 @@ html(lang='en', ng-app='StarterApp')
     script.
       var _globals = {}
 
-    script(src="./bower_components/prism/prism.js")
-    script(src="./bower_components/prism/components/prism-coffeescript.js")
-    script(src='./bower_components/victor/build/victor.js')
-    script(src='./bower_components/lodash/lodash.js')
-    script(src='./bower_components/jquery/dist/jquery.min.js')
-    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js')
-    script(src='./bower_components/bluebird/js/browser/bluebird.js')
-    script(src='./bower_components/EaselJS/lib/easeljs-0.8.1.combined.js')
-    script(src='vendor/gsap/TweenMax.js')
-    script(src='vendor/gsap/TimelineMax.js')
-    script(src='snapping/num.js')
-    script(src='snapping/draw.js')
-    script(src='snapping/stages.js')
+    // inline
+    script(src="../bower_components/prism/prism.js", inline='')
+    // inline
+    script(src="../bower_components/prism/components/prism-coffeescript.js", inline='')
+    // inline
+    script(src='../bower_components/victor/build/victor.js', inline='')
+    // inline
+    script(src='../bower_components/lodash/lodash.js', inline='')
+    // inline
+    script(src='../bower_components/jquery/dist/jquery.min.js', inline='')
+    // inline
+    script(src='../bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    // inline
+    script(src='../bower_components/bluebird/js/browser/bluebird.js', inline='')
+    // inline
+    script(src='../bower_components/EaselJS/lib/easeljs-0.8.1.combined.js', inline='')
+    // inline
+    script(src='../vendor/gsap/TweenMax.js', inline='')
+    // inline
+    script(src='../vendor/gsap/TimelineMax.js', inline='')
+    // inline
+    script(src='../snapping/num.js', inline='')
+    // inline
+    script(src='../snapping/draw.js', inline='')
+    // inline
+    script(src='../snapping/stages.js', inline='')
 
     script.
       _globals.do()
