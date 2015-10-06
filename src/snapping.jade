@@ -23,7 +23,7 @@ html(lang='en', ng-app='StarterApp')
             div(flex='')
               pre
                 code(class='language-coffeescript')
-                  |    position = @square.getPosition()
+                  |    position = @square.getTopLeftCorner()
                   |    if position.distanceTo(@start) < 10
                   |        return @start.subtract(position)
             div(flex='')
@@ -32,14 +32,14 @@ html(lang='en', ng-app='StarterApp')
           p Okay, that is much better, but this totally does not seem like a programmer's approach. Let's start generalizing!
           p.md-title Level 1
           p.md-subhead#generalizations Generailzation 1
-          p Any numbers of 'sticky' points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
+          p Any numbers of snapping points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
           p.md-subhead Generailzation 2
-          p Arbitrary objects to which we could snap. In above examples we might want to be able to snap also to lines, not only in the corner.
+          p Arbitrary primitives to which we could snap. In above examples we might want to be able to snap also to lines themselve, not only in the corner.
           p.md-subhead Generailzation 3
-          p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some placement assistance, i.e. snaping?
+          p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some snaping?
           br
           p First two generalizations are not that difficult to implement, so we are going to do it right away. Third one is a little bit more tricky, so let's put it away for a while.
-          p For multiple points all we need is an array of points instead of one point associated with object we are moving. Like so:
+          p For 'Generailzation 1' all we need is an array of points instead of one point associated with object we are moving. Like so:
             pre
               code(class='language-coffeescript')
                 | class Rectangle
@@ -49,7 +49,7 @@ html(lang='en', ng-app='StarterApp')
                 |     point3 = point1.add(0, @height)
                 |     point4 = point1.add(@width, @height)
                 |     return [point1, point2, point3, point4]
-          p And here is what we can have for snapping 'target'
+          p For 'Generailzation 2' we can introduce a following class
             pre
               code(class='language-coffeescript')
                 | class SnappingPrimitive
@@ -84,7 +84,7 @@ html(lang='en', ng-app='StarterApp')
 
           p Let's see how it performs.
           canvas#demo3(width='900px', height='400px')
-          p Now our snapping works really nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
+          p Now our snapping works nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
           p Your first instinct to solve this problem may be to find pairwise intersections of all different snapping primitives and snap points not only to primitives, but to those intersections also. Sure, let's go for it!
           pre
             code(class='language-coffeescript')
@@ -123,7 +123,7 @@ html(lang='en', ng-app='StarterApp')
           canvas#demo7(width='900px', height='400px')
           p Implementation is going to be pretty complicated, so I will try to describe a little further what we are going to do.
           ol
-            li Create a list of 'multi' snappings. Multi-snapping is an object, which hase specified delta, and multiple points snapped to multiple lines.
+            li Create a list of 'multi' snappings. Multi-snapping is an object, which has specified delta, and multiple snappings, each of which is a point snapped to certain snapping primitive.
             li Find 'direct' snappings. That is, for each point find all lines to which we can snap it.
             li Add 'direct' snappings to our multi-snapping list.
             li Go through all pairs of 'direct' snappings and for each pair do the following
@@ -202,7 +202,112 @@ html(lang='en', ng-app='StarterApp')
           canvas#demo8(width='900px', height='400px')
           p.md-title Level 2
           p Now it is time for a mind-blowing part. So, we have an algorithm which snaps a set of points to a set of some objects on 2d plane(we used only line segments, but it is possible to have anything for which we can find projection and intersection points with other objects). However, imagine if you are rotating object. It really feels that there should be something in common between snapping panning object and snapping rotating object. And there is!
-          p First, here is an idea that will help. When we snap and object, we do not have to find the vector by which we move the object. It would be sufficient to know the delta by which we 'correct' the mouse cursor position, that is such delta, that, when added to cursor position, would result in such cursor position that the moving object would be placed snapped. Every time the object is moved we are going to use such 'corrected' cursor position and will result in object being snapped.
+          p First, here is an idea that will help. When we snap and object, we do not have to find the vector by which we move the object. It would be sufficient to know the delta by which we 'correct' the mouse cursor position, that is such delta, that, when added to cursor position, would result in such cursor position that the moving object would be placed snapped. Every time the object is moved we are going to use such 'corrected' cursor position and as a result the object will be snapped.
+          p Lets consider rotation. To snap rotating object we first need to see if we can bring point to line by rotating it around rotation center and find the angle of this rotation. If we succeed, we now need to take current mouse position and rotate it around rotation center by the same angle. Image below illustrates this.
+          p
+            img(src='images/rotation.png', style='width: 100%')
+          p Remember the key idea of snapping multiple points to multiple lines. We are moving one snapped point to another snapped point, together with lines and then check if those lines intersect and if we can snap to that intersection. Extending this idea just a little, we can realize that we are not stuck with 'panning' movement here. All we actually need is a way to transform one point to another, such that the movement corresponds to the movement we are trying to implement.
+          p As you may notice all that logic specific to movement can be extracted to separate class and then different movement types may be used interchangeably in our snapping algorithm. Here how this class may look
+          pre
+            code(class='language-coffeescript').
+              class MovementProvider
+                getNearestPoint: (primitive, point) ->
+                  throw new Error()
+
+                getMouseDelta: (projection, point) ->
+                  throw new Error()
+
+                combineSnappings: (firstSnap, secondSnap) ->
+                  throw new Error()
+
+              class PanMovementProvider
+                getNearestPoints: (primitive, point) ->
+                  return [primitive.getNearestPoint(point)]
+
+                getMouseDelta: (projection, point) ->
+                  return projection.subtract(point)
+
+                combineSnappings: (firstSnap, secondSnap) ->
+                  pointsDelta = firstSnap.point.subtract(secondSnap.point)
+                  movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
+                  intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+                  if intersection
+                    return intersection.subtract(firstSnap.point)
+                  return null
+
+
+              class RotateMovementProvider
+                constructor: (@center) ->
+
+                getNearestPoints: (primitive, point) ->
+                  radius = @center.distanceTo(point)
+                  intersections = num.findLineSegmentCircleIntersections(primitive.start, primitive.end,
+                    @center.x, @center.y, radius)
+                  return intersections
+
+                _getMouseDelta: (angle) ->
+                  snappedPosition = @mousePosition.rotateAround(@center, angle)
+                  return snappedPosition.subtract(@mousePosition)
+
+                getMouseDelta: (projection, point) ->
+                  throw new Error() if projection.x == undefined
+                  v1 = num.Num2.vectorFromPoints(@center, projection)
+                  v2 = num.Num2.vectorFromPoints(@center, point)
+                  angle = v2.angleTo(v1)
+                  return @_getMouseDelta(angle)
+
+                combineSnappings: (firstSnap, secondSnap) ->
+                  v1 = num.Num2.vectorFromPoints(@center, firstSnap.point)
+                  v2 = num.Num2.vectorFromPoints(@center, secondSnap.point)
+                  angle = v2.angleTo(v1)
+                  movedSecondSnap = secondSnap.primitive.rotateBy(@center, angle)
+                  intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+                  if intersection and intersection.epsilonEquals(firstSnap.point)
+                    return @getMouseDelta(intersection, firstSnap.point)
+                  return null
+          p And the final version of snapping algorithm!
+          pre
+            code(class='language-coffeescript').
+              minDistance = 20
+              points = @getSnappingShape().wrapper.getSnappingPoints()
+              movementProvider = @getSnappingShape().wrapper.movementProvider
+              movementProvider.mousePosition = @mousePosition
+              singleSnaps = []
+              for point in points
+                for p in @snapTo
+                  nearest = movementProvider.getNearestPoints(p, point)
+                  for n in nearest
+                    delta = movementProvider.getMouseDelta(n, point)
+                    if delta.length() < minDistance
+                      singleSnaps.push({point: point, delta: delta, primitive: p})
+              snaps = new SnapsDictionary()
+              for snap in singleSnaps
+                snaps.add(snap)
+
+              for i in [0..singleSnaps.length - 1] by 1
+                firstSnap = singleSnaps[i]
+                for j in [i+1..singleSnaps.length - 1] by 1
+                  secondSnap = singleSnaps[j]
+
+                  if !firstSnap.delta.epsilonEquals(secondSnap.delta)
+                    intersectionDelta = movementProvider.combineSnappings(firstSnap, secondSnap)
+                    if intersectionDelta
+                      delta = intersectionDelta
+                      snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+                      snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+
+              nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+              if nearestSnap == Infinity or nearestSnap == -Infinity
+                return num.Num2.zero
+              return nearestSnap.delta
+          p Here is working demo of this code. You can move lines by dragging yellow squares. One rectangle is rotating other is panning. The brown cross indicates the 'snapped' position of mouse cursor.
+          canvas#demo10(width='900px', height='400px')
+          p.md-title Outroduction
+          ol
+            li Algorithm presented here is not intended to provide practical solution to snapping from UX perspective. Instead, it is a demonstration of some ideas, which I find interesting for solving a complicated algorithmical problem.
+            li All the code is working and you may use it in any possible way, but since it was written only for demonstration, it is below production level quality and likely to have bugs.
+            li You can comment through github issues, or contact me if you have questions/remarks. Feedback is, surely, welcome.
+
 
 
     script.

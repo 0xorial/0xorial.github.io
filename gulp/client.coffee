@@ -51,12 +51,12 @@ module.exports = (gulp, $) ->
 
 
   gulp.task 'client-copy', ->
-    return gulp.src(['./src/**/*.html', './src/**/*.js','./src/**/*.css'])
+    return gulp.src(['./src/**/*.html', './src/**/*.js', './src/**/*.css', './src/**/*.png'])
       .pipe($.changed(dst))
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-copy-watch', ->
-    $.watch ['./src/**/*.html', './src/**/*.js','./src/**/*.css'], () ->
+    $.watch ['./src/**/*.html', './src/**/*.js','./src/**/*.css', './src/**/*.png'], () ->
       gulp.start 'client-copy', ->
         browserSync.reload()
     return

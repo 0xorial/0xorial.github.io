@@ -139,7 +139,7 @@ class MyStage1 extends draw.MyStage
     @_stage.update()
 
   onLogicUpdate: ->
-    position = @square.getPosition()
+    position = @square.getTopLeftCorner()
     if num.epsilonEquals(position.x, @start.x, 0.1) and num.epsilonEquals(position.y, @start.y, 0.1)
       @square.setFill('green')
     else
@@ -151,7 +151,7 @@ class MyStage2 extends MyStage1
     @snapTo = []
 
   snap: ->
-    position = @square.getPosition()
+    position = @square.getTopLeftCorner()
     if position.distanceTo(@start) < 10
         return @start.subtract(position)
 
@@ -249,7 +249,7 @@ class MyStage5 extends MyStage4
     @snapTo = [line1.primitive, line2.primitive]
 
     @square0 = new draw.Rectangle()
-    @square0.setPosition(new num.Num2(65, 35))
+    @square0.setPosition(new num.Num2(75, 50))
     @square0.width = 20
     @square0.height = 30
     @square0.fill = 'green'
@@ -279,7 +279,7 @@ class MyStage6 extends draw.MyStage
     line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
 
     @square0 = new draw.Rectangle()
-    @square0.setPosition(new num.Num2(90, 35))
+    @square0.setPosition(new num.Num2(100, 50))
     @square0.width = 20
     @square0.height = 30
     @square0.fill = 'red'
@@ -324,7 +324,7 @@ class MyStage7 extends draw.MyStage
     line2 = new Line(new num.Num2(100,0), new num.Num2(0, 100))
 
     @square0 = new draw.Rectangle()
-    @square0.setPosition(new num.Num2(90, 35))
+    @square0.setPosition(new num.Num2(100, 50))
     @square0.width = 20
     @square0.height = 30
     @square0.fill = 'red'
@@ -509,10 +509,53 @@ class RotateMovementProvider
       return @getMouseDelta(intersection, firstSnap.point)
     return null
 
-
 class MyStage9 extends draw.MyStage
+  constructor: (id) ->
+    super(id, true)
+
+    start = new num.Num2(85, 32)
+    line1 = new draw.Line(start, start.add(100, 0))
+    line2 = new draw.Line(start, start.add(0, 100))
+
+    @square0 = new draw.Rectangle(70, 70, 'red')
+    @square0.setPosition(new num.Num2(100, 50))
+
+    squarePoints = @square0.getSnappingPoints()
+    # @arrow1 = new draw.Arrow(squarePoints[0], line2.primitive.getNearestPoint(squarePoints[0]))
+    # @arrow2 = new draw.Arrow(squarePoints[2], line1.primitive.getNearestPoint(squarePoints[2]))
+
+    # @arrow3 = new draw.Arrow(squarePoints[0], squarePoints[0].subtract(24, 0), 'green')
+    # @arrow4 = new draw.Arrow(squarePoints[2], squarePoints[2].subtract(24, 0), 'green')
+
+    @text = new draw.Text('Move point, together with line, to which it is snapped to another point!', '10px Gochi Hand')
+    @text.setPosition(new num.Num2(90, 20))
+
+    # TweenMax.ticker.addEventListener 'tick', (e) =>
+    #   @_stage.update()
+
+    # time = 3
+    # tl = new TimelineMax()
+
+    # tl.to(@arrow1.shape, time, {y: 30}, 'g')
+    # tl.to(@arrow3.shape, time, {y: 30}, 'g')
+    # tl.to(line2.shape.shape, time, {y: 30}, 'g')
+    # tl.delay(0.5)
+    # tl.repeat(-1)
+    # tl.repeatDelay(0.5)
+
+    # @addShape @arrow1
+    # @addShape @arrow2
+    # @addShape @arrow3
+    # @addShape @arrow4
+
+    @addShape line1
+    @addShape line2
+    @addShape @square0
+    @addShape @text
+
+class MyStage10 extends draw.MyStage
   constructor: (@id) ->
-    super(@id)
+    super(@id, true)
 
     @zoom = 2
     @_updateTransform()
@@ -554,13 +597,6 @@ class MyStage9 extends draw.MyStage
     @addShape line.shape
     @snapTo.push line.primitive
     @lines.push line
-
-  onLogicUpdate: ->
-    position = @square.getPosition()
-    if num.epsilonEquals(position.x, @start.x, 0.1) and num.epsilonEquals(position.y, @start.y, 0.1)
-      @square.setFill('green')
-    else
-      @square.setFill('red')
 
   onMouseDown: (e) ->
     handled = false
@@ -627,7 +663,7 @@ class MyStage9 extends draw.MyStage
 
 
 _globals.do = ->
-  new MyStage9('demo1')
+  new MyStage1('demo1')
   new MyStage2('demo2')
   new MyStage3('demo3')
   new MyStage4('demo4')
@@ -635,3 +671,5 @@ _globals.do = ->
   new MyStage6('demo6')
   new MyStage7('demo7')
   new MyStage8('demo8')
+  new MyStage9('demo9')
+  new MyStage10('demo10')

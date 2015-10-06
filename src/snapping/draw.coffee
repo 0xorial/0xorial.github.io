@@ -105,6 +105,9 @@ class exports.Rectangle extends exports.Shape
     @shape.regY = @height / 2
     super().drawRect(0, 0, @width, @height)
 
+  getTopLeftCorner: ->
+    return @getSnappingPoints()[0]
+
   getSnappingPoints: ->
     pos = @getPosition()
     w2 = @width/2
@@ -120,6 +123,11 @@ class exports.Rectangle extends exports.Shape
     return new num.Num2(@shape.x, @shape.y)
 
 class exports.Line extends exports.Shape
+  constructor: (@start, @end, stroke) ->
+    super()
+    @stroke = 'black'
+    @stroke = stroke if stroke
+
   _makeGraphics: ->
     super().moveTo(@start.x, @start.y).lineTo(@end.x, @end.y)
 
@@ -155,7 +163,7 @@ class exports.Text extends exports.ShapeBase
   update: ->
 
 class exports.MyStage
-  constructor: (@id) ->
+  constructor: (@id, @showSnapCross = false) ->
     @_stage = new createjs.Stage(@id)
 
     @cross = new exports.Cross()
@@ -195,8 +203,10 @@ class exports.MyStage
       if shape and shape.isRotatable
         @_currentRotatingShape = shape
         @_shapeStartRotation = shape.rotation
-      @cross.position = new num.Num2(@_stage.globalToLocal(event.rawX, event.rawY))
-      @addShape @cross
+
+      if @showSnapCross
+        @cross.position = new num.Num2(@_stage.globalToLocal(event.rawX, event.rawY))
+        @addShape @cross
 
 
   getSnappingShape: ->
