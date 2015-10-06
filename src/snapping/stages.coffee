@@ -2,14 +2,63 @@ draw = _globals.draw
 num = _globals.num
 
 class Line
-  constructor: (@start, @end) ->
-    @shape = new draw.Line()
-    @shape.stroke = 'black'
-    @shape.start = @start
-    @shape.end = @end
+  constructor: (@start, @end, @movable = false) ->
+    @line = new draw.Line()
+    @line.stroke = 'black'
+    @line.start = @start
+    @line.end = @end
+
+    if !@movable
+      @shape = @line
+    else
+      @shape = new draw.Container()
+      @shape.addShape(@line)
+      @gizmo1 = new draw.Rectangle(6, 6, 'yellow')
+      @gizmo1.setPosition(@start)
+      @shape.addShape(@gizmo1)
+      @gizmo2 = new draw.Rectangle(6, 6, 'yellow')
+      @gizmo2.setPosition(@end)
+      @shape.addShape(@gizmo2)
+
     @primitive = new LineSnappingPrimitive()
     @primitive.start = @start
     @primitive.end = @end
+
+  onMouseDown: (globalPosition) ->
+    gizmo1Position = @gizmo1.shape.globalToLocal(globalPosition.x, globalPosition.y)
+    if @gizmo1.shape.hitTest(gizmo1Position.x, gizmo1Position.y)
+      @movingGizmo = @gizmo1
+      return true
+    gizmo2Position = @gizmo2.shape.globalToLocal(globalPosition.x, globalPosition.y)
+    if @gizmo2.shape.hitTest(gizmo2Position.x, gizmo2Position.y)
+      @movingGizmo = @gizmo2
+      return true
+    return false
+
+  onMouseMove: (stagePosition) ->
+    if @movingGizmo
+      if @movingGizmo == @gizmo1
+        @start = stagePosition
+      else
+        @end = stagePosition
+
+      @line.start = @start
+      @line.end = @end
+      @primitive.start = @start
+      @primitive.end = @end
+      @movingGizmo.setPosition(stagePosition)
+      @shape.update()
+      return true
+    return false
+
+  onMouseUp: ->
+    @movingGizmo = null
+
+  setSnapped: (snapped) ->
+    if snapped
+      @line.stroke = 'red'
+    else
+      @line.stroke = 'black'
 
 
 class SnappingPrimitive
@@ -444,6 +493,7 @@ class RotateMovementProvider
     return snappedPosition.subtract(@mousePosition)
 
   getMouseDelta: (projection, point) ->
+    throw new Error() if projection.x == undefined
     v1 = num.Num2.vectorFromPoints(@center, projection)
     v2 = num.Num2.vectorFromPoints(@center, point)
     angle = v2.angleTo(v1)
@@ -467,13 +517,14 @@ class MyStage9 extends draw.MyStage
     @zoom = 2
     @_updateTransform()
 
+    @lines = []
+    @snapTo = []
+
     @start = new num.Num2(30, 50)
     startLine = @start.add -0.5
 
-    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 0))
-    line2 = new Line(new num.Num2(0,0), new num.Num2(0, 100))
-
-    @snapTo = [line1.primitive, line2.primitive]
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 0), true)
+    line2 = new Line(new num.Num2(0,0), new num.Num2(0, 100), true)
 
     @square = new draw.Rectangle()
     @square.setPosition(num.Num2.zero.add(10, 15))
@@ -491,12 +542,18 @@ class MyStage9 extends draw.MyStage
     @square0.markMovable()
     @square0.movementProvider = new PanMovementProvider()
 
-    @addShape line1.shape
-    @addShape line2.shape
     @addShape @square
     @addShape @square0
 
+    @addSnapLine(line1)
+    @addSnapLine(line2)
+
     @_stage.update()
+
+  addSnapLine: (line) ->
+    @addShape line.shape
+    @snapTo.push line.primitive
+    @lines.push line
 
   onLogicUpdate: ->
     position = @square.getPosition()
@@ -504,6 +561,34 @@ class MyStage9 extends draw.MyStage
       @square.setFill('green')
     else
       @square.setFill('red')
+
+  onMouseDown: (e) ->
+    handled = false
+    if e.nativeEvent.which == 1
+      stagePosition = new num.Num2(e.rawX, e.rawY)
+      for s in @lines
+        if s.onMouseDown(stagePosition)
+          handled = true
+          break
+    if !handled
+      super(e)
+
+  onMouseMove: (e) ->
+    handled = false
+    stagePosition = new num.Num2(@_stage.globalToLocal(e.rawX, e.rawY))
+    for s in @lines
+      if s.onMouseMove(stagePosition)
+        handled = true
+        break
+    if !handled
+      super(e)
+    else
+      @_stage.update()
+
+  onMouseUp: (e) ->
+    for s in @lines
+      s.onMouseUp()
+    super(e)
 
   snap: ->
     minDistance = 20

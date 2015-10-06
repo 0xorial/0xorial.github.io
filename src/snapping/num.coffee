@@ -33,10 +33,10 @@ segmentContainsPoint = (point1, point2, point) ->
   tx = (point.x - point1.x) / dpx
   ty = (point.y - point1.y) / dpy
   if exports.epsilonEquals(dpx, 0)
-    return exports.epsilonEquals(point.x, point1.x) and ty >= 0 and ty <= 1
+    return exports.epsilonEquals(point.x, point1.x) and ty >= -0.1 and ty <= 1.1
   if exports.epsilonEquals(dpy, 0)
-    return exports.epsilonEquals(point.y, point1.y) and tx >= 0 and tx <= 1
-  if exports.epsilonEquals(tx, ty) and tx >= 0 and tx <= 1
+    return exports.epsilonEquals(point.y, point1.y) and tx >= -0.1 and tx <= 1.1
+  if exports.epsilonEquals(tx, ty) and tx >= -0.1 and tx <= 1.1
     return true
 
   return false

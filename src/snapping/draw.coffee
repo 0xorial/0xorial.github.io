@@ -16,13 +16,32 @@ class exports.ShapeBase
     return getPosition()
 
   setPosition: (x, y) ->
-    if x.x
+    if x.x != undefined
       y = x.y
       x = x.x
     @shape.x = x
     @shape.y = y
     @update()
 
+  update: ->
+
+class exports.Container extends exports.ShapeBase
+  constructor: ->
+    @shape = new createjs.Container()
+    @shapes = []
+
+  addShape: (shape) ->
+    @shapes.push(shape)
+    @shape.addChild(shape.shape)
+
+  removeShape: (shape) ->
+    i = @shapes.indexOf(shape)
+    @shapes.splice(i, 1)
+    @shape.removeChild(shape.shape)
+
+  update: ->
+    for s in @shapes
+      s.update()
 
 class exports.Shape extends exports.ShapeBase
   constructor: ->
@@ -63,7 +82,24 @@ class exports.Circle extends exports.Shape
   _makeGraphics: ->
     super().drawCircle(0, 0, @radius)
 
+class exports.Cross extends exports.Shape
+  constructor: ->
+    super()
+    @stroke = 'brown'
+    @position = num.Num2.zero
+
+  _makeGraphics: ->
+    size = 5
+    start1 = @position.subtract(size, 0)
+    end1 = @position.add(size, 0)
+    start2 = @position.subtract(0, size)
+    end2 = @position.add(0, size)
+    super().moveTo(start1.x, start1.y).lineTo(end1.x, end1.y).moveTo(start2.x, start2.y).lineTo(end2.x, end2.y)
+
 class exports.Rectangle extends exports.Shape
+  constructor: (@width, @height, @fill) ->
+    super()
+
   _makeGraphics: ->
     @shape.regX = @width / 2
     @shape.regY = @height / 2
@@ -122,6 +158,7 @@ class exports.MyStage
   constructor: (@id) ->
     @_stage = new createjs.Stage(@id)
 
+    @cross = new exports.Cross()
     @_offset = new num.Num2(80, 50)
     @zoom = 2
     @_updateTransform()
@@ -158,6 +195,9 @@ class exports.MyStage
       if shape and shape.isRotatable
         @_currentRotatingShape = shape
         @_shapeStartRotation = shape.rotation
+      @cross.position = new num.Num2(@_stage.globalToLocal(event.rawX, event.rawY))
+      @addShape @cross
+
 
   getSnappingShape: ->
     if @_currentMovingShape
@@ -199,21 +239,25 @@ class exports.MyStage
       console.log 'snapping delta' + snappingDelta.toString()
 
       newPosition.addThis(snappingDelta)
+      adjustedMousePosition = @mousePosition.add(snappingDelta)
+      @cross.position = new num.Num2(adjustedMousePosition)
+      @cross.update()
       console.log 'new position' + newPosition.toString()
       @_currentMovingShape.x = newPosition.x
       @_currentMovingShape.y = newPosition.y
     else if @_currentRotatingShape
-      mouseStage = new num.Num2(@_stage.globalToLocal(mouse.x, mouse.y))
       centerStage = @_currentRotatingShape.wrapper.getCenter()
-      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, mouseStage)
+      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, @mousePosition)
 
       snappingDelta = @snap()
 
       console.log 'snapping delta' + snappingDelta.toString()
 
-      mouseStage.addThis(snappingDelta)
-      console.log 'new position' + mouseStage.toString()
-      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, mouseStage)
+      adjustedMousePosition = @mousePosition.add(snappingDelta)
+      @cross.position = new num.Num2(adjustedMousePosition)
+      @cross.update()
+      console.log 'new position' + adjustedMousePosition.toString()
+      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, adjustedMousePosition)
 
 
     else
