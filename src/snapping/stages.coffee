@@ -45,6 +45,9 @@ class LineSnappingPrimitive
   moveBy: (delta) ->
     return new LineSnappingPrimitive(@start.add(delta), @end.add(delta))
 
+  rotateBy: (center, angle) ->
+    return new LineSnappingPrimitive(@start.rotateAround(center, angle), @end.rotateAround(center, angle))
+
 
 class MyStage1 extends draw.MyStage
   constructor: (@id) ->
@@ -402,6 +405,61 @@ class MyStage8 extends MyStage4
       return num.Num2.zero
     return nearestSnap.delta
 
+class MovementProvider
+  getNearestPoint: (primitive, point) ->
+    throw new Error()
+
+  getMouseDelta: (projection, point) ->
+    throw new Error()
+
+  combineSnappings: (firstSnap, secondSnap) ->
+    throw new Error()
+
+class PanMovementProvider
+  getNearestPoints: (primitive, point) ->
+    return [primitive.getNearestPoint(point)]
+
+  getMouseDelta: (projection, point) ->
+    return projection.subtract(point)
+
+  combineSnappings: (firstSnap, secondSnap) ->
+    pointsDelta = firstSnap.point.subtract(secondSnap.point)
+    movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
+    intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+    if intersection
+      return intersection.subtract(firstSnap.point)
+    return null
+
+
+class RotateMovementProvider
+  constructor: (@center) ->
+
+  getNearestPoints: (primitive, point) ->
+    radius = @center.distanceTo(point)
+    intersections = num.findLineSegmentCircleIntersections(primitive.start, primitive.end, @center.x, @center.y, radius)
+    return intersections
+
+  _getMouseDelta: (angle) ->
+    snappedPosition = @mousePosition.rotateAround(@center, angle)
+    return snappedPosition.subtract(@mousePosition)
+
+  getMouseDelta: (projection, point) ->
+    v1 = num.Num2.vectorFromPoints(@center, projection)
+    v2 = num.Num2.vectorFromPoints(@center, point)
+    angle = v2.angleTo(v1)
+    return @_getMouseDelta(angle)
+
+  combineSnappings: (firstSnap, secondSnap) ->
+    v1 = num.Num2.vectorFromPoints(@center, firstSnap.point)
+    v2 = num.Num2.vectorFromPoints(@center, secondSnap.point)
+    angle = v2.angleTo(v1)
+    movedSecondSnap = secondSnap.primitive.rotateBy(@center, angle)
+    intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+    if intersection and intersection.epsilonEquals(firstSnap.point)
+      return @getMouseDelta(intersection, firstSnap.point)
+    return null
+
+
 class MyStage9 extends draw.MyStage
   constructor: (@id) ->
     super(@id)
@@ -412,34 +470,32 @@ class MyStage9 extends draw.MyStage
     @start = new num.Num2(30, 50)
     startLine = @start.add -0.5
 
-    @line1 = new draw.Line()
-    @line1.stroke = 'black'
-    @line1.start = startLine
-    @line1.end = startLine.add(100, 0)
-    @line2 = new draw.Line()
-    @line2.stroke = 'black'
-    @line2.start = startLine
-    @line2.end = startLine.add(0, 100)
+    line1 = new Line(new num.Num2(0,0), new num.Num2(100, 0))
+    line2 = new Line(new num.Num2(0,0), new num.Num2(0, 100))
+
+    @snapTo = [line1.primitive, line2.primitive]
 
     @square = new draw.Rectangle()
-    @square.setPosition(@start.add(10))
+    @square.setPosition(num.Num2.zero.add(10, 15))
     @square.width = 20
     @square.height = 30
     @square.fill = 'red'
+    @square.markRotatable()
+    @square.movementProvider = new RotateMovementProvider(@square.getCenter())
 
-    @square.markRotatable @_stage
+    @square0 = new draw.Rectangle()
+    @square0.setPosition(@start.add(40))
+    @square0.width = 20
+    @square0.height = 30
+    @square0.fill = 'red'
+    @square0.markMovable()
+    @square0.movementProvider = new PanMovementProvider()
 
-    @addShape @line1
-    @addShape @line2
+    @addShape line1.shape
+    @addShape line2.shape
     @addShape @square
+    @addShape @square0
 
-    @text = new draw.Text('Put square precisely in the corner.\n it will become green when(if) you succeed', '20px Gochi Hand')
-    @_stage.addChild @text.shape
-
-    @arrow = new draw.Arrow({x: 10, y: 40}, @start)
-    @arrow.stroke = 'black'
-
-    @addShape @arrow
     @_stage.update()
 
   onLogicUpdate: ->
@@ -448,6 +504,41 @@ class MyStage9 extends draw.MyStage
       @square.setFill('green')
     else
       @square.setFill('red')
+
+  snap: ->
+    minDistance = 20
+    points = @getSnappingShape().wrapper.getSnappingPoints()
+    movementProvider = @getSnappingShape().wrapper.movementProvider
+    movementProvider.mousePosition = @mousePosition
+    singleSnaps = []
+    for point in points
+      for p in @snapTo
+        nearest = movementProvider.getNearestPoints(p, point)
+        for n in nearest
+          delta = movementProvider.getMouseDelta(n, point)
+          if delta.length() < minDistance
+            singleSnaps.push({point: point, delta: delta, primitive: p})
+    snaps = new SnapsDictionary()
+    for snap in singleSnaps
+      snaps.add(snap)
+
+    for i in [0..singleSnaps.length - 1] by 1
+      firstSnap = singleSnaps[i]
+      for j in [i+1..singleSnaps.length - 1] by 1
+        secondSnap = singleSnaps[j]
+
+        if !firstSnap.delta.epsilonEquals(secondSnap.delta)
+          intersectionDelta = movementProvider.combineSnappings(firstSnap, secondSnap)
+          if intersectionDelta
+            delta = intersectionDelta
+            snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+            snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+
+    nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+    if nearestSnap == Infinity or nearestSnap == -Infinity
+      return num.Num2.zero
+    return nearestSnap.delta
+
 
 
 _globals.do = ->

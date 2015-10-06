@@ -73,11 +73,12 @@ class exports.Rectangle extends exports.Shape
     pos = @getPosition()
     w2 = @width/2
     h2 = @height/2
+    center = pos
     point1 = pos.add(-w2, -h2)
     point2 = pos.add(w2, -h2)
-    point3 = pos.add(-h2, h2)
+    point3 = pos.add(-w2, h2)
     point4 = pos.add(w2, h2)
-    return [point1, point2, point3, point4]
+    return [point1, point2, point3, point4].map (p) => p.rotateAroundDeg(center, @shape.rotation)
 
   getCenter: ->
     return new num.Num2(@shape.x, @shape.y)
@@ -141,8 +142,6 @@ class exports.MyStage
 
       @_updateTransform()
 
-    @_offset = new num.Num2(0, 0)
-
     @_stage.on 'stagemouseup', (e) => @onMouseUp(e)
     @_stage.on 'stagemousedown', (e) => @onMouseDown(e)
     @_stage.on 'stagemousemove', (e) => @onMouseMove(e)
@@ -160,6 +159,10 @@ class exports.MyStage
         @_currentRotatingShape = shape
         @_shapeStartRotation = shape.rotation
 
+  getSnappingShape: ->
+    if @_currentMovingShape
+      return @_currentMovingShape
+    return @_currentRotatingShape
 
   onMouseUp: (event) ->
     @_currentMovingShape = null
@@ -167,7 +170,15 @@ class exports.MyStage
     @_dragStartPosition = null
     @_dragStartOffset = null
 
+  _calculateRotation: (centerStage, mouseStage) ->
+    _dragStartPosition = @_stage.globalToLocal(@_dragStartPosition.x, @_dragStartPosition.y)
+    startVector = num.Num2.vectorFromPoints(centerStage, _dragStartPosition)
+    currentVector = num.Num2.vectorFromPoints(centerStage, mouseStage)
+    angleDiff = currentVector.angleToDeg(startVector)
+    return @_shapeStartRotation - angleDiff
+
   onMouseMove: (event) ->
+    @mousePosition = new num.Num2(@_stage.globalToLocal(event.rawX, event.rawY))
     mouse = new num.Num2(event.stageX, event.stageY)
     if @_dragStartPosition
       delta = num.Num2.subtract(mouse, @_dragStartPosition)
@@ -192,14 +203,19 @@ class exports.MyStage
       @_currentMovingShape.x = newPosition.x
       @_currentMovingShape.y = newPosition.y
     else if @_currentRotatingShape
-      mouseStage =  @_stage.globalToLocal(mouse.x, mouse.y)
+      mouseStage = new num.Num2(@_stage.globalToLocal(mouse.x, mouse.y))
       centerStage = @_currentRotatingShape.wrapper.getCenter()
-      # centerStage = @_currentRotatingShape.localToGlobal(centerLocal.x, centerLocal.y)
-      _dragStartPosition = @_stage.globalToLocal(@_dragStartPosition.x, @_dragStartPosition.y)
-      startVector = num.Num2.vectorFromPoints(centerStage, _dragStartPosition)
-      currentVector = num.Num2.vectorFromPoints(centerStage, mouseStage)
-      angleDiff = currentVector.angleToDeg(startVector)
-      @_currentRotatingShape.rotation = @_shapeStartRotation - angleDiff
+      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, mouseStage)
+
+      snappingDelta = @snap()
+
+      console.log 'snapping delta' + snappingDelta.toString()
+
+      mouseStage.addThis(snappingDelta)
+      console.log 'new position' + mouseStage.toString()
+      @_currentRotatingShape.rotation = @_calculateRotation(centerStage, mouseStage)
+
+
     else
       shape = @_pickShape(event.stageX, event.stageY)
       shape = null if shape and !shape.isPickable
