@@ -42,7 +42,7 @@ module.exports = (gulp, $) ->
       .pipe($.changed(dst))
       .pipe($.plumber())
       .pipe($.jade())
-      .pipe(inlinesource())
+      # .pipe(inlinesource())
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-jade-watch', ->
@@ -51,14 +51,22 @@ module.exports = (gulp, $) ->
         browserSync.reload()
     return
 
+  copy = [
+    './src/**/*.html'
+    './src/**/*.js'
+    './src/**/*.css'
+    './src/**/*.png'
+    './src/**/*.gif'
+    './src/**/*.svg'
+  ]
 
   gulp.task 'client-copy', ->
-    return gulp.src(['./src/**/*.html', './src/**/*.js', './src/**/*.css', './src/**/*.png'])
+    return gulp.src(copy)
       .pipe($.changed(dst))
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-copy-watch', ->
-    $.watch ['./src/**/*.html', './src/**/*.js','./src/**/*.css', './src/**/*.png'], () ->
+    $.watch copy, () ->
       gulp.start 'client-copy', ->
         browserSync.reload()
     return
