@@ -30,8 +30,9 @@ class exports.Image extends createjs.Bitmap
 
 
 class exports.Rectangle extends createjs.Shape
-  constructor: (@width, @height) ->
-
+  constructor: (@width, @height, @stroke = 'black') ->
+    super()
+    @graphics.beginStroke(@stroke).drawRect(0,0, @width, @height)
 
 class exports.MyStage extends createjs.Stage
   constructor: (@elementId) ->
