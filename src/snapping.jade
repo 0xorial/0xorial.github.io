@@ -34,15 +34,15 @@ html(lang='en', ng-app='StarterApp')
 
           p Okay, that is much better, but this totally does not seem like a programmer's approach. Let's start generalizing!
           p.md-title Level 1
-          p.md-subhead#generalizations Generailzation 1
+          p.md-subhead#generalizations Generalization 1
           p Any numbers of snapping points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
-          p.md-subhead Generailzation 2
+          p.md-subhead Generalization 2
           p Arbitrary primitives to which we could snap. In above examples we might want to be able to snap also to lines themselve, not only in the corner.
-          p.md-subhead Generailzation 3
+          p.md-subhead Generalization 3
           p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some snaping?
           br
           p First two generalizations are not that difficult to implement, so we are going to do it right away. Third one is a little bit more tricky, so let's put it away for a while.
-          p For 'Generailzation 1' all we need is an array of points instead of one point associated with object we are moving. Like so:
+          p For 'Generalization 1' all we need is an array of points instead of one point associated with object we are moving. Like so:
             pre
               code(class='language-coffeescript')
                 | class Rectangle
@@ -52,7 +52,7 @@ html(lang='en', ng-app='StarterApp')
                 |     point3 = point1.add(0, @height)
                 |     point4 = point1.add(@width, @height)
                 |     return [point1, point2, point3, point4]
-          p For 'Generailzation 2' we can introduce a following class
+          p For 'Generalization 2' we can introduce a following class
             pre
               code(class='language-coffeescript')
                 | class SnappingPrimitive
