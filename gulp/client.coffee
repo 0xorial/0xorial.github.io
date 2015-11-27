@@ -4,8 +4,9 @@ sequence = require 'run-sequence'
 fs = require('fs')
 inlinesource = require('gulp-inline-source')
 
+isRelease = false
 
-module.exports = (gulp, $) ->
+module.exports = (gulp, $, options) ->
 
   dst = './'
 
@@ -42,12 +43,29 @@ module.exports = (gulp, $) ->
       .pipe($.changed(dst))
       .pipe($.plumber())
       .pipe($.jade())
-      # .pipe(inlinesource())
+      # .pipe(inlinesource({rootpath: './', compress: options.compress}))
       .pipe(gulp.dest(dst))
 
+  createJadeTask = (taskName, file, base, rootpath) ->
+    gulp.task taskName, ->
+      return gulp.src([file], {base: base})
+        .pipe($.changed(dst))
+        .pipe($.plumber())
+        .pipe($.jade())
+        # .pipe(inlinesource({rootpath: rootpath, compress: options.compress}))
+        .pipe(gulp.dest(dst))
+    return undefined
+
   gulp.task 'client-jade-watch', ->
-    $.watch ['./src/**/*.jade'], () ->
-      gulp.start 'client-jade', ->
+    $.watch ['./src/**/*.jade'], (file) ->
+      tn = 'client-jade-temp'
+      createJadeTask tn, file.history[file.history.length - 1], file.base, file.cwd
+
+      # console.log Object.keys(file)
+      # for k in Object.keys(file)
+      #   console.log(file[k])
+
+      gulp.start tn, ->
         browserSync.reload()
     return
 
