@@ -4,6 +4,15 @@ html(lang='en', ng-app='StarterApp')
     link(rel='stylesheet', href='./bower_components/angular-material/angular-material.min.css', inline='')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
+    
+  script(type='text/ng-template' id='scheduledItem.html')
+    .md-whiteframe-z1
+      div {{item.memo.text}}
+      span Learned: 
+      div {{item.memo.learnDate | date : 'fullDate' }}
+      span Repeat:
+      div {{item.date | date : 'fullDate' }}
+  
   body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;')
       md-content(layout='column', layout-align='start center' layout-padding='')
@@ -13,10 +22,20 @@ html(lang='en', ng-app='StarterApp')
               label Text
               input(type='text' ng-model='memoText')
             submit.md-button.md-raised(ng-click="addNewMemo()") Add
-
+        md-title History
         div(ng-controller='MemoListCtrl')
           .md-whiteframe-z1(ng-repeat='memo in memos' layout-padding)
+            div {{memo.learnDate | date : 'fullDate' }}
             div {{memo.text}}
+            
+        div(ng-controller='MemoScheduleCtrl')
+          md-title Review Schedule
+          md-title Today
+          div(ng-repeat='item in todayItems' ng-include="'scheduledItem.html'" layout-padding)
+          md-title Following week
+          div(ng-repeat='item in weekItems' ng-include="'scheduledItem.html'" layout-padding)
+          md-title Following month
+          div(ng-repeat='item in monthItems' ng-include="'scheduledItem.html'" layout-padding)
 
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
@@ -26,6 +45,8 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
     //- inline
     script(src='./bower_components/bluebird/js/browser/bluebird.js', inline='')
+    
+    script(src='./bower_components/moment/min/moment.min.js', inline='')
 
     script(src='./bower_components/angular/angular.js')
     script(src='./bower_components/angular-messages/angular-messages.js')
@@ -36,5 +57,3 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/angular-material-icons/angular-material-icons.min.js')
 
     script(src='./memory/app.js')
-
-
