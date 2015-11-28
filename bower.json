@@ -19,11 +19,12 @@
     "angular-ui-router": "~0.2.15",
     "animate.css": "~3.4.0",
     "bluebird": "~2.9.34",
-    "EaselJS": "https://github.com/0xorial/EaselJS.git#~0.8.1",
     "jquery": "~2.1.4",
     "jquery-mousewheel": "~3.1.13",
     "lodash": "~3.10.1",
     "prism": "~1.0.1",
-    "victor": "~1.1.0"
+    "victor": "~1.1.0",
+    "angular-material": "~0.11.4",
+    "EaselJS": "easeljs#~0.8.1"
   }
 }
