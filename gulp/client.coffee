@@ -91,7 +91,12 @@ module.exports = (gulp, $, options) ->
 
 
   gulp.task 'browser-sync', ->
-    browserSync({server: dst})
+    browserSync(
+      server:
+        baseDir: dst
+      online: false
+      ghostMode: false
+      )
     return
 
 

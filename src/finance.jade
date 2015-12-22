@@ -15,29 +15,29 @@ html(lang='en', ng-app='StarterApp')
 
   body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;')
-      md-content(layout='column', layout-align='start center' layout-padding='')
-        div(ng-controller='TransactionsListCtrl' )
+      md-content(layout='column', layout-align='start center' layout-padding='' ng-controller='TransactionsListCtrl')
+        div
           div(layout-padding='' ng-repeat='transaction in allTransactions' )
-            .md-whiteframe-z1(layout-padding='', style='display: inline-block;' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()')
+            .md-whiteframe-z1(ng-mouseenter='simulateUntil(transaction)', ng-mouseleave='simulateAll()', layout-padding='', style='display: inline-block;')
               span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": transaction.color}')
               span(style='display: inline-block; width: 130px') {{transaction.description}}
               span(style='display: inline-block; width: 100px') {{transaction.amount | currency}}
               span(style='display: inline-block; width: 100px') Date:
               span(style='display: inline-block; width: 250px') {{transaction.jsDate | date : 'fullDate'}}
-        div(ng-controller='TransactionsListCtrl')
+        div
           div(layout-padding='' ng-repeat='account in accounts' )
             .md-whiteframe-z1(layout-padding='', style='display: inline-block;')
-              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": account.color}')
-              span(style='display: inline-block; width: 130px') {{account.name}}
+              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": account.account.color}')
+              span(style='display: inline-block; width: 130px') {{account.account.name}}
               span(style='display: inline-block; width: 130px') {{account.balance}}
-              span(style='display: inline-block; width: 130px') {{account.currency}}
+              span(style='display: inline-block; width: 130px') {{account.account.currency}}
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
     //- inline
-    script(src='./bower_components/jquery/dist/jquery.min.js', inline='')
+    //- script(src='./bower_components/jquery/dist/jquery.min.js', inline='')
     //- inline
-    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    //- script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
     //- inline
     script(src='./bower_components/bluebird/js/browser/bluebird.js', inline='')
 

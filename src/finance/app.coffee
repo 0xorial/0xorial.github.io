@@ -27,22 +27,27 @@ class CurrencyAmount
     return @currency == amount.currency and @amount == amount.amount
 
 class Account
-  constructor: (@currency, @balance, @name, @color) ->
-
-  execute: (currencyAmount) ->
-    if currencyAmount.currency != @currency
-      throw new Error('wrong currency')
-    @balance += currencyAmount.amount
+  constructor: (@currency, @name, @color) ->
 
   isSame: (other) ->
     return @ == other
 
+class AccountState
+  constructor: (@account, @balance) ->
+    if !@balance
+      @balance = 0
+
+  execute: (currencyAmount) ->
+    if currencyAmount.currency != @account.currency
+      throw new Error('wrong currency')
+    return new AccountState(@account, @balance + currencyAmount.amount)
+
 class AccountSelector
-  getAccounts: (@currencyAmount) ->
+  getAccounts: (context, currencyAmount) ->
     throw new Error('abstract method')
 
 class Transaction
-  constructor: (@date, @currencyAmount, @account, @description, @payment) ->
+  constructor: (@date, @currencyAmount, @account, @description, @payment, @id) ->
 
   isSame: (other) ->
     return @date.isSame(other.date) \
@@ -53,74 +58,97 @@ class Transaction
 
 class Payment
   # returns generator returning transactions ordered by payment time
-  getTransactions: ->
+  getTransactions: (context) ->
     throw new Error('abstract method')
-
-  getTransactionsArray: ->
-    return Array.from(@getTransactions())
 
 class SimplePayment extends Payment
   constructor: (@accountSelector, @date, @currencyAmount, @description) ->
-  getTransactions: ->
-    account = @accountSelector.getAccounts(@currencyAmount)
-    yield new Transaction(@date, @currencyAmount, account, @description)
+  getTransactions: (context) ->
+    account = @accountSelector.getAccounts(context, @currencyAmount)
+    context.transaction(@date, @currencyAmount, account, @description, @)
 
 class PeriodicPayment extends Payment
   constructor: (@accountSelector, @startDate, @endDate, @period, @currencyAmount, @description) ->
-  getTransactions: ->
+  getTransactions: (context) ->
     date = @startDate
     while date < @endDate
-      account = @accountSelector.getAccounts(@currencyAmount)
-      yield new Transaction(date, @currencyAmount, account)
+      account = @accountSelector.getAccounts(context, @currencyAmount)
+      context.transaction(date, @currencyAmount, account, @)
       date += @period
 
 class BorrowPayment extends Payment
   constructor: (@accountSelector, @date, @returnDate, @currencyAmount, @description) ->
-  getTransactions: ->
-    account = @accountSelector.getAccounts(@currencyAmount)
-    yield new Transaction(@date, @currencyAmount, account, 'borrow ' + @description)
-    returnAmount = new CurrencyAmount(@currencyAmount.currency, -@currencyAmount.amount)
-    account = @accountSelector.getAccounts(returnAmount)
-    yield new Transaction(@returnDate, returnAmount, account, 'return ' + @description)
+  getTransactions: (context) ->
+    account = @accountSelector.getAccounts(context, @currencyAmount)
+    context.transaction(@date, @currencyAmount, account, 'borrow ' + @description, @)
+    returnAmount = @currencyAmount.multiply(-1)
+    account = @accountSelector.getAccounts(context, returnAmount)
+    context.transaction(@returnDate, returnAmount, account, 'return ' + @description, @)
 
 class TaxableIncomePayment extends Payment
   constructor: (@accountSelector, @currencyAmount, @params) ->
     # earnedAt
     # paymentDate
 
-  getTransactions: ->
-    account = @accountSelector.getAccounts(@currencyAmount)
-    yield new Transaction(@params.paymentDate, @currencyAmount, account, 'salary')
+  getTransactions: (context) ->
+    account = @accountSelector.getAccounts(context, @currencyAmount)
+    context.transaction(@params.paymentDate, @currencyAmount, account, 'salary', @)
     taxDate = @params.earnedAt.clone().add(1, 'month')
     amount = @currencyAmount.amount
     vat = 0.21
     vatTaxAmount = @currencyAmount.multiply(vat)
-    yield new Transaction(taxDate, vatTaxAmount, account, 'vat')
+    context.transaction(taxDate, vatTaxAmount, account, 'vat', @)
     noVatAmount = @currencyAmount.multiply(1 - vat)
     social = 0.22
     socialTaxAmount = noVatAmount.multiply(0.22)
-    yield new Transaction(taxDate, socialTaxAmount, account, 'social tax')
+    context.transaction(taxDate, socialTaxAmount, account, 'social tax', @)
     incomeAmount = noVatAmount.subtract(socialTaxAmount)
     incomeTaxAmount = incomeAmount.multiply(0.5)
-    yield new Transaction(taxDate, incomeTaxAmount, account, 'income tax')
+    context.transaction(taxDate, incomeTaxAmount, account, 'income tax', @)
 
 class StaticAccountSelector extends AccountSelector
   constructor: (@account) ->
-  getAccounts: (currencyAmount) ->
+  getAccounts: (context, currencyAmount) ->
     return @account
 
 class FirstSuitingSelector extends AccountSelector
   constructor: (@accounts) ->
-  getAccounts: (currencyAmount) ->
+  getAccounts: (context, currencyAmount) ->
     matching = @accounts.filter (a) -> a.currency == currencyAmount.currency
     if matching.length == 0
       return null
-    return _.max(matching, 'balance')
+    return matching[0]
 
-account1 = new Account('EUR', 0, 'cash', 'green')
-account2 = new Account('USD', 0, 'cash USD', 'yellow')
-account3 = new Account('EUR', 0, 'bank corporate', 'orange')
-account4 = new Account('EUR', 0, 'bank 2', 'blue')
+class SimulationContext
+  constructor: (@accounts) ->
+    @nextTransactionId = 0
+    @transactions = []
+    @accountStates = new Map()
+    for a in @accounts
+      @accountStates.set(a, new AccountState(a))
+
+  transaction: (date, amount, account, description, payment) ->
+    t = new Transaction(date, amount, account, description, payment, @nextTransactionId++)
+    @transactions.push t
+
+  executeTransactions: (lastTransaction) ->
+    @transactions.sort (a,b) ->
+      if a.date.isSame(b.date)
+        return a.id > b.id
+      return a.date.isAfter(b.date)
+    for t in @transactions
+      state = @accountStates.get(t.account)
+      newState = state.execute(t.currencyAmount)
+      t.accountState = newState
+      @accountStates.set(t.account, newState)
+      if lastTransaction and t.id == lastTransaction.id
+        break
+
+
+account1 = new Account('EUR', 'cash', 'green')
+account2 = new Account('USD', 'cash USD', 'yellow')
+account3 = new Account('EUR', 'bank corporate', 'orange')
+account4 = new Account('EUR', 'bank 2', 'blue')
 
 eur = (a) -> new CurrencyAmount('EUR', a)
 staticAccount = (a) -> new StaticAccountSelector(a)
@@ -162,13 +190,24 @@ deserializePayment = (p) ->
 
 
 app.controller 'TransactionsListCtrl', ($scope, SimulationService, DataService) ->
-  $scope.allTransactions = SimulationService.getSimulated()
-  $scope.simulateUntil = (transaction) ->
-    $scope.allTransactions = SimulationService.getSimulated(transaction)
-  $scope.simulateAll = () ->
-    $scope.allTransactions = SimulationService.getSimulated()
 
-  $scope.accounts = DataService.getAccounts()
+  init = () ->
+    context = SimulationService.getSimulated()
+    $scope.allTransactions = context.transactions
+    acc = Array.from(context.accountStates.values())
+    $scope.accounts = acc
+
+  update = (transaction) ->
+    context = SimulationService.getSimulated(transaction)
+    acc = Array.from(context.accountStates.values())
+    $scope.accounts = acc
+
+  init()
+
+  $scope.simulateUntil = (transaction) ->
+    update(transaction)
+  $scope.simulateAll = () ->
+    update(null)
 
 
 app.controller 'AccountsController', ($scope, SimulationService, DataService) ->
@@ -176,28 +215,21 @@ app.controller 'AccountsController', ($scope, SimulationService, DataService) ->
 
 app.service 'SimulationService', (DataService) ->
   runSimulation = (transaction) ->
-    accounts = DataService.getAccounts()
-    for a in accounts
-      a.balance = 0
-
     payments = transactions.map (t) -> deserializePayment(t)
-    tt = _.flatten(payments.map (t) -> t.getTransactionsArray())
+    context = new SimulationContext(DataService.getAccounts())
+    for p in payments
+      p.getTransactions(context)
 
-    #todo: stabilize this sort
-    tt.sort (a,b) ->
-      return a.date.isAfter(b.date)
+    context.executeTransactions(transaction)
 
-    transactionFound = false
+    tt = context.transactions
+
     for t in tt
-      if !transactionFound
-        t.account.execute(t.currencyAmount)
       # t.moneyAfter = t.account.balance
       t.amount = t.currencyAmount.amount
       t.jsDate = t.date.toDate()
       t.color = t.account.color
-      if transaction and transaction.isSame(t)
-        transactionFound = true
-    return tt
+    return context
 
   return getSimulated: (transaction)->
     return runSimulation(transaction)
