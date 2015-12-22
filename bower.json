@@ -25,6 +25,7 @@
     "prism": "~1.0.1",
     "victor": "~1.1.0",
     "angular-material": "~0.11.4",
-    "EaselJS": "easeljs#~0.8.1"
+    "EaselJS": "easeljs#~0.8.1",
+    "moment": "~2.10.6"
   }
 }

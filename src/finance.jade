@@ -1,0 +1,54 @@
+html(lang='en', ng-app='StarterApp')
+  head
+    //- inline ./bower_components/angular-material/angular-material.min.css
+    link(rel='stylesheet', href='./bower_components/angular-material/angular-material.min.css', inline='')
+    //- inline ../app.css
+    link(rel='stylesheet', href='../app.css', inline='')
+
+  script(type='text/ng-template' id='scheduledItem.html')
+    .md-whiteframe-z1
+      div {{item.memo.text}}
+      span Learned:
+      div {{item.memo.learnDate | date : 'fullDate' }}
+      span Repeat:
+      div {{item.date | date : 'fullDate' }}
+
+  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
+    md-content(style='width: 100%;')
+      md-content(layout='column', layout-align='start center' layout-padding='')
+        div(ng-controller='TransactionsListCtrl' )
+          div(layout-padding='' ng-repeat='transaction in allTransactions' )
+            .md-whiteframe-z1(layout-padding='', style='display: inline-block;' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()')
+              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": transaction.color}')
+              span(style='display: inline-block; width: 130px') {{transaction.description}}
+              span(style='display: inline-block; width: 100px') {{transaction.amount | currency}}
+              span(style='display: inline-block; width: 100px') Date:
+              span(style='display: inline-block; width: 250px') {{transaction.jsDate | date : 'fullDate'}}
+        div(ng-controller='TransactionsListCtrl')
+          div(layout-padding='' ng-repeat='account in accounts' )
+            .md-whiteframe-z1(layout-padding='', style='display: inline-block;')
+              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": account.color}')
+              span(style='display: inline-block; width: 130px') {{account.name}}
+              span(style='display: inline-block; width: 130px') {{account.balance}}
+              span(style='display: inline-block; width: 130px') {{account.currency}}
+        
+    //- inline
+    script(src='./bower_components/lodash/lodash.js', inline='')
+    //- inline
+    script(src='./bower_components/jquery/dist/jquery.min.js', inline='')
+    //- inline
+    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    //- inline
+    script(src='./bower_components/bluebird/js/browser/bluebird.js', inline='')
+
+    script(src='./bower_components/moment/min/moment.min.js', inline='')
+
+    script(src='./bower_components/angular/angular.js')
+    script(src='./bower_components/angular-messages/angular-messages.js')
+    script(src='./bower_components/angular-ui-router/release/angular-ui-router.min.js')
+    script(src='./bower_components/angular-animate/angular-animate.min.js')
+    script(src='./bower_components/angular-aria/angular-aria.min.js')
+    script(src='./bower_components/angular-material/angular-material.min.js')
+    script(src='./bower_components/angular-material-icons/angular-material-icons.min.js')
+
+    script(src='./finance/app.js')
