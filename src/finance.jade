@@ -53,7 +53,7 @@ html(lang='en', ng-app='StarterApp')
               span(style='width: 130px') {{account.account.name}}
               span(style='width: 130px') {{account.balance}}
               span(style='width: 130px') {{account.account.currency}}
-        md-conntent(ng-controller='PaymentsListCtrl')
+        md-content(ng-controller='PaymentsListCtrl')
           div(layout-padding='' ng-repeat='p in payments' )
             .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
               div(ng-include='templateFor(p)' style='display: inline-block;')
