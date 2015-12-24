@@ -32,15 +32,23 @@ class Account
   isSame: (other) ->
     return @ == other
 
-class AccountState
-  constructor: (@account, @balance) ->
-    if !@balance
-      @balance = 0
+class AccountsState
+  constructor: (@accounts, @balances) ->
+    if !@balances
+      @balances = @accounts.map -> 0
 
-  execute: (currencyAmount) ->
-    if currencyAmount.currency != @account.currency
-      throw new Error('wrong currency')
-    return new AccountState(@account, @balance + currencyAmount.amount)
+  execute: (account, amount) ->
+    newBalances = []
+    found = false
+    for b, index in @balances
+      a = @accounts[index]
+      if not found and a == account
+        found = true
+        newBalances.push(b + amount)
+      else
+        newBalances.push(b)
+    return new AccountsState(@accounts, newBalances)
+
 
 class AccountSelector
   getAccounts: (context, currencyAmount) ->
@@ -123,26 +131,21 @@ class SimulationContext
   constructor: (@accounts) ->
     @nextTransactionId = 0
     @transactions = []
-    @accountStates = new Map()
-    for a in @accounts
-      @accountStates.set(a, new AccountState(a))
+    @currentAccountsState = new AccountsState(@accounts)
 
   transaction: (date, amount, account, description, payment) ->
     t = new Transaction(date, amount, account, description, payment, @nextTransactionId++)
     @transactions.push t
 
-  executeTransactions: (lastTransaction) ->
+  executeTransactions:  ->
     @transactions.sort (a,b) ->
       if a.date.isSame(b.date)
         return a.id > b.id
       return a.date.isAfter(b.date)
     for t in @transactions
-      state = @accountStates.get(t.account)
-      newState = state.execute(t.currencyAmount)
+      newState = @currentAccountsState.execute(t.account, t.currencyAmount.amount)
       t.accountState = newState
-      @accountStates.set(t.account, newState)
-      if lastTransaction and t.id == lastTransaction.id
-        break
+      @currentAccountsState = newState
 
 
 account1 = new Account('EUR', 'cash', 'green')
@@ -191,15 +194,21 @@ payments = transactions.map (t) -> deserializePayment(t)
 
 app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, DataService) ->
 
+  context = SimulationService.getSimulated()
+
   init = () ->
-    context = SimulationService.getSimulated()
     $scope.allTransactions = context.transactions
-    acc = Array.from(context.accountStates.values())
+    state = context.currentAccountsState
+    acc = _.zip(state.accounts, state.balances)
+      .map (a) -> { account: a[0], balance: a[1]}
     $scope.accounts = acc
 
   update = (transaction) ->
-    context = SimulationService.getSimulated(transaction)
-    acc = Array.from(context.accountStates.values())
+    state = context.currentAccountsState
+    if transaction
+      state = transaction.accountState
+    acc = _.zip(state.accounts, state.balances)
+      .map (a) -> { account: a[0], balance: a[1]}
     $scope.accounts = acc
 
   init()
@@ -225,7 +234,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     if payment instanceof TaxableIncomePayment then return 'TaxableIncomePayment.html'
     return 'SimplePayment.html'
 
-app.controller 'AccountsController', ($scope, SimulationService, DataService) ->
+app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
   $scope.accounts = DataService.getAccounts()
 
 app.service 'SimulationService', (DataService) ->
