@@ -161,7 +161,6 @@ Types = {
   Simple: 'simple'
   Borrow: 'borrow'
   SimpleExpense: 'simpleExpense'
-  BorrowReturn: 'borrowReturn'
   TaxableIncome: 'taxableIncome'
   PeriodicPayment: 'periodicPayment'
 }
@@ -188,8 +187,9 @@ deserializePayment = (p) ->
         paymentDate: date
       return new TaxableIncomePayment(accountSelector, eur(p.amount), params)
 
+payments = transactions.map (t) -> deserializePayment(t)
 
-app.controller 'TransactionsListCtrl', ($scope, SimulationService, DataService) ->
+app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, DataService) ->
 
   init = () ->
     context = SimulationService.getSimulated()
@@ -209,13 +209,27 @@ app.controller 'TransactionsListCtrl', ($scope, SimulationService, DataService) 
   $scope.simulateAll = () ->
     update(null)
 
+  $scope.$on 'enterPayment', (__, payment) ->
+    for t in $scope.allTransactions
+      t.higlight = t.payment == payment
+
+app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
+  $scope.payments = DataService.getPayments()
+  $scope.enteredPayment = (payment) ->
+    $rootScope.$broadcast('enterPayment', payment)
+  $scope.leftPayment = (payment) ->
+    $rootScope.$broadcast('enterPayment', null)
+  $scope.templateFor = (payment) ->
+    if payment instanceof BorrowPayment then return 'BorrowPayment.html'
+    if payment instanceof PeriodicPayment then return 'PeriodicPayment.html'
+    if payment instanceof TaxableIncomePayment then return 'TaxableIncomePayment.html'
+    return 'SimplePayment.html'
 
 app.controller 'AccountsController', ($scope, SimulationService, DataService) ->
   $scope.accounts = DataService.getAccounts()
 
 app.service 'SimulationService', (DataService) ->
   runSimulation = (transaction) ->
-    payments = transactions.map (t) -> deserializePayment(t)
     context = new SimulationContext(DataService.getAccounts())
     for p in payments
       p.getTransactions(context)
@@ -235,6 +249,12 @@ app.service 'SimulationService', (DataService) ->
     return runSimulation(transaction)
 
 app.service 'DataService', ->
-  return \
+  return {
     getAccounts: ->
       return allAccountsData
+    getPayments: ->
+      return payments
+    }
+
+app.service 'SelectionService', ->
+  # selectedPayment

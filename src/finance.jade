@@ -12,25 +12,57 @@ html(lang='en', ng-app='StarterApp')
       div {{item.memo.learnDate | date : 'fullDate' }}
       span Repeat:
       div {{item.date | date : 'fullDate' }}
+      
+  script(type='text/ng-template', id='SimplePayment.html')
+    span(style='display: inline-block; width: 130px') {{p.description}}
+    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
-  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
-    md-content(style='width: 100%;')
-      md-content(layout='column', layout-align='start center' layout-padding='' ng-controller='TransactionsListCtrl')
+  script(type='text/ng-template', id='BorrowPayment.html')
+    span(style='display: inline-block; width: 130px') {{p.description}}
+    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.returnDate}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+
+  script(type='text/ng-template', id='PeriodicPayment.html')
+    span(style='display: inline-block; width: 130px') {{p.description}}
+    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.period}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+
+  script(type='text/ng-template', id='TaxableIncomePayment.html')
+    span(style='display: inline-block; width: 130px') NOOOO
+    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
+    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+  
+
+  body(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
+    md-content(style='width: 100%;' layout='row')
+      md-conntent(ng-controller='PaymentsListCtrl')
+        div(layout-padding='' ng-repeat='p in payments' )
+          .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
+            div(ng-include='templateFor(p)' style='display: inline-block;')
+      
+      md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
         div
           div(layout-padding='' ng-repeat='transaction in allTransactions' )
-            .md-whiteframe-z1(ng-mouseenter='simulateUntil(transaction)', ng-mouseleave='simulateAll()', layout-padding='', style='display: inline-block;')
-              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": transaction.color}')
-              span(style='display: inline-block; width: 130px') {{transaction.description}}
-              span(style='display: inline-block; width: 100px') {{transaction.amount | currency}}
-              span(style='display: inline-block; width: 100px') Date:
-              span(style='display: inline-block; width: 250px') {{transaction.jsDate | date : 'fullDate'}}
+            .md-whiteframe-z1(layout='row' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background": transaction.higlight ? "green" : null }')
+              span(style='width: 20px; height: 20px', ng-style='{"background": transaction.color}')
+              span(style='width: 130px') {{transaction.description}}
+              span(style='width: 100px') {{transaction.amount | currency}}
+              span(style='width: 100px') Date:
+              span(style='width: 250px') {{transaction.jsDate | date : 'fullDate'}}
         div
-          div(layout-padding='' ng-repeat='account in accounts' )
-            .md-whiteframe-z1(layout-padding='', style='display: inline-block;')
-              span(style='display: inline-block; width: 20px; height: 20px', ng-style='{"background": account.account.color}')
-              span(style='display: inline-block; width: 130px') {{account.account.name}}
-              span(style='display: inline-block; width: 130px') {{account.balance}}
-              span(style='display: inline-block; width: 130px') {{account.account.currency}}
+          div(layout-padding='' ng-repeat='account in accounts')
+            .md-whiteframe-z1(layout-padding='' layout='row')
+              span(style='width: 20px; height: 20px', ng-style='{"background": account.account.color}')
+              span(style='width: 130px') {{account.account.name}}
+              span(style='width: 130px') {{account.balance}}
+              span(style='width: 130px') {{account.account.currency}}
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
