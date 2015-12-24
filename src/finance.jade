@@ -42,10 +42,21 @@ html(lang='en', ng-app='StarterApp')
 
   body(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;' layout='row')
-      md-conntent(ng-controller='PaymentsListCtrl')
-        div(layout-padding='' ng-repeat='p in payments' )
-          .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
-            div(ng-include='templateFor(p)' style='display: inline-block;')
+      md-content(layout='column')
+        div(ng-controller='AccountsListCtrl')
+          div(layout='row') 
+            div Showing balance for: 
+            div {{ date | date : 'fullDate'}}
+          div(layout-padding='' ng-repeat='account in accounts')
+            .md-whiteframe-z1(layout-padding='' layout='row')
+              span(style='width: 20px; height: 20px', ng-style='{"background": account.account.color}')
+              span(style='width: 130px') {{account.account.name}}
+              span(style='width: 130px') {{account.balance}}
+              span(style='width: 130px') {{account.account.currency}}
+        md-conntent(ng-controller='PaymentsListCtrl')
+          div(layout-padding='' ng-repeat='p in payments' )
+            .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
+              div(ng-include='templateFor(p)' style='display: inline-block;')
       
       md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
         div
@@ -56,13 +67,6 @@ html(lang='en', ng-app='StarterApp')
               span(style='width: 100px') {{transaction.amount | currency}}
               span(style='width: 100px') Date:
               span(style='width: 250px') {{transaction.jsDate | date : 'fullDate'}}
-        div
-          div(layout-padding='' ng-repeat='account in accounts')
-            .md-whiteframe-z1(layout-padding='' layout='row')
-              span(style='width: 20px; height: 20px', ng-style='{"background": account.account.color}')
-              span(style='width: 130px') {{account.account.name}}
-              span(style='width: 130px') {{account.balance}}
-              span(style='width: 130px') {{account.account.currency}}
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')

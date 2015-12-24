@@ -104,14 +104,14 @@ class TaxableIncomePayment extends Payment
     taxDate = @params.earnedAt.clone().add(1, 'month')
     amount = @currencyAmount.amount
     vat = 0.21
-    vatTaxAmount = @currencyAmount.multiply(vat)
+    vatTaxAmount = @currencyAmount.multiply(-vat)
     context.transaction(taxDate, vatTaxAmount, account, 'vat', @)
     noVatAmount = @currencyAmount.multiply(1 - vat)
     social = 0.22
-    socialTaxAmount = noVatAmount.multiply(0.22)
+    socialTaxAmount = noVatAmount.multiply(-0.22)
     context.transaction(taxDate, socialTaxAmount, account, 'social tax', @)
     incomeAmount = noVatAmount.subtract(socialTaxAmount)
-    incomeTaxAmount = incomeAmount.multiply(0.5)
+    incomeTaxAmount = incomeAmount.multiply(-0.5)
     context.transaction(taxDate, incomeTaxAmount, account, 'income tax', @)
 
 class StaticAccountSelector extends AccountSelector
@@ -194,29 +194,13 @@ payments = transactions.map (t) -> deserializePayment(t)
 
 app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, DataService) ->
 
-  context = SimulationService.getSimulated()
-
-  init = () ->
-    $scope.allTransactions = context.transactions
-    state = context.currentAccountsState
-    acc = _.zip(state.accounts, state.balances)
-      .map (a) -> { account: a[0], balance: a[1]}
-    $scope.accounts = acc
-
-  update = (transaction) ->
-    state = context.currentAccountsState
-    if transaction
-      state = transaction.accountState
-    acc = _.zip(state.accounts, state.balances)
-      .map (a) -> { account: a[0], balance: a[1]}
-    $scope.accounts = acc
-
-  init()
+  context = SimulationService.runSimulation()
+  $scope.allTransactions = context.transactions
 
   $scope.simulateUntil = (transaction) ->
-    update(transaction)
+    $rootScope.$broadcast 'enterTransaction', transaction
   $scope.simulateAll = () ->
-    update(null)
+    $rootScope.$broadcast 'enterTransaction', null
 
   $scope.$on 'enterPayment', (__, payment) ->
     for t in $scope.allTransactions
@@ -235,18 +219,46 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     return 'SimplePayment.html'
 
 app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
-  $scope.accounts = DataService.getAccounts()
 
-app.service 'SimulationService', (DataService) ->
-  runSimulation = (transaction) ->
+  stateConvert = (state) ->
+    acc = _.zip(state.accounts, state.balances)
+      .map (a) -> { account: a[0], balance: a[1]}
+    return acc
+
+  context = SimulationService.getLastSimulation()
+  transaction = null
+
+  update = ->
+    if not context
+      return
+    state = context.currentAccountsState
+    date = _.last(context.transactions).date
+    if transaction
+      state = transaction.accountState
+      date = transaction.date
+    $scope.accounts = stateConvert state
+    $scope.date = date.toDate()
+
+  update()
+
+  $scope.$on 'simulationRan', (__, c) ->
+    context = c
+    update()
+
+  $scope.$on 'enterTransaction', (__, t) ->
+    transaction = t
+    update()
+
+
+app.service 'SimulationService', ($rootScope, DataService) ->
+  runSimulation = ->
     context = new SimulationContext(DataService.getAccounts())
     for p in payments
       p.getTransactions(context)
 
-    context.executeTransactions(transaction)
+    context.executeTransactions()
 
     tt = context.transactions
-
     for t in tt
       # t.moneyAfter = t.account.balance
       t.amount = t.currencyAmount.amount
@@ -254,8 +266,15 @@ app.service 'SimulationService', (DataService) ->
       t.color = t.account.color
     return context
 
-  return getSimulated: (transaction)->
-    return runSimulation(transaction)
+  lastSimulation = null
+  return {
+    runSimulation: ->
+      lastSimulation = runSimulation()
+      $rootScope.$broadcast 'simulationRan', lastSimulation
+      return lastSimulation
+    getLastSimulation: ->
+      return lastSimulation
+  }
 
 app.service 'DataService', ->
   return {
