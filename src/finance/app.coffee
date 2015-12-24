@@ -1,4 +1,5 @@
 app = angular.module('StarterApp', [
+  'md.data.table'
   'ngMaterial'
 ])
 
@@ -205,6 +206,30 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
   $scope.$on 'enterPayment', (__, payment) ->
     for t in $scope.allTransactions
       t.higlight = t.payment == payment
+
+  $scope.selected = [];
+
+  $scope.query = {
+    filter: '',
+    order: 'name',
+    limit: 5,
+    page: 1
+  };
+
+  success = (desserts) ->
+    $scope.desserts = desserts
+
+  $scope.search = (predicate) ->
+    $scope.filter = predicate;
+    $scope.deferred = $nutrition.desserts.get($scope.query, success).$promise;
+
+
+  $scope.onOrderChange = (order) ->
+    return $nutrition.desserts.get($scope.query, success).$promise;
+
+  $scope.onPaginationChange = (page, limit) ->
+    return $nutrition.desserts.get($scope.query, success).$promise;
+
 
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
   $scope.payments = DataService.getPayments()

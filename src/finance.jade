@@ -2,6 +2,7 @@ html(lang='en', ng-app='StarterApp')
   head
     //- inline ./bower_components/angular-material/angular-material.min.css
     link(rel='stylesheet', href='./bower_components/angular-material/angular-material.min.css', inline='')
+    link(rel='stylesheet', href='./bower_components/angular-material-data-table/dist/md-data-table.min.css', inline='')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
 
@@ -43,37 +44,60 @@ html(lang='en', ng-app='StarterApp')
   body(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;' layout='row')
       md-content(layout='column')
-        div(ng-controller='AccountsListCtrl')
-          div(layout='row') 
-            div Showing balance for: 
-            div {{ date | date : 'fullDate'}}
-          div(layout-padding='' ng-repeat='account in accounts')
-            .md-whiteframe-z1(layout-padding='' layout='row')
-              span(style='width: 20px; height: 20px', ng-style='{"background": account.account.color}')
-              span(style='width: 130px') {{account.account.name}}
-              span(style='width: 130px') {{account.balance}}
-              span(style='width: 130px') {{account.account.currency}}
-        md-content(ng-controller='PaymentsListCtrl')
-          div(layout-padding='' ng-repeat='p in payments' )
-            .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
-              div(ng-include='templateFor(p)' style='display: inline-block;')
+        .md-whiteframe-z1(style='margin:10px')
+          div(ng-controller='AccountsListCtrl')
+            md-data-table-toolbar
+              h2 {{ date | date : 'fullDate'}}
+            md-data-table-container
+              table(md-data-table='')
+                thead()
+                  tr
+                    th(name='Name')
+                    th(name='Balance')
+                    th(name='Currency')
+                tbody
+                  tr(ng-repeat='account in accounts')
+                    td {{account.account.name}}
+                    td {{account.balance}}
+                    td {{account.account.currency}}
+
+        .md-whiteframe-z1(style='margin:10px')
+          md-content(ng-controller='PaymentsListCtrl')
+            div(layout-padding='' ng-repeat='p in payments' )
+              .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
+                div(ng-include='templateFor(p)' style='display: inline-block;')
       
-      md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
-        div
-          div(layout-padding='' ng-repeat='transaction in allTransactions' )
-            .md-whiteframe-z1(layout='row' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background": transaction.higlight ? "green" : null }')
-              span(style='width: 20px; height: 20px', ng-style='{"background": transaction.color}')
-              span(style='width: 130px') {{transaction.description}}
-              span(style='width: 100px') {{transaction.amount | currency}}
-              span(style='width: 100px') Date:
-              span(style='width: 250px') {{transaction.jsDate | date : 'fullDate'}}
+      .md-whiteframe-z1(style='margin:10px')
+        md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
+          md-data-table-toolbar
+            h2 Transactions
+          md-data-table-container
+            table(md-data-table='')
+              thead()
+                tr
+                  th(name='Description')
+                  th(name='Amount')
+                  th(name='Date')
+              tbody
+                tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background": transaction.higlight ? "green" : null }')
+                  td {{transaction.description}}
+                  td {{transaction.amount | currency}}
+                  td {{transaction.jsDate | date : 'fullDate'}}
+        
+          //- div(layout-padding='' ng-repeat='transaction in allTransactions' )
+          //-   .md-whiteframe-z1(layout='row' )
+          //-     span(style='width: 20px; height: 20px', ng-style='{"background": transaction.color}')
+          //-     span(style='width: 130px') {{transaction.description}}
+          //-     span(style='width: 100px') {{transaction.amount | currency}}
+          //-     span(style='width: 100px') Date:
+          //-     span(style='width: 250px') {{transaction.jsDate | date : 'fullDate'}}
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
     //- inline
-    //- script(src='./bower_components/jquery/dist/jquery.min.js', inline='')
+    script(src='./bower_components/jquery/dist/jquery.min.js', inline='')
     //- inline
-    //- script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    script(src='./bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
     //- inline
     script(src='./bower_components/bluebird/js/browser/bluebird.js', inline='')
 
@@ -86,5 +110,6 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/angular-aria/angular-aria.min.js')
     script(src='./bower_components/angular-material/angular-material.min.js')
     script(src='./bower_components/angular-material-icons/angular-material-icons.min.js')
+    script(src='./bower_components/angular-material-data-table/dist/md-data-table.min.js')
 
     script(src='./finance/app.js')
