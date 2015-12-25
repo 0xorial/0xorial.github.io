@@ -21,7 +21,16 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
       t.higlight = t.payment == payment
 
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
+
+  SimplePayment.augmentDate 'date'
+  BorrowPayment.augmentDate 'date'
+  BorrowPayment.augmentDate 'returnDate'
+  TaxableIncomePayment.augmentDateDeep 'earnedAt',
+    get: -> @params.earnedAt
+    set: (v) -> @params.earnedAt = v
+
   $scope.payments = DataService.getPayments()
+
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment)
   $scope.leftPayment = (payment) ->

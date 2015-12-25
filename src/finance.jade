@@ -16,27 +16,27 @@ html(lang='en', ng-app='StarterApp')
       
   script(type='text/ng-template', id='SimplePayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'fullDate'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='BorrowPayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.date}}
-    span(style='display: inline-block; width: 130px') {{p.returnDate}}
+    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'fullDate'}}
+    span(style='display: inline-block; width: 130px') {{p.jsReturnDate | date : 'fullDate'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='PeriodicPayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.date | date : 'fullDate'}}
     span(style='display: inline-block; width: 130px') {{p.period}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='TaxableIncomePayment.html')
     span(style='display: inline-block; width: 130px') NOOOO
-    span(style='display: inline-block; width: 130px') {{p.date}}
+    span(style='display: inline-block; width: 130px') {{p.earnedAt | date : 'fullDate'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
   
@@ -115,5 +115,4 @@ html(lang='en', ng-app='StarterApp')
     script(src='./finance/utils.js')
     script(src='./finance/model.js')
     script(src='./finance/data.js')
-    script(src='./finance/model.js')
     script(src='./finance/app.js')
