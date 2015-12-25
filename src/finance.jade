@@ -3,6 +3,7 @@ html(lang='en', ng-app='StarterApp')
     //- inline ./bower_components/angular-material/angular-material.min.css
     link(rel='stylesheet', href='./bower_components/angular-material/angular-material.min.css', inline='')
     link(rel='stylesheet', href='./bower_components/angular-material-data-table/dist/md-data-table.min.css', inline='')
+    link(rel='stylesheet', href='./bower_components/md-color-picker/dist/mdColorPicker.min.css', inline='')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
 
@@ -54,11 +55,18 @@ html(lang='en', ng-app='StarterApp')
               table(md-data-table='')
                 thead()
                   tr
+                    th
+                    th(name='Color')
                     th(name='Name')
                     th(name='Balance')
                     th(name='Currency')
                 tbody
                   tr(ng-repeat='account in accounts')
+                    td(style='padding-right: 0;')
+                      span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
+                    td(style='padding-left: 20px;')
+                      md-input-container(style='padding: 2px;')
+                        input(ng-model='account.account.color' style='width: 50px')
                     td {{account.account.name}}
                     td(style='min-width: 100px;') {{account.balance | number : 2}}
                     td {{account.account.currency}}
@@ -67,6 +75,8 @@ html(lang='en', ng-app='StarterApp')
                         ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
                   tr
                     form(ng-submit='add()')
+                      td
+                      td 
                       td 
                         md-input-container
                           label Name
@@ -75,7 +85,7 @@ html(lang='en', ng-app='StarterApp')
                       td 
                         md-input-container
                           label Currency
-                          input(ng-model='newAccountCurrency')
+                          input(ng-model='newAccountCurrency' style='width:40px')
                       td
                         button(type='submit' style='background: none; border: none;')
                           ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
@@ -94,11 +104,14 @@ html(lang='en', ng-app='StarterApp')
             table(md-data-table='')
               thead()
                 tr
+                  th
                   th(name='Description')
                   th(name='Amount')
                   th(name='Date')
               tbody
                 tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
+                  td(style='padding-right: 0;')
+                    span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": transaction.account.color}')
                   td {{transaction.description}}
                   td {{transaction.amount | currency}}
                   td {{transaction.jsDate | date : 'dd/MM/yyyy'}}
@@ -130,6 +143,8 @@ html(lang='en', ng-app='StarterApp')
     script(src='./bower_components/angular-material/angular-material.min.js')
     script(src='./bower_components/angular-material-icons/angular-material-icons.min.js')
     script(src='./bower_components/angular-material-data-table/dist/md-data-table.min.js')
+    script(src='./bower_components/tinycolor/dist/tinycolor-min.js')
+    script(src='./bower_components/md-color-picker/dist/mdColorPicker.min.js')
 
     script(src='./finance/utils.js')
     script(src='./finance/model.js')
