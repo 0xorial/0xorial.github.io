@@ -44,11 +44,6 @@ class exports.AccountsState
         newBalances.push(b)
     return new exports.AccountsState(@accounts, newBalances)
 
-
-class exports.AccountSelector
-  getAccounts: (context, currencyAmount) ->
-    throw new Error('abstract method')
-
 class exports.Transaction
   constructor: (@date, @currencyAmount, @account, @description, @payment, @id) ->
 
@@ -109,10 +104,22 @@ class exports.TaxableIncomePayment extends exports.Payment
     incomeTaxAmount = incomeAmount.multiply(-0.5)
     context.transaction(taxDate, incomeTaxAmount, account, 'income tax', @)
 
+class exports.AccountSelector
+  getAccounts: (context, currencyAmount) ->
+    throw new Error('abstract method')
+
+  canDeleteAcount: (account) ->
+    throw new Error('abstract method')
+
+  notifyAccountDeleted: (account) ->
+
 class exports.StaticAccountSelector extends exports.AccountSelector
   constructor: (@account) ->
   getAccounts: (context, currencyAmount) ->
     return @account
+
+  canDeleteAcount: (account) ->
+    return @account != account
 
 class exports.FirstSuitingSelector extends exports.AccountSelector
   constructor: (@accounts) ->
@@ -121,6 +128,12 @@ class exports.FirstSuitingSelector extends exports.AccountSelector
     if matching.length == 0
       return null
     return matching[0]
+
+  canDeleteAcount: (account) ->
+    return true
+
+  notifyAccountDeleted: (account) ->
+    _.remove(@accounts, account)
 
 class exports.SimulationContext
   constructor: (@accounts) ->

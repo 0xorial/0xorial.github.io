@@ -10,44 +10,46 @@ html(lang='en', ng-app='StarterApp')
     .md-whiteframe-z1
       div {{item.memo.text}}
       span Learned:
-      div {{item.memo.learnDate | date : 'fullDate' }}
+      div {{item.memo.learnDate | date : 'dd/MM/yyyy' }}
       span Repeat:
-      div {{item.date | date : 'fullDate' }}
+      div {{item.date | date : 'dd/MM/yyyy' }}
       
   script(type='text/ng-template', id='SimplePayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'fullDate'}}
+    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'dd/MM/yyyy'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='BorrowPayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'fullDate'}}
-    span(style='display: inline-block; width: 130px') {{p.jsReturnDate | date : 'fullDate'}}
+    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'dd/MM/yyyy'}}
+    span(style='display: inline-block; width: 130px') {{p.jsReturnDate | date : 'dd/MM/yyyy'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='PeriodicPayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.date | date : 'fullDate'}}
+    span(style='display: inline-block; width: 130px') {{p.date | date : 'dd/MM/yyyy'}}
     span(style='display: inline-block; width: 130px') {{p.period}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
 
   script(type='text/ng-template', id='TaxableIncomePayment.html')
     span(style='display: inline-block; width: 130px') NOOOO
-    span(style='display: inline-block; width: 130px') {{p.earnedAt | date : 'fullDate'}}
+    span(style='display: inline-block; width: 130px') {{p.earnedAt | date : 'dd/MM/yyyy'}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
     span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
   
 
-  body(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
+  body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     md-content(style='width: 100%;' layout='row')
       md-content(layout='column')
         .md-whiteframe-z1(style='margin:10px')
           div(ng-controller='AccountsListCtrl')
             md-data-table-toolbar
-              h2 {{ date | date : 'fullDate'}}
+              h2 Accounts
+              md-checkbox(ng-model='autoSelect') Auto
+              md-datepicker(ng-model='date' ng-disabled='autoSelect')
             md-data-table-container
               table(md-data-table='')
                 thead()
@@ -58,8 +60,25 @@ html(lang='en', ng-app='StarterApp')
                 tbody
                   tr(ng-repeat='account in accounts')
                     td {{account.account.name}}
-                    td {{account.balance}}
+                    td(style='min-width: 100px;') {{account.balance | number : 2}}
                     td {{account.account.currency}}
+                    td
+                      button(style='background: none; border: none;')
+                        ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
+                  tr
+                    form(ng-submit='add()')
+                      td 
+                        md-input-container
+                          label Name
+                          input(ng-model='newAccountName')
+                      td 
+                      td 
+                        md-input-container
+                          label Currency
+                          input(ng-model='newAccountCurrency')
+                      td
+                        button(type='submit' style='background: none; border: none;')
+                          ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
 
         .md-whiteframe-z1(style='margin:10px')
           md-content(ng-controller='PaymentsListCtrl')
@@ -79,10 +98,10 @@ html(lang='en', ng-app='StarterApp')
                   th(name='Amount')
                   th(name='Date')
               tbody
-                tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background": transaction.higlight ? "green" : null }')
+                tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
                   td {{transaction.description}}
                   td {{transaction.amount | currency}}
-                  td {{transaction.jsDate | date : 'fullDate'}}
+                  td {{transaction.jsDate | date : 'dd/MM/yyyy'}}
         
           //- div(layout-padding='' ng-repeat='transaction in allTransactions' )
           //-   .md-whiteframe-z1(layout='row' )
@@ -90,7 +109,7 @@ html(lang='en', ng-app='StarterApp')
           //-     span(style='width: 130px') {{transaction.description}}
           //-     span(style='width: 100px') {{transaction.amount | currency}}
           //-     span(style='width: 100px') Date:
-          //-     span(style='width: 250px') {{transaction.jsDate | date : 'fullDate'}}
+          //-     span(style='width: 250px') {{transaction.jsDate | date : 'dd/MM/yyyy'}}
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')

@@ -1,6 +1,7 @@
 app = angular.module('StarterApp', [
   'md.data.table'
   'ngMaterial'
+  'ngMdIcons'
 ])
 
 app.controller 'AppCtrl', ($rootScope, $scope, $timeout) ->
@@ -19,6 +20,9 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
   $scope.$on 'enterPayment', (__, payment) ->
     for t in $scope.allTransactions
       t.higlight = t.payment == payment
+
+  $scope.$on 'simulationRan', (__, c) ->
+    $scope.allTransactions = c.transactions
 
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
@@ -42,6 +46,17 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     return 'SimplePayment.html'
 
 app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
+  $scope.autoSelect = true
+
+  $scope.delete = (account) ->
+    DataService.deleteAccount(account.account)
+
+  $scope.add = ->
+    name = $scope.newAccountName
+    currency = $scope.newAccountCurrency
+    DataService.addAccount(new Account(currency, name, 'white'))
+    $scope.newAccountName = ''
+    $scope.newAccountName = ''
 
   stateConvert = (state) ->
     acc = _.zip(state.accounts, state.balances)
@@ -69,11 +84,19 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
     update()
 
   $scope.$on 'enterTransaction', (__, t) ->
+    if !$scope.autoSelect
+      return
     transaction = t
     update()
 
 
 app.service 'SimulationService', ($rootScope, DataService) ->
+
+  lastSimulation = null
+
+  $rootScope.$on 'dataChanged', ->
+    runSimulation()
+
   runSimulation = ->
     context = new SimulationContext(DataService.getAccounts())
     for p in payments
@@ -87,22 +110,39 @@ app.service 'SimulationService', ($rootScope, DataService) ->
       t.amount = t.currencyAmount.amount
       t.jsDate = t.date.toDate()
       t.color = t.account.color
-    return context
 
-  lastSimulation = null
+    lastSimulation = context
+    $rootScope.$broadcast 'simulationRan', lastSimulation
+    return
+
   return {
     runSimulation: ->
-      lastSimulation = runSimulation()
-      $rootScope.$broadcast 'simulationRan', lastSimulation
+      runSimulation()
       return lastSimulation
     getLastSimulation: ->
       return lastSimulation
   }
 
-app.service 'DataService', ->
+app.service 'DataService', ($rootScope)->
   return {
     getAccounts: ->
       return allAccountsData
+    deleteAccount: (account) ->
+      canDelete = true
+      for p in payments
+        if !p.accountSelector.canDeleteAcount(account)
+          canDelete = false
+      if !canDelete then return
+      _.remove(allAccountsData, account)
+      for p in payments
+        p.accountSelector.notifyAccountDeleted(account)
+      $rootScope.$broadcast 'dataChanged'
+
+    addAccount: (account) ->
+      allAccountsData.push(account)
+      $rootScope.$broadcast 'dataChanged'
+
+
     getPayments: ->
       return payments
     }
