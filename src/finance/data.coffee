@@ -25,7 +25,7 @@ transactions = [
   {"id": 2, "type": Types.Borrow, "date": "3/12/2015", "returnDate": "11/12/2015", "amount": 100, "description": "Tom", "account": staticAccount(account1)},
   {"id": 7, "type": Types.SimpleExpense, "date": "3/12/2015", "amount": 1050, "description": "bought bike", "account": allAccounts}
   {"id": 3, "type": Types.Borrow, "date": "4/12/2015", "returnDate": "11/12/2015",  "amount": 150, "description": "Wim", "account": staticAccount(account1)},
-  {"id": 5, "type": Types.TaxableIncome, "date": "10/12/2015", "amount": 1000, "taxSystem": "be-self-employ", "account": staticAccount(account3)}
+  {"id": 5, "type": Types.TaxableIncome, "date": "10/12/2015", "amount": 1000, "description": "payment for hard work", "account": staticAccount(account3)}
 ]
 
 deserializePayment = (p) ->
@@ -37,6 +37,7 @@ deserializePayment = (p) ->
     when Types.SimpleExpense then return new SimplePayment(accountSelector, date, eur(-p.amount), p.description)
     when Types.TaxableIncome
       params =
+        description: p.description
         earnedAt: date
         paymentDate: date
       return new TaxableIncomePayment(accountSelector, eur(p.amount), params)

@@ -87,6 +87,7 @@ class exports.TaxableIncomePayment extends exports.Payment
   constructor: (@accountSelector, @currencyAmount, @params) ->
     # earnedAt
     # paymentDate
+    # description
 
   getTransactions: (context) ->
     account = @accountSelector.getAccounts(context, @currencyAmount)

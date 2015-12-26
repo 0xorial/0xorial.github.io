@@ -27,17 +27,69 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
 
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
-  SimplePayment.augmentDate 'date'
-  BorrowPayment.augmentDate 'date'
-  BorrowPayment.augmentDate 'returnDate'
-  TaxableIncomePayment.augmentDateDeep 'earnedAt',
-    get: -> @params.earnedAt
-    set: (v) -> @params.earnedAt = v
+  getAccountInfo = (selector) ->
+    if selector instanceof StaticAccountSelector
+      return {
+        accountName: selector.account.name
+        color: selector.account.color
+      }
+    else if selector instanceof FirstSuitingSelector
+      return {
+        accountName: 'any'
+        }
 
-  $scope.payments = DataService.getPayments()
+  getPaymentInfo = (p) ->
+    a = getAccountInfo(p.accountSelector)
+    if p instanceof SimplePayment
+      return {
+        payment: p
+        description: p.description
+        type: 'Simple'
+        date: p.date.toDate()
+        amount: p.currencyAmount.amount
+        currency: p.currencyAmount.currency
+        accountName: a.accountName
+        color: a.color
+      }
+    if p instanceof BorrowPayment
+      return {
+        payment: p
+        description: p.description
+        type: 'Loan'
+        date: p.date.toDate()
+        amount: p.currencyAmount.amount
+        currency: p.currencyAmount.currency
+        accountName: a.accountName
+        color: a.color
+      }
+    if p instanceof PeriodicPayment
+      return {
+        payment: p
+        description: p.description
+        type: 'Periodic'
+        date: p.date.toDate()
+        amount: p.currencyAmount.amount
+        currency: p.currencyAmount.currency
+        accountName: a.accountName
+        color: a.color
+      }
+    if p instanceof TaxableIncomePayment
+      return {
+        payment: p
+        description: p.params.description
+        type: 'Income(taxable)'
+        date: p.params.earnedAt.toDate()
+        amount: p.currencyAmount.amount
+        currency: p.currencyAmount.currency
+        accountName: a.accountName
+        color: a.color
+      }
+
+  payments = DataService.getPayments()
+  $scope.payments =  payments.map getPaymentInfo
 
   $scope.enteredPayment = (payment) ->
-    $rootScope.$broadcast('enterPayment', payment)
+    $rootScope.$broadcast('enterPayment', payment.payment)
   $scope.leftPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', null)
   $scope.templateFor = (payment) ->

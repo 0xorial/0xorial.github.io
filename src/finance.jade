@@ -7,13 +7,6 @@ html(lang='en', ng-app='StarterApp')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
 
-  script(type='text/ng-template' id='scheduledItem.html')
-    .md-whiteframe-z1
-      div {{item.memo.text}}
-      span Learned:
-      div {{item.memo.learnDate | date : 'dd/MM/yyyy' }}
-      span Repeat:
-      div {{item.date | date : 'dd/MM/yyyy' }}
       
   script(type='text/ng-template', id='SimplePayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
@@ -91,10 +84,43 @@ html(lang='en', ng-app='StarterApp')
                           ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
 
         .md-whiteframe-z1(style='margin:10px')
-          md-content(ng-controller='PaymentsListCtrl')
-            div(layout-padding='' ng-repeat='p in payments' )
-              .md-whiteframe-z1(ng-mouseenter='enteredPayment(p)', ng-mouseleave='leftPayment(p)', layout-padding='')
-                div(ng-include='templateFor(p)' style='display: inline-block;')
+          md-content(ng-controller='PaymentsListCtrl')          
+            md-data-table-toolbar
+              h2 Payments
+            md-content(layout='row')
+              md-content
+                md-button.md-raised Simple
+              md-content 
+                md-button.md-raised Periodic
+              md-content 
+                md-button.md-raised Borrow
+              md-content 
+                md-button.md-raised Income
+            md-data-table-container
+              table(md-data-table='')
+                thead()
+                  tr
+                    th(name='Description')
+                    th(name='Type')
+                    th(name='Date')
+                    th(name='Amount')
+                    th(name='Currency')
+                    th(name='Account')
+                    th
+                tbody
+                  tr(ng-repeat='p in payments' ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)')
+                    td {{p.description}}
+                    td {{p.type}}
+                    td {{p.date | date : 'dd/MM/yyyy'}}
+                    td {{p.amount | number : 2}}
+                    td {{p.currency}}
+                    td
+                      div(layout='row' layout-align='start center')
+                        div(style='padding:10px; margin-right: 10px;' ng-style='{"background-color": p.color}')
+                        div {{p.accountName}}
+                    td
+                      button(style='background: none; border: none;')
+                        ng-md-icon(icon='edit' style="fill: #99c2ff; cursor:pointer;" size='24' ng-click='edit(p)')
       
       .md-whiteframe-z1(style='margin:10px')
         md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
@@ -114,15 +140,7 @@ html(lang='en', ng-app='StarterApp')
                     span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": transaction.account.color}')
                   td {{transaction.description}}
                   td {{transaction.amount | currency}}
-                  td {{transaction.jsDate | date : 'dd/MM/yyyy'}}
-        
-          //- div(layout-padding='' ng-repeat='transaction in allTransactions' )
-          //-   .md-whiteframe-z1(layout='row' )
-          //-     span(style='width: 20px; height: 20px', ng-style='{"background": transaction.color}')
-          //-     span(style='width: 130px') {{transaction.description}}
-          //-     span(style='width: 100px') {{transaction.amount | currency}}
-          //-     span(style='width: 100px') Date:
-          //-     span(style='width: 250px') {{transaction.jsDate | date : 'dd/MM/yyyy'}}
+                  td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
         
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
