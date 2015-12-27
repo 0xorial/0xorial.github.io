@@ -27,19 +27,11 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
 
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
-  getAccountInfo = (selector) ->
-    if selector instanceof StaticAccountSelector
-      return {
-        accountName: selector.account.name
-        color: selector.account.color
-      }
-    else if selector instanceof FirstSuitingSelector
-      return {
-        accountName: 'any'
-        }
-
   getPaymentInfo = (p) ->
-    a = getAccountInfo(p.accountSelector)
+    a = {
+      accountName: p.account.name
+      color: p.account.color
+    }
     if p instanceof SimplePayment
       return {
         payment: p
@@ -107,7 +99,9 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     payment.showEdit = false
 
   $scope.saveEdit = (payment) ->
+    payment.update()
     payment.showEdit = false
+    $rootScope.$broadcast 'dataChanged'
 
   $scope.delete = (payment) ->
     DataService.deletePayment(payment.payment)
@@ -118,15 +112,10 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 app.controller 'SimplePaymentEditCtrl', ($scope, DataService) ->
   $scope.payment = _.assign({}, $scope.p.payment)
   $scope.payment.date = $scope.payment.date.toDate()
-  $scope.accountSelectors = DataService.getAccounts().map (a) ->
-    selector = new StaticAccountSelector(a)
-    return {
-      name: a.name + '(' + a.currency + ')'
-      color: a.color
-      selector: selector
-    }
-  $scope.selectedAccountSelector = _.find($scope.accountSelectors, (s) ->
-    s.selector.account == $scope.payment.accountSelector.account)
+  $scope.accounts = DataService.getAccounts()
+  $scope.p.update = ->
+    _.assign(@payment, $scope.payment)
+    @payment.date = moment(@payment.date)
 
 app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
   $scope.autoSelect = true
@@ -211,14 +200,7 @@ app.service 'DataService', ($rootScope)->
     getAccounts: ->
       return allAccountsData
     deleteAccount: (account) ->
-      canDelete = true
-      for p in payments
-        if !p.accountSelector.canDeleteAcount(account)
-          canDelete = false
-      if !canDelete then return
       _.remove(allAccountsData, account)
-      for p in payments
-        p.accountSelector.notifyAccountDeleted(account)
       $rootScope.$broadcast 'dataChanged'
 
     addAccount: (account) ->
