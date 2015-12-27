@@ -9,7 +9,7 @@ html(lang='en', ng-app='StarterApp')
 
       
   script(type='text/ng-template', id='SimplePayment.html')
-    div(ng-controller='SimplePaymentEditCtrl' layout='row')
+    div.md-inline-form(ng-controller='SimplePaymentEditCtrl' layout='row')
       md-input-container
         label Description
         input(ng-model='payment.description')
