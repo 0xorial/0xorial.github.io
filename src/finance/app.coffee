@@ -85,8 +85,10 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         color: a.color
       }
 
-  payments = DataService.getPayments()
-  $scope.payments =  payments.map getPaymentInfo
+  update = ->
+    payments = DataService.getPayments()
+    $scope.payments =  payments.map getPaymentInfo
+  update()
 
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
@@ -97,6 +99,34 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     if payment instanceof PeriodicPayment then return 'PeriodicPayment.html'
     if payment instanceof TaxableIncomePayment then return 'TaxableIncomePayment.html'
     return 'SimplePayment.html'
+
+  $scope.edit = (payment) ->
+    payment.showEdit = true
+
+  $scope.cancelEdit = (payment) ->
+    payment.showEdit = false
+
+  $scope.saveEdit = (payment) ->
+    payment.showEdit = false
+
+  $scope.delete = (payment) ->
+    DataService.deletePayment(payment.payment)
+
+  $scope.$on 'simulationRan', (__, c) ->
+    update()
+
+app.controller 'SimplePaymentEditCtrl', ($scope, DataService) ->
+  $scope.payment = _.assign({}, $scope.p.payment)
+  $scope.payment.date = $scope.payment.date.toDate()
+  $scope.accountSelectors = DataService.getAccounts().map (a) ->
+    selector = new StaticAccountSelector(a)
+    return {
+      name: a.name + '(' + a.currency + ')'
+      color: a.color
+      selector: selector
+    }
+  $scope.selectedAccountSelector = _.find($scope.accountSelectors, (s) ->
+    s.selector.account == $scope.payment.accountSelector.account)
 
 app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
   $scope.autoSelect = true
@@ -152,7 +182,7 @@ app.service 'SimulationService', ($rootScope, DataService) ->
 
   runSimulation = ->
     context = new SimulationContext(DataService.getAccounts())
-    for p in payments
+    for p in DataService.getPayments()
       p.getTransactions(context)
 
     context.executeTransactions()
@@ -195,7 +225,10 @@ app.service 'DataService', ($rootScope)->
       allAccountsData.push(account)
       $rootScope.$broadcast 'dataChanged'
 
-
     getPayments: ->
       return payments
+
+    deletePayment: (payment) ->
+      _.remove(payments, payment)
+      $rootScope.$broadcast 'dataChanged'
     }
