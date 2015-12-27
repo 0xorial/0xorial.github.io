@@ -17,11 +17,11 @@ eur = (a) -> new CurrencyAmount('EUR', a)
 
 allAccountsData = [
   account1, account2, account3, account4,
-  account1, account2, account3, account4,
-  account1, account2, account3, account4,
-  account1, account2, account3, account4,
-  account1, account2, account3, account4,
-  account1, account2, account3, account4,
+  # account1, account2, account3, account4,
+  # account1, account2, account3, account4,
+  # account1, account2, account3, account4,
+  # account1, account2, account3, account4,
+  # account1, account2, account3, account4,
 ]
 
 transactions = [

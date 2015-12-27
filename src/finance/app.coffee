@@ -135,6 +135,11 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
       .map (a) -> { account: a[0], balance: a[1]}
     return acc
 
+  stateMerge = (state) ->
+    for b, index in state.balances
+      $scope.accounts[index].balance = b
+    return
+
   context = SimulationService.getLastSimulation()
   transaction = null
 
@@ -146,7 +151,11 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
     if transaction
       state = transaction.accountState
       date = transaction.date
-    $scope.accounts = stateConvert state
+    if $scope.accounts and $scope.accounts.length == state.accounts.length
+      stateMerge(state)
+    else
+      $scope.accounts = stateConvert state
+
     $scope.date = date.toDate()
 
   update()

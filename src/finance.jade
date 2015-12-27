@@ -17,10 +17,10 @@ html(lang='en', ng-app='StarterApp')
       md-input-container
         label Amount
         input(type='number' ng-model='payment.currencyAmount.amount')
-      md-select(ng-model='selectedAccountSelector')
-        md-option(ng-repeat='selector in accountSelectors') 
-          span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": selector.color}')
-          span {{selector.name}}
+      md-select(ng-model='payment.account')
+        md-option(ng-repeat='a in accounts' ng-value='a') 
+          span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": a.color}')
+          span {{a.name + ' (' + a.currency + ')'}}
           
   script(type='text/ng-template', id='BorrowPayment.html')
     span(style='display: inline-block; width: 130px') {{p.description}}
@@ -44,55 +44,56 @@ html(lang='en', ng-app='StarterApp')
   
 
   body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
-    md-content(style='width: 100%;' layout='row')
-      md-content(layout='column')
-        .md-whiteframe-z1(style='margin:10px')
-          div(ng-controller='AccountsListCtrl')
+    div(style='width: 100%;' layout='row')
+      div(layout='column')
+        div(ng-controller='AccountsListCtrl' flex='33' layout='column')
+          div.md-whiteframe-z1(style='margin:10px' layout-padding='' layout='column' flex='')
             md-data-table-toolbar
               h2 Accounts
               md-checkbox(ng-model='autoSelect') Auto
               md-datepicker(ng-model='date' ng-disabled='autoSelect')
-            md-data-table-container
-              table(md-data-table='')
-                thead()
-                  tr
-                    th
-                    th(name='Color')
-                    th(name='Name')
-                    th(name='Balance')
-                    th(name='Currency')
-                tbody
-                  tr(ng-repeat='account in accounts')
-                    td(style='padding-right: 0;')
-                      span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
-                    td(style='padding-left: 20px;')
-                      md-input-container(style='padding: 2px;')
-                        input(ng-model='account.account.color' style='width: 50px')
-                    td {{account.account.name}}
-                    td(style='min-width: 100px;') {{account.balance | number : 2}}
-                    td {{account.account.currency}}
-                    td
-                      button(style='background: none; border: none;')
-                        ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
-                  tr
-                    form(ng-submit='add()')
+            md-content
+              md-data-table-container
+                table(md-data-table='')
+                  thead
+                    tr
+                      th
+                      th(name='Color')
+                      th(name='Name')
+                      th(name='Balance')
+                      th(name='Currency')
+                  tbody
+                    tr(ng-repeat='account in accounts')
+                      td(style='padding-right: 0;')
+                        span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
+                      td(style='padding-left: 20px;')
+                        md-input-container(style='padding: 2px;')
+                          input(ng-model='account.account.color' style='width: 50px')
+                      td {{account.account.name}}
+                      td(style='min-width: 100px;') {{account.balance | number : 2}}
+                      td {{account.account.currency}}
                       td
-                      td 
-                      td 
-                        md-input-container
-                          label Name
-                          input(ng-model='newAccountName')
-                      td 
-                      td 
-                        md-input-container
-                          label Currency
-                          input(ng-model='newAccountCurrency' style='width:40px')
-                      td
-                        button(type='submit' style='background: none; border: none;')
-                          ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
+                        button(style='background: none; border: none;')
+                          ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
+                    tr
+                      form(ng-submit='add()')
+                        td
+                        td 
+                        td 
+                          md-input-container
+                            label Name
+                            input(ng-model='newAccountName')
+                        td 
+                        td 
+                          md-input-container
+                            label Currency
+                            input(ng-model='newAccountCurrency' style='width:40px')
+                        td
+                          button(type='submit' style='background: none; border: none;')
+                            ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
 
-        .md-whiteframe-z1(style='margin:10px')
-          md-content(ng-controller='PaymentsListCtrl')          
+        md-content(ng-controller='PaymentsListCtrl' flex='66' )
+          .md-whiteframe-z1(style='margin:10px' layout='column')
             h2 Payments
             md-content(layout='row')
               md-button.md-raised Simple
@@ -117,13 +118,13 @@ html(lang='en', ng-app='StarterApp')
                   button(style='background: none; border: none;')
                     ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
               div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
-                div(ng-include='templateFor(p.payment)')
+                div(ng-if='p.showEdit' ng-include='templateFor(p.payment)')
                 md-content(layout='row' layout-align='end center')
                   md-button.md-raised(ng-click='cancelEdit(p)') Cancel
-                  md-button.md-raised Save
+                  md-button.md-raised(ng-click='saveEdit(p)') Save
                 
-      .md-whiteframe-z1(style='margin:10px')
-        md-content(ng-controller='TransactionsListCtrl' layout='column' layout-align='start center' layout-padding='')
+      md-content(ng-controller='TransactionsListCtrl' layout='column')
+        .md-whiteframe-z1(style='margin:10px' flex='90' layout='column' layout-padding='')
           md-data-table-toolbar
             h2 Transactions
           md-data-table-container
