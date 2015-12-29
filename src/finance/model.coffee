@@ -27,6 +27,18 @@ class exports.Account
   isSame: (other) ->
     return @ == other
 
+  toJson: (context) ->
+    return {
+      id: context.registerObject(@)
+      currency: @currency
+      name: @name
+      color: @color
+    }
+  @fromJson: (json, context) ->
+    r = new exports.Account(json.currency, json.name, json.color)
+    context.registerObjectWithId(json.id, r)
+    return r
+
 class exports.AccountsState
   constructor: (@accounts, @balances) ->
     if !@balances
@@ -45,11 +57,11 @@ class exports.AccountsState
     return new exports.AccountsState(@accounts, newBalances)
 
 class exports.Transaction
-  constructor: (@date, @currencyAmount, @account, @description, @payment, @id) ->
+  constructor: (@date, @amount, @account, @description, @payment, @id) ->
 
   isSame: (other) ->
     return @date.isSame(other.date) \
-      and @currencyAmount.isSame(other.currencyAmount) \
+      and @amount == other.amount \
       and @account.isSame(other.account) \
       and @description == other.description \
       and @payment == other.payment
@@ -60,46 +72,114 @@ class exports.Payment
     throw new Error('abstract method')
 
 class exports.SimplePayment extends exports.Payment
-  constructor: (@account, @date, @currencyAmount, @description) ->
+  constructor: (@account, @date, @amount, @description) ->
   getTransactions: (context) ->
-    context.transaction(@date, @currencyAmount, @account, @description, @)
+    context.transaction(@date, @amount, @account, @description, @)
+  toJson: (context) ->
+    return {
+      type: 'SimplePayment'
+      date: @date.valueOf()
+      amount: @amount
+      accountId: context.getObjectId(@account)
+      description: @description
+    }
+  @fromJson: (json, context) ->
+    return new exports.SimplePayment(
+      context.resolveObject(json.accountId),
+      moment(json.date),
+      json.amount,
+      json.description)
 
 class exports.PeriodicPayment extends exports.Payment
-  constructor: (@account, @startDate, @endDate, @period, @currencyAmount, @description) ->
+  constructor: (@account, @startDate, @endDate, @period, @amount, @description) ->
   getTransactions: (context) ->
     date = @startDate
-    while date < @endDate
-      context.transaction(date, currencyAmount, @account, @)
+    while date.isBefore(@endDate)
+      context.transaction(date, @amount, @account, @)
       date += @period
+  toJson: (context) ->
+    return {
+      type: 'PeriodicPayment'
+      accountId: context.getObjectId(@account)
+      startDate: @startDate.valueOf()
+      endDate : @endDate.valueOf()
+      period: @period
+      amount: @amount
+      description : @description
+    }
+  @fromJson: (json, context) ->
+    return new exports.PeriodicPayment(
+      context.resolveObject(json.accountId),
+      moment(json.startDate),
+      moment(json.endDate),
+      json.period,
+      json.amount,
+      json.description)
 
 class exports.BorrowPayment extends exports.Payment
-  constructor: (@account, @date, @returnDate, @currencyAmount, @description) ->
+  constructor: (@account, @date, @returnDate, @amount, @description) ->
 
   getTransactions: (context) ->
-    context.transaction(@date, @currencyAmount, @account, 'borrow ' + @description, @)
-    returnAmount = @currencyAmount.multiply(-1)
+    context.transaction(@date, @amount, @account, 'borrow ' + @description, @)
+    returnAmount = @amount * (-1)
     context.transaction(@returnDate, returnAmount, @account, 'return ' + @description, @)
 
+  toJson: (context) ->
+    return {
+      type: 'BorrowPayment'
+      accountId: context.getObjectId(@account)
+      date: @date.valueOf()
+      returnDate: @returnDate.valueOf()
+      amount: @amount
+      description: @description
+    }
+  @fromJson: (json, context) ->
+    return new exports.BorrowPayment(
+      context.resolveObject(json.accountId),
+      moment(json.date),
+      moment(json.returnDate),
+      json.amount,
+      json.description)
+
 class exports.TaxableIncomePayment extends exports.Payment
-  constructor: (@account, @currencyAmount, @params) ->
+  constructor: (@account, @amount, @params) ->
     # earnedAt
     # paymentDate
     # description
 
   getTransactions: (context) ->
-    context.transaction(@params.paymentDate, @currencyAmount, @account, 'salary', @)
+    context.transaction(@params.paymentDate, @amount, @account, 'salary', @)
     taxDate = @params.earnedAt.clone().add(1, 'month')
-    amount = @currencyAmount.amount
+    amount = @amount.amount
     vat = 0.21
-    vatTaxAmount = @currencyAmount.multiply(-vat)
+    vatTaxAmount = @amount * (-vat)
     context.transaction(taxDate, vatTaxAmount, @account, 'vat', @)
-    noVatAmount = @currencyAmount.multiply(1 - vat)
+    noVatAmount = @amount * (1 - vat)
     social = 0.22
-    socialTaxAmount = noVatAmount.multiply(-0.22)
+    socialTaxAmount = noVatAmount * (-0.22)
     context.transaction(taxDate, socialTaxAmount, @account, 'social tax', @)
-    incomeAmount = noVatAmount.subtract(socialTaxAmount)
-    incomeTaxAmount = incomeAmount.multiply(-0.5)
+    incomeAmount = noVatAmount - socialTaxAmount
+    incomeTaxAmount = incomeAmount * (-0.5)
     context.transaction(taxDate, incomeTaxAmount, @account, 'income tax', @)
+
+  toJson: (context) ->
+    params = _.clone(@params)
+    params.earnedAt = params.earnedAt.valueOf()
+    params.paymentDate = params.paymentDate.valueOf()
+    return {
+      type: 'TaxableIncomePayment'
+      accountId: context.getObjectId(@account)
+      params: params
+      amount: @amount
+    }
+  @fromJson: (json, context) ->
+    params = _.clone(json.params)
+    params.earnedAt = moment(params.earnedAt)
+    params.paymentDate = moment(params.paymentDate)
+    return new exports.TaxableIncomePayment(
+      context.resolveObject(json.accountId),
+      json.amount,
+      params)
 
 class exports.SimulationContext
   constructor: (@accounts) ->
@@ -117,6 +197,6 @@ class exports.SimulationContext
         return a.id > b.id
       return a.date.isAfter(b.date)
     for t in @transactions
-      newState = @currentAccountsState.execute(t.account, t.currencyAmount.amount)
+      newState = @currentAccountsState.execute(t.account, t.amount)
       t.accountState = newState
       @currentAccountsState = newState

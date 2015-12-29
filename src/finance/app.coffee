@@ -29,6 +29,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
   getPaymentInfo = (p) ->
     a = {
+      currency: p.account.currency
       accountName: p.account.name
       color: p.account.color
     }
@@ -38,8 +39,8 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         description: p.description
         type: 'Simple'
         date: p.date.toDate()
-        amount: p.currencyAmount.amount
-        currency: p.currencyAmount.currency
+        amount: p.amount
+        currency: a.currency
         accountName: a.accountName
         color: a.color
       }
@@ -49,8 +50,8 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         description: p.description
         type: 'Loan'
         date: p.date.toDate()
-        amount: p.currencyAmount.amount
-        currency: p.currencyAmount.currency
+        amount: p.amount
+        currency: a.currency
         accountName: a.accountName
         color: a.color
       }
@@ -60,8 +61,8 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         description: p.description
         type: 'Periodic'
         date: p.date.toDate()
-        amount: p.currencyAmount.amount
-        currency: p.currencyAmount.currency
+        amount: p.amount
+        currency: a.currency
         accountName: a.accountName
         color: a.color
       }
@@ -71,8 +72,8 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         description: p.params.description
         type: 'Income(taxable)'
         date: p.params.earnedAt.toDate()
-        amount: p.currencyAmount.amount
-        currency: p.currencyAmount.currency
+        amount: p.amount
+        currency: a.currency
         accountName: a.accountName
         color: a.color
       }
@@ -188,7 +189,7 @@ app.service 'SimulationService', ($rootScope, DataService) ->
     tt = context.transactions
     for t in tt
       # t.moneyAfter = t.account.balance
-      t.amount = t.currencyAmount.amount
+      t.amount = t.amount
       t.jsDate = t.date.toDate()
       t.color = t.account.color
 
@@ -204,10 +205,65 @@ app.service 'SimulationService', ($rootScope, DataService) ->
       return lastSimulation
   }
 
+app.controller 'SerializationCtrl', ($scope, $rootScope, DataService) ->
+
+  serialize = ->
+    ctx = new SerializationContext()
+
+    accounts = DataService.getAccounts()
+    payments = DataService.getPayments()
+
+    accounts = accounts.map (a) -> a.toJson(ctx)
+    payments = payments.map (p) -> p.toJson(ctx)
+
+    root = {
+      accounts: accounts,
+      payments: payments
+    }
+    $scope.serializedData = JSON.stringify(root)
+
+  deserialize = ->
+    root = JSON.parse($scope.serializedData)
+    ctx = new SerializationContext()
+    accounts = []
+    for a in root.accounts
+      account = Account.fromJson(a, ctx)
+      accounts.push account
+
+    payments = []
+    for p in root.payments
+      payment = null
+      switch p.type
+        when 'SimplePayment'
+          payment = SimplePayment.fromJson(p, ctx)
+        when 'BorrowPayment'
+          paymennt = BorrowPayment.fromJson(p, ctx)
+        when 'PeriodicPayment'
+          payment = PeriodicPayment.fromJson(p, ctx)
+        when 'TaxableIncomePayment'
+          payment = TaxableIncomePayment.fromJson(p, ctx)
+
+      if payment == null
+        throw new Error()
+
+      payments.push payment
+
+    DataService.setAccounts(accounts)
+    DataService.setPayments(payments)
+    $rootScope.$broadcast 'dataChanged'
+
+  $scope.loadData = ->
+    deserialize()
+  $scope.saveData = ->
+    serialize()
+
+
 app.service 'DataService', ($rootScope)->
   return {
     getAccounts: ->
       return allAccountsData
+    setAccounts: (value) ->
+      allAccountsData = value
     deleteAccount: (account) ->
       _.remove(allAccountsData, account)
       $rootScope.$broadcast 'dataChanged'
@@ -218,6 +274,8 @@ app.service 'DataService', ($rootScope)->
 
     getPayments: ->
       return payments
+    setPayments: (value) ->
+      paymetns = value
 
     deletePayment: (payment) ->
       _.remove(payments, payment)

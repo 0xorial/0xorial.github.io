@@ -142,7 +142,13 @@ html(lang='en', ng-app='StarterApp')
                   td {{transaction.description}}
                   td {{transaction.amount | currency}}
                   td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
-        
+      
+      div(ng-controller='SerializationCtrl' layout='column')
+        input(ng-value='serializedData')
+        div(layout='row')
+          md-button.md-raised(ng-click='loadData()') Load
+          md-button.md-raised(ng-click='saveData()') Save
+      
     //- inline
     script(src='./bower_components/lodash/lodash.js', inline='')
     //- inline

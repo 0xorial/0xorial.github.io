@@ -15,3 +15,25 @@ console.realWarn = console.warn;
 console.warn = (message) ->
   if (message.indexOf("ARIA") == -1)
     console.realWarn.apply(console, arguments);
+
+exports = window
+
+class exports.SerializationContext
+  constructor: ->
+    @objects = []
+
+  registerObject: (object) ->
+    @objects.push(object)
+    return @objects.length - 1
+
+  registerObjectWithId: (id, object) ->
+    @objects[id] = object
+
+  getObjectId: (object) ->
+    for o,id in @objects
+      if o == object
+        return id
+    throw new Error()
+
+  resolveObject: (id) ->
+    return @objects[id]
