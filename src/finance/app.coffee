@@ -237,7 +237,7 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService) ->
         when 'SimplePayment'
           payment = SimplePayment.fromJson(p, ctx)
         when 'BorrowPayment'
-          paymennt = BorrowPayment.fromJson(p, ctx)
+          payment = BorrowPayment.fromJson(p, ctx)
         when 'PeriodicPayment'
           payment = PeriodicPayment.fromJson(p, ctx)
         when 'TaxableIncomePayment'
@@ -257,27 +257,31 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService) ->
   $scope.saveData = ->
     serialize()
 
+dataContainer = {
+  accounts: allAccountsData
+  payments: payments
+}
 
 app.service 'DataService', ($rootScope)->
   return {
     getAccounts: ->
-      return allAccountsData
+      return dataContainer.accounts
     setAccounts: (value) ->
-      allAccountsData = value
+      dataContainer.accounts = value
     deleteAccount: (account) ->
-      _.remove(allAccountsData, account)
+      _.remove(dataContainer.accounts, account)
       $rootScope.$broadcast 'dataChanged'
 
     addAccount: (account) ->
-      allAccountsData.push(account)
+      dataContainer.accounts.push(account)
       $rootScope.$broadcast 'dataChanged'
 
     getPayments: ->
-      return payments
+      return dataContainer.payments
     setPayments: (value) ->
-      paymetns = value
+      dataContainer.payments = value
 
     deletePayment: (payment) ->
-      _.remove(payments, payment)
+      _.remove(dataContainer.payments, payment)
       $rootScope.$broadcast 'dataChanged'
     }

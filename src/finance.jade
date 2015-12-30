@@ -144,7 +144,7 @@ html(lang='en', ng-app='StarterApp')
                   td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
       
       div(ng-controller='SerializationCtrl' layout='column')
-        input(ng-value='serializedData')
+        input(ng-model='serializedData')
         div(layout='row')
           md-button.md-raised(ng-click='loadData()') Load
           md-button.md-raised(ng-click='saveData()') Save
