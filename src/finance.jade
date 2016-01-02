@@ -7,7 +7,13 @@ html(lang='en', ng-app='StarterApp')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
 
-      
+
+  script(type='text/ng-template', id='AccountsDropDown.html')
+    md-select(ng-model='payment.account' )
+      md-option(ng-repeat='a in accounts' ng-value='a') 
+        span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": a.color}')
+        span {{a.name + ' (' + a.currency + ')'}}
+  
   script(type='text/ng-template', id='SimplePayment.html')
     div.md-inline-form(ng-controller='SimplePaymentEditCtrl' layout='row')
       md-input-container
@@ -16,31 +22,56 @@ html(lang='en', ng-app='StarterApp')
       md-datepicker(ng-model='payment.date')
       md-input-container
         label Amount
-        input(type='number' ng-model='payment.currencyAmount.amount')
-      md-select(ng-model='payment.account')
-        md-option(ng-repeat='a in accounts' ng-value='a') 
-          span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": a.color}')
-          span {{a.name + ' (' + a.currency + ')'}}
+        input(type='number' ng-model='payment.amount' style='width: 100px')
+      div(ng-include='"AccountsDropDown.html"')
           
   script(type='text/ng-template', id='BorrowPayment.html')
-    span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.jsDate | date : 'dd/MM/yyyy'}}
-    span(style='display: inline-block; width: 130px') {{p.jsReturnDate | date : 'dd/MM/yyyy'}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+    div.md-inline-form(ng-controller='BorrowPaymentEditCtrl' layout='column')
+      div(layout='row')
+        md-input-container
+          label Description
+          input(ng-model='payment.description')
+        md-input-container
+          label Amount
+          input(type='number' ng-model='payment.amount' style='width: 100px')
+        div(ng-include='"AccountsDropDown.html"')
+      div(layout='row')
+        md-datepicker(ng-model='payment.date')
+        md-datepicker(ng-model='payment.returnDate')
 
   script(type='text/ng-template', id='PeriodicPayment.html')
-    span(style='display: inline-block; width: 130px') {{p.description}}
-    span(style='display: inline-block; width: 130px') {{p.date | date : 'dd/MM/yyyy'}}
-    span(style='display: inline-block; width: 130px') {{p.period}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+    div.md-inline-form(ng-controller='PeriodicPaymentEditCtrl' layout='column')
+      div(layout='row')
+        md-input-container
+          label Description
+          input(ng-model='payment.description')
+        md-input-container
+          label Amount
+          input(type='number' ng-model='payment.amount' style='width: 100px')
+        div(ng-include='"AccountsDropDown.html"')
+      div(layout='row')
+        md-datepicker(ng-model='payment.startDate')
+        md-datepicker(ng-model='payment.endDate')
+        md-input-container
+          label Amount
+          input(type='number' ng-model='payment.period.quantity' style='width: 100px')
+        md-select(ng-model='payment.period.units' )
+          md-option(ng-repeat='a in ["days", "weeks", "months"]' ng-value='a') 
+            span {{a}}
 
   script(type='text/ng-template', id='TaxableIncomePayment.html')
-    span(style='display: inline-block; width: 130px') NOOOO
-    span(style='display: inline-block; width: 130px') {{p.earnedAt | date : 'dd/MM/yyyy'}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.currency}}
-    span(style='display: inline-block; width: 130px') {{p.currencyAmount.amount}}
+    div.md-inline-form(ng-controller='TaxableIncomePaymentEditCtrl' layout='column')
+      div(layout='row')
+        md-input-container
+          label Description
+          input(ng-model='payment.params.description')
+        md-input-container
+          label Amount
+          input(type='number' ng-model='payment.amount' style='width: 100px')
+        div(ng-include='"AccountsDropDown.html"')
+      div(layout='row')
+        md-datepicker(ng-model='payment.earnedAt')
+        md-datepicker(ng-model='payment.paymentDate')
   
 
   body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
@@ -96,11 +127,13 @@ html(lang='en', ng-app='StarterApp')
           .md-whiteframe-z1(style='margin:10px' layout='column')
             h2 Payments
             md-content(layout='row')
-              md-button.md-raised Simple
-              md-button.md-raised Periodic
-              md-button.md-raised Borrow
-              md-button.md-raised Income
+              md-button.md-raised(ng-click='newSimplePayment()') Simple
+              md-button.md-raised(ng-click='newPeriodicPayment()') Periodic
+              md-button.md-raised(ng-click='newBorrowPayment()') Borrow
+              md-button.md-raised(ng-click='newTaxableIncomePayment()') Income
             md-content(layout='column')
+              div(ng-include="'SimplePayment.html'" )
+                
               div(ng-repeat-start='p in payments' ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)' ng-hide='p.showEdit' \
                   layout='row' layout-align='space-between center' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
                 div(style='width: 180px;') {{p.description}}
@@ -143,8 +176,8 @@ html(lang='en', ng-app='StarterApp')
                   td {{transaction.amount | currency}}
                   td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
       
-      div(ng-controller='SerializationCtrl' layout='column')
-        input(ng-model='serializedData')
+      div(ng-controller='SerializationCtrl' layout='column' flex='')
+        textarea(ng-model='serializedData' flex='')
         div(layout='row')
           md-button.md-raised(ng-click='loadData()') Load
           md-button.md-raised(ng-click='saveData()') Save

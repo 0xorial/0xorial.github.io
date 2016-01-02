@@ -93,10 +93,11 @@ class exports.SimplePayment extends exports.Payment
 class exports.PeriodicPayment extends exports.Payment
   constructor: (@account, @startDate, @endDate, @period, @amount, @description) ->
   getTransactions: (context) ->
-    date = @startDate
+    date = @startDate.clone()
     while date.isBefore(@endDate)
-      context.transaction(date, @amount, @account, @)
-      date += @period
+      context.transaction(date.clone(), @amount, @account, @description, @)
+      date.add(@period.quantity, @period.units)
+
   toJson: (context) ->
     return {
       type: 'PeriodicPayment'
@@ -194,8 +195,14 @@ class exports.SimulationContext
   executeTransactions:  ->
     @transactions.sort (a,b) ->
       if a.date.isSame(b.date)
-        return a.id > b.id
-      return a.date.isAfter(b.date)
+        if a.id == b.id
+          return 0
+        if a.id < b.id
+          return -1
+        return 1
+      if a.date.isBefore(b.date)
+        return -1
+      return 1
     for t in @transactions
       newState = @currentAccountsState.execute(t.account, t.amount)
       t.accountState = newState

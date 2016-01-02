@@ -28,11 +28,15 @@ app.controller 'TransactionsListCtrl', ($scope, $rootScope, SimulationService, D
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
   getPaymentInfo = (p) ->
-    a = {
-      currency: p.account.currency
-      accountName: p.account.name
-      color: p.account.color
-    }
+    if p.account
+      a = {
+        currency: p.account.currency
+        accountName: p.account.name
+        color: p.account.color
+      }
+    else
+      a = {}
+
     if p instanceof SimplePayment
       return {
         payment: p
@@ -60,7 +64,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
         payment: p
         description: p.description
         type: 'Periodic'
-        date: p.date.toDate()
+        date: p.startDate.toDate()
         amount: p.amount
         currency: a.currency
         accountName: a.accountName
@@ -110,6 +114,10 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
   $scope.$on 'simulationRan', (__, c) ->
     update()
 
+  $scope.newSimplePayment = ->
+    $scope.payments.splice(0, 0, getPaymentInfo(new SimplePayment()))
+
+
 app.controller 'SimplePaymentEditCtrl', ($scope, DataService) ->
   $scope.payment = _.assign({}, $scope.p.payment)
   $scope.payment.date = $scope.payment.date.toDate()
@@ -117,6 +125,37 @@ app.controller 'SimplePaymentEditCtrl', ($scope, DataService) ->
   $scope.p.update = ->
     _.assign(@payment, $scope.payment)
     @payment.date = moment(@payment.date)
+
+app.controller 'BorrowPaymentEditCtrl', ($scope, DataService) ->
+  $scope.payment = _.assign({}, $scope.p.payment)
+  $scope.payment.date = $scope.payment.date.toDate()
+  $scope.payment.returnDate = $scope.payment.returnDate.toDate()
+  $scope.accounts = DataService.getAccounts()
+  $scope.p.update = ->
+    _.assign(@payment, $scope.payment)
+    @payment.date = moment(@payment.date)
+    @payment.returnDate = moment(@payment.returnDate)
+
+app.controller 'PeriodicPaymentEditCtrl', ($scope, DataService) ->
+  $scope.payment = _.assign({}, $scope.p.payment)
+  $scope.payment.startDate = $scope.payment.startDate.toDate()
+  $scope.payment.endDate = $scope.payment.endDate.toDate()
+  $scope.accounts = DataService.getAccounts()
+  $scope.p.update = ->
+    _.assign(@payment, $scope.payment)
+    @payment.startDate = moment(@payment.startDate)
+    @payment.endDate = moment(@payment.endDate)
+
+app.controller 'TaxableIncomePaymentEditCtrl', ($scope, DataService) ->
+  $scope.payment = _.assign({}, $scope.p.payment)
+  $scope.payment.earnedAt = $scope.payment.params.earnedAt.toDate()
+  $scope.payment.paymentDate = $scope.payment.params.paymentDate.toDate()
+  $scope.accounts = DataService.getAccounts()
+  $scope.p.update = ->
+    _.assign(@payment, $scope.payment)
+    @payment.params.earnedAt = moment(@payment.earnedAt)
+    @payment.params.paymentDate = moment(@payment.paymentDate)
+
 
 app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
   $scope.autoSelect = true
@@ -220,7 +259,7 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService) ->
       accounts: accounts,
       payments: payments
     }
-    $scope.serializedData = JSON.stringify(root)
+    $scope.serializedData = JSON.stringify(root, null, '  ')
 
   deserialize = ->
     root = JSON.parse($scope.serializedData)
