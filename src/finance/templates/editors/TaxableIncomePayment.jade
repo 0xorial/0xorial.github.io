@@ -1,0 +1,12 @@
+div.md-inline-form(ng-controller='TaxableIncomePaymentEditCtrl' layout='column')
+  div(layout='row')
+    md-input-container
+      label Description
+      input(ng-model='payment.params.description')
+    md-input-container
+      label Amount
+      input(type='number' ng-model='payment.amount' style='width: 100px')
+    accounts-drop-down(selected-account='payment.account')
+  div(layout='row')
+    md-datepicker(ng-model='payment.earnedAt')
+    md-datepicker(ng-model='payment.paymentDate')

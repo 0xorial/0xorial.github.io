@@ -1,0 +1,9 @@
+div.md-inline-form(ng-controller='SimplePaymentEditCtrl' layout='row')
+  md-input-container
+    label Description
+    input(ng-model='payment.description')
+  md-datepicker(ng-model='payment.date')
+  md-input-container
+    label Amount
+    input(type='number' ng-model='payment.amount' style='width: 100px')
+  accounts-drop-down(selected-account='payment.account')

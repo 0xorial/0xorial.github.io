@@ -1,0 +1,12 @@
+div.md-inline-form(ng-controller='BorrowPaymentEditCtrl' layout='column')
+  div(layout='row')
+    md-input-container
+      label Description
+      input(ng-model='payment.description')
+    md-input-container
+      label Amount
+      input(type='number' ng-model='payment.amount' style='width: 100px')
+    accounts-drop-down(selected-account='payment.account')
+  div(layout='row')
+    md-datepicker(ng-model='payment.date')
+    md-datepicker(ng-model='payment.returnDate')

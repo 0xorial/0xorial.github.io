@@ -1,0 +1,18 @@
+div.md-inline-form(ng-controller='PeriodicPaymentEditCtrl' layout='column')
+  div(layout='row')
+    md-input-container
+      label Description
+      input(ng-model='payment.description')
+    md-input-container
+      label Amount
+      input(type='number' ng-model='payment.amount' style='width: 100px')
+    accounts-drop-down(selected-account='payment.account')
+  div(layout='row')
+    md-datepicker(ng-model='payment.startDate')
+    md-datepicker(ng-model='payment.endDate')
+    md-input-container
+      label Amount
+      input(type='number' ng-model='payment.period.quantity' style='width: 100px')
+    md-select(ng-model='payment.period.units' )
+      md-option(ng-repeat='a in ["days", "weeks", "months"]' ng-value='a') 
+        span {{a}}
