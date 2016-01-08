@@ -32,9 +32,11 @@ html(lang='en', ng-app='StarterApp')
                       td(style='padding-right: 0;')
                         span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
                       td(style='padding-left: 20px;')
-                        md-input-container(style='padding: 2px;')
+                        md-input-container(style='padding: 2px; margin: 0;' layout-align='center center')
                           input(ng-model='account.account.color' style='width: 50px')
-                      td {{account.account.name}}
+                      td
+                        md-input-container(style='padding: 2px; margin: 0;')
+                          input(ng-model='account.account.name' style='width: 150px')
                       td(style='min-width: 100px;') {{account.balance | number : 2}}
                       td {{account.account.currency}}
                       td
