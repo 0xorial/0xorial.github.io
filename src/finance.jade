@@ -5,74 +5,8 @@ html(lang='en', ng-app='StarterApp')
     link(rel='stylesheet', href='./bower_components/angular-material-data-table/dist/md-data-table.min.css', inline='')
     link(rel='stylesheet', href='./bower_components/md-color-picker/dist/mdColorPicker.min.css', inline='')
     //- inline ../app.css
-    link(rel='stylesheet', href='../app.css', inline='')
+    link(rel='stylesheet', href='../app.css', inline='')  
 
-
-  script(type='text/ng-template', id='AccountsDropDown.html')
-    md-select(ng-model='payment.account' )
-      md-option(ng-repeat='a in accounts' ng-value='a') 
-        span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": a.color}')
-        span {{a.name + ' (' + a.currency + ')'}}
-  
-  script(type='text/ng-template', id='SimplePayment.html')
-    div.md-inline-form(ng-controller='SimplePaymentEditCtrl' layout='row')
-      md-input-container
-        label Description
-        input(ng-model='payment.description')
-      md-datepicker(ng-model='payment.date')
-      md-input-container
-        label Amount
-        input(type='number' ng-model='payment.amount' style='width: 100px')
-      div(ng-include='"AccountsDropDown.html"')
-          
-  script(type='text/ng-template', id='BorrowPayment.html')
-    div.md-inline-form(ng-controller='BorrowPaymentEditCtrl' layout='column')
-      div(layout='row')
-        md-input-container
-          label Description
-          input(ng-model='payment.description')
-        md-input-container
-          label Amount
-          input(type='number' ng-model='payment.amount' style='width: 100px')
-        div(ng-include='"AccountsDropDown.html"')
-      div(layout='row')
-        md-datepicker(ng-model='payment.date')
-        md-datepicker(ng-model='payment.returnDate')
-
-  script(type='text/ng-template', id='PeriodicPayment.html')
-    div.md-inline-form(ng-controller='PeriodicPaymentEditCtrl' layout='column')
-      div(layout='row')
-        md-input-container
-          label Description
-          input(ng-model='payment.description')
-        md-input-container
-          label Amount
-          input(type='number' ng-model='payment.amount' style='width: 100px')
-        div(ng-include='"AccountsDropDown.html"')
-      div(layout='row')
-        md-datepicker(ng-model='payment.startDate')
-        md-datepicker(ng-model='payment.endDate')
-        md-input-container
-          label Amount
-          input(type='number' ng-model='payment.period.quantity' style='width: 100px')
-        md-select(ng-model='payment.period.units' )
-          md-option(ng-repeat='a in ["days", "weeks", "months"]' ng-value='a') 
-            span {{a}}
-
-  script(type='text/ng-template', id='TaxableIncomePayment.html')
-    div.md-inline-form(ng-controller='TaxableIncomePaymentEditCtrl' layout='column')
-      div(layout='row')
-        md-input-container
-          label Description
-          input(ng-model='payment.params.description')
-        md-input-container
-          label Amount
-          input(type='number' ng-model='payment.amount' style='width: 100px')
-        div(ng-include='"AccountsDropDown.html"')
-      div(layout='row')
-        md-datepicker(ng-model='payment.earnedAt')
-        md-datepicker(ng-model='payment.paymentDate')
-  
 
   body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     div(style='width: 100%;' layout='row')
@@ -151,7 +85,7 @@ html(lang='en', ng-app='StarterApp')
                   button(style='background: none; border: none;')
                     ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
               div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
-                div(ng-if='p.showEdit' ng-include='templateFor(p.payment)')
+                div(ng-if='p.showEdit' ng-include='"finance/templates/editors/" + templateFor(p.payment)')
                 md-content(layout='row' layout-align='end center')
                   md-button.md-raised(ng-click='cancelEdit(p)') Cancel
                   md-button.md-raised(ng-click='saveEdit(p)') Save
@@ -215,3 +149,4 @@ html(lang='en', ng-app='StarterApp')
     script(src='./finance/controllers/PaymentsListCtrl.js')
     script(src='./finance/controllers/SerializationCtrl.js')
     script(src='./finance/controllers/TransactionsListCtrl.js')
+    script(src='./finance/templates/utils/AccountsDropDown.js')
