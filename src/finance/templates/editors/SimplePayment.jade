@@ -1,8 +1,8 @@
-div.md-inline-form(ng-controller='SimplePaymentEditCtrl' layout='row')
+div.md-inline-form(layout='row')
   md-input-container
     label Description
     input(ng-model='payment.description')
-  md-datepicker(ng-model='payment.date')
+  md-datepicker(ng-model='payment.dateJs')
   md-input-container
     label Amount
     input(type='number' ng-model='payment.amount' style='width: 100px')

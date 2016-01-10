@@ -1,5 +1,3 @@
-
-
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
   getPaymentInfo = (p) ->
@@ -66,11 +64,13 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
   $scope.leftPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', null)
-  $scope.templateFor = (payment) ->
-    if payment instanceof BorrowPayment then return 'BorrowPayment.html'
-    if payment instanceof PeriodicPayment then return 'PeriodicPayment.html'
-    if payment instanceof TaxableIncomePayment then return 'TaxableIncomePayment.html'
-    return 'SimplePayment.html'
+  $scope.templateFor = (payment)->
+    x = ->
+      if payment instanceof BorrowPayment then return 'borrowPayment'
+      if payment instanceof PeriodicPayment then return 'periodicPayment'
+      if payment instanceof TaxableIncomePayment then return 'taxableIncomePayment'
+      return 'simplePayment'
+    return _.kebabCase(x(payment))
 
   $scope.edit = (payment) ->
     payment.showEdit = true

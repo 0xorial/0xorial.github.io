@@ -11,12 +11,37 @@ Function::augmentDateDeep = (propertyName, getSetDate) ->
     get: -> getSetDate.get.call(@).toDate()
     set: (value) -> getSetDate.set.call(@, moment(value))
 
+exports = window
+
+_.mixin {
+  augmentDate: (o, datePropertyName) ->
+    Object.defineProperty o, _.camelCase(datePropertyName + '_js'),
+      get: -> @[datePropertyName].toDate()
+      set: (value) -> @[datePropertyName] = moment(value)
+
+  augmentDatesDeep: (o) ->
+    _.traverse o, (val, key, obj) ->
+      if moment.isMoment(val)
+        _.augmentDate(o, key)
+
+  traverse: (obj, cb) ->
+    myIsObject = (o) ->
+      return !_.isFunction(o) and _.isObject(o)
+    _.forIn obj, (val, key) ->
+      if _.isArray(val)
+        val.forEach (el) ->
+          if myIsObject(el)
+            _.traverse(el, cb)
+      else if myIsObject(obj[key])
+        _.traverse(obj[key], cb)
+      cb(val, key, obj)
+  }
+
 console.realWarn = console.warn;
 console.warn = (message) ->
   if (message.indexOf("ARIA") == -1)
     console.realWarn.apply(console, arguments);
 
-exports = window
 
 class exports.SerializationContext
   constructor: ->
