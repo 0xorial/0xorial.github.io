@@ -11,113 +11,15 @@ html(lang='en', ng-app='StarterApp')
   body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
     div(style='width: 100%;' layout='row')
       div(layout='column')
-        div(ng-controller='AccountsListCtrl' flex='33' layout='column')
-          div.md-whiteframe-z1(style='margin:10px' layout-padding='' layout='column' flex='')
-            md-data-table-toolbar
-              h2 Accounts
-              md-checkbox(ng-model='autoSelect') Auto
-              md-datepicker(ng-model='date' ng-disabled='autoSelect')
-            md-content
-              md-data-table-container
-                table(md-data-table='')
-                  thead
-                    tr
-                      th
-                      th(name='Color')
-                      th(name='Name')
-                      th(name='Balance')
-                      th(name='Currency')
-                  tbody
-                    tr(ng-repeat='account in accounts')
-                      td(style='padding-right: 0;')
-                        span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
-                      td(style='padding-left: 20px;')
-                        md-input-container(style='padding: 2px; margin: 0;' layout-align='center center')
-                          input(ng-model='account.account.color' style='width: 50px')
-                      td
-                        md-input-container(style='padding: 2px; margin: 0;')
-                          input(ng-model='account.account.name' style='width: 150px')
-                      td(style='min-width: 100px;') {{account.balance | number : 2}}
-                      td {{account.account.currency}}
-                      td
-                        button(style='background: none; border: none;')
-                          ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
-                    tr
-                      form(ng-submit='add()')
-                        td
-                        td 
-                        td 
-                          md-input-container
-                            label Name
-                            input(ng-model='newAccountName')
-                        td 
-                        td 
-                          md-input-container
-                            label Currency
-                            input(ng-model='newAccountCurrency' style='width:40px')
-                        td
-                          button(type='submit' style='background: none; border: none;')
-                            ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' )
+        div(ng-include='"finance/controllers/AccountsList.html"' flex='33' layout='column')
 
         md-content(flex='66' )
           .md-whiteframe-z1(style='margin:10px' layout='column')
             h2 Payments
-            div(layout='column' ng-controller='NewPaymentCtrl')
-              div(layout='row')
-                md-button.md-raised(ng-click='newSimplePayment()') Simple
-                md-button.md-raised(ng-click='newPeriodicPayment()') Periodic
-                md-button.md-raised(ng-click='newBorrowPayment()') Borrow
-                md-button.md-raised(ng-click='newTaxableIncomePayment()') Income
-              div(layout='column')
-                simple-payment(payment='template.simplePayment' ng-show='visibility.simplePayment')
-                periodic-payment(payment='template.periodicPayment' ng-show='visibility.periodicPayment')
-                borrow-payment(payment='template.borrowPayment' ng-show='visibility.borrowPayment')
-                taxable-income-payment(payment='template.taxableIncomePayment' ng-show='visibility.taxableIncomePayment')
-
-            md-content(layout='column' ng-controller='PaymentsListCtrl' )                
-              div(ng-repeat-start='p in payments' ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)' ng-hide='p.showEdit' \
-                  layout='row' layout-align='space-between center' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
-                div(style='width: 180px;') {{p.description}}
-                div(style='width: 120px;') {{p.type}}
-                div(style='width: 100px;') {{p.date | date : 'dd/MM/yyyy'}}
-                div(style='width: 80px;') {{p.amount | number : 2}}
-                div(style='width: 80px;') {{p.currency}}
-                div(style='width: 100px;' layout='row' layout-align='start center')
-                  div(style='padding:10px; margin-right: 10px;' ng-style='{"background-color": p.color}')
-                  div {{p.accountName}}
-                div(style='padding-right: 0;')
-                  button(style='background: none; border: none;' ng-click='edit(p)')
-                    ng-md-icon(icon='edit' style="fill: #99c2ff; cursor:pointer;" size='24')
-                div(style='padding-left: 0;')
-                  button(style='background: none; border: none;')
-                    ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
-              div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
-                div(ng-if='p.showEdit')
-                  div(directive='templateFor(p.payment)' ng-attr-payment='p.editPayment')
-                  
-                md-content(layout='row' layout-align='end center')
-                  md-button.md-raised(ng-click='cancelEdit(p)') Cancel
-                  md-button.md-raised(ng-click='saveEdit(p)') Save
+            div(ng-include='"finance/controllers/NewPayment.html"')
+            div(ng-include='"finance/controllers/PaymentsList.html"')
                 
-      md-content(ng-controller='TransactionsListCtrl' layout='column')
-        .md-whiteframe-z1(style='margin:10px' flex='90' layout='column' layout-padding='')
-          md-data-table-toolbar
-            h2 Transactions
-          md-data-table-container
-            table(md-data-table='')
-              thead()
-                tr
-                  th
-                  th(name='Description')
-                  th(name='Amount')
-                  th(name='Date')
-              tbody
-                tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
-                  td(style='padding-right: 0;')
-                    span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": transaction.account.color}')
-                  td {{transaction.description}}
-                  td {{transaction.amount | currency}}
-                  td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+      div(ng-include='"finance/controllers/TransactionsList.html"')
       
       div(ng-controller='SerializationCtrl' layout='column' flex='')
         textarea(ng-model='serializedData' flex='')

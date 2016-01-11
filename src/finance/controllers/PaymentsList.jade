@@ -1,0 +1,24 @@
+md-content(layout='column' ng-controller='PaymentsListCtrl' )                
+  div(ng-repeat-start='p in payments' ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)' ng-hide='p.showEdit' \
+      layout='row' layout-align='space-between center' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
+    div(style='width: 180px;') {{p.description}}
+    div(style='width: 120px;') {{p.type}}
+    div(style='width: 100px;') {{p.date | date : 'dd/MM/yyyy'}}
+    div(style='width: 80px;') {{p.amount | number : 2}}
+    div(style='width: 80px;') {{p.currency}}
+    div(style='width: 100px;' layout='row' layout-align='start center')
+      div(style='padding:10px; margin-right: 10px;' ng-style='{"background-color": p.color}')
+      div {{p.accountName}}
+    div(style='padding-right: 0;')
+      button(style='background: none; border: none;' ng-click='edit(p)')
+        ng-md-icon(icon='edit' style="fill: #99c2ff; cursor:pointer;" size='24')
+    div(style='padding-left: 0;')
+      button(style='background: none; border: none;')
+        ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
+  div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
+    div(ng-if='p.showEdit')
+      div(directive='templateFor(p.payment)' ng-attr-payment='p.editPayment')
+      
+    md-content(layout='row' layout-align='end center')
+      md-button.md-raised(ng-click='cancelEdit(p)') Cancel
+      md-button.md-raised(ng-click='saveEdit(p)') Save

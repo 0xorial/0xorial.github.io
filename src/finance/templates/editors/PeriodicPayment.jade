@@ -11,7 +11,7 @@ div.md-inline-form(layout='column')
     md-datepicker(ng-model='payment.startDateJs')
     md-datepicker(ng-model='payment.endDateJs')
     md-input-container
-      label Amount
+      label Period
       input(type='number' ng-model='payment.period.quantity' style='width: 100px')
     md-select(ng-model='payment.period.units' )
       md-option(ng-repeat='a in ["days", "weeks", "months"]' ng-value='a') 
