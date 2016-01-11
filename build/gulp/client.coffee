@@ -8,7 +8,7 @@ isRelease = false
 
 module.exports = (gulp, $, options) ->
 
-  dst = './'
+  dst = '../'
 
   gulp.task 'client-sass', ->
     return gulp.src(['./src/**/*.scss', './src/**/_*.scss'])
