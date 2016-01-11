@@ -27,14 +27,15 @@ _.mixin {
   traverse: (obj, cb) ->
     myIsObject = (o) ->
       return !_.isFunction(o) and _.isObject(o)
+
     _.forIn obj, (val, key) ->
+      cb(val, key, obj)
       if _.isArray(val)
         val.forEach (el) ->
           if myIsObject(el)
             _.traverse(el, cb)
       else if myIsObject(obj[key])
         _.traverse(obj[key], cb)
-      cb(val, key, obj)
   }
 
 console.realWarn = console.warn;

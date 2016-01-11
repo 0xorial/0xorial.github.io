@@ -8,8 +8,8 @@ div.md-inline-form(layout='column')
       input(type='number' ng-model='payment.amount' style='width: 100px')
     accounts-drop-down(selected-account='payment.account')
   div(layout='row')
-    md-datepicker(ng-model='payment.startDate')
-    md-datepicker(ng-model='payment.endDate')
+    md-datepicker(ng-model='payment.startDateJs')
+    md-datepicker(ng-model='payment.endDateJs')
     md-input-container
       label Amount
       input(type='number' ng-model='payment.period.quantity' style='width: 100px')

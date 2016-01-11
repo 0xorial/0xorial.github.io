@@ -8,7 +8,10 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
   $scope.visibility = {}
   $scope.template = {}
   for k of paymentTypes
-    $scope.template[k] = new paymentTypes[k]
-    $scope.visibility[k] = false
-    $scope[_.camelCase('new_' + k)] = ->
-      $scope.visibility[k] = !$scope.visibility[k]
+    ( (k) ->
+      $scope.template[k] = new paymentTypes[k]
+      $scope.visibility[k] = false
+      $scope[_.camelCase('new_' + k)] = ->
+        $scope.visibility[k] = !$scope.visibility[k]
+    )(k)
+  return
