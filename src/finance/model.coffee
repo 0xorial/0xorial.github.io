@@ -71,10 +71,19 @@ class exports.Payment
   getTransactions: (context) ->
     throw new Error('abstract method')
 
+  clone: ->
+    c = new @constructor()
+    @assignTo(c)
+    return c
+
 class exports.SimplePayment extends exports.Payment
   constructor: (@account, @date, @amount, @description) ->
   getTransactions: (context) ->
     context.transaction(@date, @amount, @account, @description, @)
+
+  assignTo: (to) ->
+    _.assign(to, @)
+
   toJson: (context) ->
     return {
       type: 'SimplePayment'
@@ -97,6 +106,9 @@ class exports.PeriodicPayment extends exports.Payment
     while date.isBefore(@endDate)
       context.transaction(date.clone(), @amount, @account, @description, @)
       date.add(@period.quantity, @period.units)
+
+  assignTo: (to) ->
+    _.assign(to, @)
 
   toJson: (context) ->
     return {
@@ -124,6 +136,9 @@ class exports.BorrowPayment extends exports.Payment
     context.transaction(@date, @amount, @account, 'borrow ' + @description, @)
     returnAmount = @amount * (-1)
     context.transaction(@returnDate, returnAmount, @account, 'return ' + @description, @)
+
+  assignTo: (to) ->
+    _.assign(to, @)
 
   toJson: (context) ->
     return {
@@ -162,6 +177,12 @@ class exports.TaxableIncomePayment extends exports.Payment
     incomeAmount = noVatAmount - socialTaxAmount
     incomeTaxAmount = incomeAmount * (-0.5)
     context.transaction(taxDate, incomeTaxAmount, @account, 'income tax', @)
+
+  assignTo: (to) ->
+    _.assign(to, @)
+    to.params = {}
+    _.assign(to.params, @params)
+
 
   toJson: (context) ->
     params = _.clone(@params)

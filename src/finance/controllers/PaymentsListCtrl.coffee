@@ -73,13 +73,16 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     return _.kebabCase(x(payment))
 
   $scope.edit = (payment) ->
+    payment.editPayment = payment.payment.clone()
     payment.showEdit = true
 
   $scope.cancelEdit = (payment) ->
     payment.showEdit = false
+    payment.editPayment = null
 
   $scope.saveEdit = (payment) ->
-    payment.update()
+    payment.editPayment.assignTo(payment.payment)
+    payment.editPayment = null
     payment.showEdit = false
     $rootScope.$broadcast 'dataChanged'
 

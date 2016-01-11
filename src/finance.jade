@@ -93,7 +93,7 @@ html(lang='en', ng-app='StarterApp')
                     ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
               div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
                 div(ng-if='p.showEdit')
-                  div(directive='templateFor(p.payment)' ng-attr-payment='p.payment')
+                  div(directive='templateFor(p.payment)' ng-attr-payment='p.editPayment')
                   
                 md-content(layout='row' layout-align='end center')
                   md-button.md-raised(ng-click='cancelEdit(p)') Cancel
