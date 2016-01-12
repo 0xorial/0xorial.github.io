@@ -1,31 +1,8 @@
 
 exports = window;
 
-class exports.CurrencyAmount
-  constructor: (@currency, @amount) ->
-
-  _getAmount: (currencyAmount) ->
-    if currencyAmount.currency
-      return currencyAmount.amount
-    return currencyAmount
-
-  multiply: (byy) ->
-    return new exports.CurrencyAmount(@currency, @amount * byy)
-
-  add: (amount) ->
-    return new exports.CurrencyAmount(@currency, @amount + @_getAmount(amount))
-
-  subtract: (amount) ->
-    return new exports.CurrencyAmount(@currency, @amount - @_getAmount(amount))
-
-  isSame: (amount) ->
-    return @currency == amount.currency and @amount == amount.amount
-
 class exports.Account
   constructor: (@currency, @name, @color) ->
-
-  isSame: (other) ->
-    return @ == other
 
   toJson: (context) ->
     return {
@@ -58,13 +35,6 @@ class exports.AccountsState
 
 class exports.Transaction
   constructor: (@date, @amount, @account, @description, @payment, @id) ->
-
-  isSame: (other) ->
-    return @date.isSame(other.date) \
-      and @amount == other.amount \
-      and @account.isSame(other.account) \
-      and @description == other.description \
-      and @payment == other.payment
 
 class exports.Payment
   # returns generator returning transactions ordered by payment time
