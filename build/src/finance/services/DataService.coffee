@@ -22,6 +22,10 @@ app.service 'DataService', ($rootScope)->
     setPayments: (value) ->
       dataContainer.payments = value
 
+    addPayment: (payment) ->
+      dataContainer.payments.push payment
+      $rootScope.$broadcast 'dataChanged'
+
     deletePayment: (payment) ->
       _.remove(dataContainer.payments, payment)
       $rootScope.$broadcast 'dataChanged'

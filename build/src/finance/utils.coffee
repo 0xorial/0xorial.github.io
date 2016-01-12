@@ -22,7 +22,7 @@ _.mixin {
   augmentDatesDeep: (o) ->
     _.traverse o, (val, key, obj) ->
       if moment.isMoment(val)
-        _.augmentDate(o, key)
+        _.augmentDate(obj, key)
 
   traverse: (obj, cb) ->
     myIsObject = (o) ->

@@ -8,7 +8,8 @@ window.makeEditor = (name) ->
         payment: '='
       }
       controller: ($scope) ->
-        _.augmentDatesDeep $scope.payment
+        $scope.$watch 'payment', (p) ->
+          _.augmentDatesDeep p
     }
 
 makeEditor 'simplePayment'

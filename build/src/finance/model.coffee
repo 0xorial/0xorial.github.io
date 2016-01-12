@@ -48,6 +48,9 @@ class exports.Payment
 
 class exports.SimplePayment extends exports.Payment
   constructor: (@account, @date, @amount, @description) ->
+    if !@date
+      @date = moment()
+
   getTransactions: (context) ->
     context.transaction(@date, @amount, @account, @description, @)
 
@@ -71,6 +74,11 @@ class exports.SimplePayment extends exports.Payment
 
 class exports.PeriodicPayment extends exports.Payment
   constructor: (@account, @startDate, @endDate, @period, @amount, @description) ->
+    if !@startDate
+      @startDate = moment()
+    if !@endDate
+      @endDate = moment()
+
   getTransactions: (context) ->
     date = @startDate.clone()
     while date.isBefore(@endDate)
@@ -101,6 +109,10 @@ class exports.PeriodicPayment extends exports.Payment
 
 class exports.BorrowPayment extends exports.Payment
   constructor: (@account, @date, @returnDate, @amount, @description) ->
+    if !@date
+      @date = moment()
+    if !@returnDate
+      @returnDate = moment()
 
   getTransactions: (context) ->
     context.transaction(@date, @amount, @account, 'borrow ' + @description, @)
@@ -129,6 +141,11 @@ class exports.BorrowPayment extends exports.Payment
 
 class exports.TaxableIncomePayment extends exports.Payment
   constructor: (@account, @amount, @params) ->
+    if !@params
+      @params = {
+        earnedAt: moment()
+        paymentDate: moment()
+      }
     # earnedAt
     # paymentDate
     # description

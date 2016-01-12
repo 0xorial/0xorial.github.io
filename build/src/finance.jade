@@ -21,15 +21,16 @@ html(lang='en', ng-app='StarterApp')
     //-   | save
     //- pre#output
 
-    div(style='width: 100%;' layout='row')
-      div(layout='column')
-        div(ng-include='"finance/controllers/AccountsList.html"' flex='33' layout='column')
-
-        md-content(flex='66' )
-          .md-whiteframe-z1(style='margin:10px' layout='column')
-            h2 Payments
-            div(ng-include='"finance/controllers/NewPayment.html"')
-            div(ng-include='"finance/controllers/PaymentsList.html"')
+    div(style='width: 100%;' layout='row' layout-align=)
+      md-tabs(flex='40' layout='column')
+        md-tab(label='Accounts' layout='column')
+          tab-body(flex='' layout='column')
+            div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
+        md-tab(label='Payments' layout='column')
+          md-content(flex='66' )
+            .md-whiteframe-z1(style='margin:10px' layout='column')
+              div(ng-include='"finance/controllers/NewPayment.html"')
+              div(ng-include='"finance/controllers/PaymentsList.html"')
                 
       div(ng-include='"finance/controllers/TransactionsList.html"')
       
