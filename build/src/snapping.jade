@@ -1,94 +1,72 @@
 html(lang='en', ng-app='StarterApp')
   head
-    // inline ../bower_components/angular-material/angular-material.min.css
-    link(rel='stylesheet', href='../bower_components/angular-material/angular-material.min.css', inline='')
+    // inline ../build/bower_components/angular-material/angular-material.min.css
+    link(rel='stylesheet', href='../build/bower_components/angular-material/angular-material.min.css', inline='')
     // inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')
-    // inline ../bower_components/prism/themes/prism.css
-    link(href="../bower_components/prism/themes/prism.css" rel="stylesheet", inline='')
+    // inline ../build/bower_components/prism/themes/prism.css
+    link(href="../build/bower_components/prism/themes/prism.css" rel="stylesheet", inline='')
     link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,100,100italic,700italic,500italic,700,500,400italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic', rel='stylesheet', type='text/css')
     link(href='https://fonts.googleapis.com/css?family=Gochi+Hand' rel='stylesheet' type='text/css')
-  body(layout='row', ng-controller='AppCtrl' style='overflow: hidden; height:100%')
-    md-content(style='width: 100%;')
-      md-content(layout='column', layout-align='start center' layout-padding='')
-        div.article-content
-
-          p.md-display-2 Snapping. The nerdy way.
-          p.md-title Introduction
-          p
-            i NOTE. You can use middle-button for panning and wheel for zooming.
-          canvas#demo1(width='900px', height='400px')
-          p You should have noticed that placing square into corner was not easy, and definitely not user-friendly.
-          p Let's see what we can do to make it better...
-          p.md-title Level 0
-          div(layout='row')
-            div(flex='')
-              pre
-                code(class='language-coffeescript')
-                  |    position = @square.getTopLeftCorner()
-                  |    if position.distanceTo(@start) < 10
-                  |        return @start.subtract(position)
-            div(flex='')
-              canvas#demo2(width='400px', height='300px')
-
-          p Okay, that is much better, but this totally does not seem like a programmer's approach. Let's start generalizing!
-          p.md-title Level 1
-          p.md-subhead#generalizations Generalization 1
-          p Any numbers of snapping points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
-          p.md-subhead Generalization 2
-          p Arbitrary primitives to which we could snap. In above examples we might want to be able to snap also to lines themselve, not only in the corner.
-          p.md-subhead Generalization 3
-          p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some snaping?
-          br
-          p First two generalizations are not that difficult to implement, so we are going to do it right away. Third one is a little bit more tricky, so let's put it away for a while.
-          p For 'Generalization 1' all we need is an array of points instead of one point associated with object we are moving. Like so:
+  body(layout='row', style='overflow: hidden; height:100%')
+    md-content(style='width: 100%; height: 100%' layout='column' layout-align='start center')
+      div.article-content()
+        p.md-display-2 Snapping. The nerdy way.
+        p.md-title Introduction
+        p
+          i NOTE. You can use middle-button for panning and wheel for zooming.
+        canvas#demo1(width='900px', height='400px')
+        p You should have noticed that placing square into corner was not easy, and definitely not user-friendly.
+        p Let's see what we can do to make it better...
+        p.md-title Level 0
+        div(layout='row')
+          div(flex='')
             pre
               code(class='language-coffeescript')
-                | class Rectangle
-                |   getSnappingPoints: ->
-                |     point1 = getPosition()
-                |     point2 = point1.add(@width, 0)
-                |     point3 = point1.add(0, @height)
-                |     point4 = point1.add(@width, @height)
-                |     return [point1, point2, point3, point4]
-          p For 'Generalization 2' we can introduce a following class
-            pre
-              code(class='language-coffeescript')
-                | class SnappingPrimitive
-                |   getNearestPoint: (point) ->
-                | class LineSnappingPrimitive
-                |   constructor: (@start, @end) ->
-                |   getNearestPoint: (point) ->
-                |     l2 = @end.distanceToSquared(@start)
-                |     if l2 < 0.01
-                |       return @start.lerpTo(@end)
-                |     t = point.subtract(@start).dot(@end.subtract(@start)) / l2
-                |     return @start if t < 0
-                |     return @end if t > 1
-                |     return @start.lerpTo(@end, t)
+                |    position = @square.getTopLeftCorner()
+                |    if position.distanceTo(@start) < 10
+                |        return @start.subtract(position)
+          div(flex='')
+            canvas#demo2(width='400px', height='300px')
 
-          p Which naturally brings us to snapping algorithm which looks like this:
-            pre
-              code(class='language-coffeescript')
-                |     minDistance = 10
-                |     points = @square.getSnappingPoints()
-                |     snaps = []
-                |     for point in points
-                |       for p in @snapTo
-                |         nearest = p.getNearestPoint(point)
-                |         distance = nearest.distanceTo point
-                |         if distance < minDistance
-                |           snaps.push({nearest: nearest, point: point, distance: distance})
-                |     nearestSnap = _.min(snaps, (snap) -> snap.distance)
-                |     if nearestSnap == Infinity
-                |       return num.Num2.zero
-                |     return nearestSnap.nearest.subtract(nearestSnap.point)
+        p Okay, that is much better, but this totally does not seem like a programmer's approach. Let's start generalizing!
+        p.md-title Level 1
+        p.md-subhead#generalizations Generalization 1
+        p Any numbers of snapping points on an object. For example, for a rectangle it makes sense to snap it by all of it corners.
+        p.md-subhead Generalization 2
+        p Arbitrary primitives to which we could snap. In above examples we might want to be able to snap also to lines themselve, not only in the corner.
+        p.md-subhead Generalization 3
+        p Arbitrary constraints on object moving. In above examples we were moving rectangle freely, but can we take it to next level and move it across a line or curve, or rotate and still have some snaping?
+        br
+        p First two generalizations are not that difficult to implement, so we are going to do it right away. Third one is a little bit more tricky, so let's put it away for a while.
+        p For 'Generalization 1' all we need is an array of points instead of one point associated with object we are moving. Like so:
+          pre
+            code(class='language-coffeescript')
+              | class Rectangle
+              |   getSnappingPoints: ->
+              |     point1 = getPosition()
+              |     point2 = point1.add(@width, 0)
+              |     point3 = point1.add(0, @height)
+              |     point4 = point1.add(@width, @height)
+              |     return [point1, point2, point3, point4]
+        p For 'Generalization 2' we can introduce a following class
+          pre
+            code(class='language-coffeescript')
+              | class SnappingPrimitive
+              |   getNearestPoint: (point) ->
+              | class LineSnappingPrimitive
+              |   constructor: (@start, @end) ->
+              |   getNearestPoint: (point) ->
+              |     l2 = @end.distanceToSquared(@start)
+              |     if l2 < 0.01
+              |       return @start.lerpTo(@end)
+              |     t = point.subtract(@start).dot(@end.subtract(@start)) / l2
+              |     return @start if t < 0
+              |     return @end if t > 1
+              |     return @start.lerpTo(@end, t)
 
-          p Let's see how it performs.
-          canvas#demo3(width='900px', height='400px')
-          p Now our snapping works nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
-          p Your first instinct to solve this problem may be to find pairwise intersections of all different snapping primitives and snap points not only to primitives, but to those intersections also. Sure, let's go for it!
+        p Which naturally brings us to snapping algorithm which looks like this:
           pre
             code(class='language-coffeescript')
               |     minDistance = 10
@@ -99,219 +77,239 @@ html(lang='en', ng-app='StarterApp')
               |         nearest = p.getNearestPoint(point)
               |         distance = nearest.distanceTo point
               |         if distance < minDistance
-              |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
-              |     intersections = []
-              |     for i in [0..@snapTo.length - 1] by 1
-              |       for j in [i+1..@snapTo.length - 1] by 1
-              |         intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
-              |         intersections.push(intersection) if intersection
-              |     for point in points
-              |       for p in intersections
-              |         nearest = p
-              |         distance = nearest.distanceTo point
-              |         if distance < minDistance
-              |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
-              |     nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
-              |     if nearestSnap == Infinity or nearestSnap == -Infinity
+              |           snaps.push({nearest: nearest, point: point, distance: distance})
+              |     nearestSnap = _.min(snaps, (snap) -> snap.distance)
+              |     if nearestSnap == Infinity
               |       return num.Num2.zero
               |     return nearestSnap.nearest.subtract(nearestSnap.point)
-          canvas#demo4(width='900px', height='400px')
-          p So far so good! But prepare, big trouble coming...
-          p.md-title Level 2
-          canvas#demo5(width='900px', height='400px')
-          p That is what happenning
-          canvas#demo6(width='900px', height='400px')
-          p Now, how on Earth can we figure out that we should move points together to the left, instead of snapping them separately to single lines...
-          p The following demo shows the key idea...
-          canvas#demo7(width='900px', height='400px')
-          p Implementation is going to be pretty complicated, so I will try to describe a little further what we are going to do.
-          ol
-            li Create a list of 'multi' snappings. Multi-snapping is an object, which has specified delta, and multiple snappings, each of which is a point snapped to certain snapping primitive.
-            li Find 'direct' snappings. That is, for each point find all lines to which we can snap it.
-            li Add 'direct' snappings to our multi-snapping list.
-            li Go through all pairs of 'direct' snappings and for each pair do the following
-              ol
-                li Transform line of second snapping in such a way that points of two snappings coincide (as shown on previous demo)
-                li Check if this new transformed line intersects line of first 'direct' snapping.
-                li If it does, create 2 new snappings, with delta coresponding to path from first point to intersection point, and having point and line of first and second 'direct' snappings. At this point we have to be careful to avoid duplicates.
-            li Go through the list of 'multi' snappings and find the best one, for example, this could be one with most snappings included.
-          p To implement this algorithm, first we are going to need couple of helper classes:
-          pre
-            code(class='language-coffeescript').
-              class MultiSnapping
-                constructor: (@delta) ->
-                  @snappings = []
 
-                addSnapping: (snapping) ->
-                  existing = _.find(@snappings, (s) -> s.primitive == snapping.primitive and s.point == snapping.point)
-                  if !existing
-                    @snappings.push snapping
+        p Let's see how it performs.
+        canvas#demo3(width='900px', height='400px')
+        p Now our snapping works nice, except for one little problem: it does not snap in the corner, which we actually wanted to do in the beginning!
+        p Your first instinct to solve this problem may be to find pairwise intersections of all different snapping primitives and snap points not only to primitives, but to those intersections also. Sure, let's go for it!
+        pre
+          code(class='language-coffeescript')
+            |     minDistance = 10
+            |     points = @square.getSnappingPoints()
+            |     snaps = []
+            |     for point in points
+            |       for p in @snapTo
+            |         nearest = p.getNearestPoint(point)
+            |         distance = nearest.distanceTo point
+            |         if distance < minDistance
+            |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 1})
+            |     intersections = []
+            |     for i in [0..@snapTo.length - 1] by 1
+            |       for j in [i+1..@snapTo.length - 1] by 1
+            |         intersection = @snapTo[i].findIntersectionPoint(@snapTo[j])
+            |         intersections.push(intersection) if intersection
+            |     for point in points
+            |       for p in intersections
+            |         nearest = p
+            |         distance = nearest.distanceTo point
+            |         if distance < minDistance
+            |           snaps.push({nearest: nearest, point: point, distance: distance, weight: 100})
+            |     nearestSnap = _.min(snaps, (snap) -> Math.max(snap.distance, 5) / snap.weight)
+            |     if nearestSnap == Infinity or nearestSnap == -Infinity
+            |       return num.Num2.zero
+            |     return nearestSnap.nearest.subtract(nearestSnap.point)
+        canvas#demo4(width='900px', height='400px')
+        p So far so good! But prepare, big trouble coming...
+        p.md-title Level 2
+        canvas#demo5(width='900px', height='400px')
+        p That is what happenning
+        canvas#demo6(width='900px', height='400px')
+        p Now, how on Earth can we figure out that we should move points together to the left, instead of snapping them separately to single lines...
+        p The following demo shows the key idea...
+        canvas#demo7(width='900px', height='400px')
+        p Implementation is going to be pretty complicated, so I will try to describe a little further what we are going to do.
+        ol
+          li Create a list of 'multi' snappings. Multi-snapping is an object, which has specified delta, and multiple snappings, each of which is a point snapped to certain snapping primitive.
+          li Find 'direct' snappings. That is, for each point find all lines to which we can snap it.
+          li Add 'direct' snappings to our multi-snapping list.
+          li Go through all pairs of 'direct' snappings and for each pair do the following
+            ol
+              li Transform line of second snapping in such a way that points of two snappings coincide (as shown on previous demo)
+              li Check if this new transformed line intersects line of first 'direct' snapping.
+              li If it does, create 2 new snappings, with delta coresponding to path from first point to intersection point, and having point and line of first and second 'direct' snappings. At this point we have to be careful to avoid duplicates.
+          li Go through the list of 'multi' snappings and find the best one, for example, this could be one with most snappings included.
+        p To implement this algorithm, first we are going to need couple of helper classes:
+        pre
+          code(class='language-coffeescript').
+            class MultiSnapping
+              constructor: (@delta) ->
+                @snappings = []
 
-                getValue: ->
-                  return @snappings.length * 1000000 / Math.max(@delta.length(), 1)
-          pre
-            code(class='language-coffeescript').
-              class SnapsDictionary
-                constructor: ->
-                  @items = []
+              addSnapping: (snapping) ->
+                existing = _.find(@snappings, (s) -> s.primitive == snapping.primitive and s.point == snapping.point)
+                if !existing
+                  @snappings.push snapping
 
-                getByDelta: (delta) ->
-                  item = _.find(@items, (item) -> item.delta.epsilonEquals(delta))
-                  if item
-                    return item
-                  return null
+              getValue: ->
+                return @snappings.length * 1000000 / Math.max(@delta.length(), 1)
+        pre
+          code(class='language-coffeescript').
+            class SnapsDictionary
+              constructor: ->
+                @items = []
 
-                add: (singleSnapping) ->
-                  existing = @getByDelta(singleSnapping.delta)
-                  if !existing
-                    existing = new MultiSnapping(singleSnapping.delta)
-                    @items.push existing
-                  existing.addSnapping(singleSnapping)
-          p And finally the snapping logic itself
-          pre
-            code(class='language-coffeescript').
-              minDistance = 10
-              points = @square.getSnappingPoints()
-              singleSnaps = []
-              for point in points
-                for p in @snapTo
-                  nearest = p.getNearestPoint(point)
-                  delta = nearest.subtract(point)
-                  if delta.length() < minDistance
-                    singleSnaps.push({point: point, delta: delta, primitive: p})
-              snaps = new SnapsDictionary()
-              for snap in singleSnaps
-                snaps.add(snap)
+              getByDelta: (delta) ->
+                item = _.find(@items, (item) -> item.delta.epsilonEquals(delta))
+                if item
+                  return item
+                return null
 
-              for i in [0..singleSnaps.length - 1] by 1
-                firstSnap = singleSnaps[i]
-                for j in [i+1..singleSnaps.length - 1] by 1
-                  secondSnap = singleSnaps[j]
+              add: (singleSnapping) ->
+                existing = @getByDelta(singleSnapping.delta)
+                if !existing
+                  existing = new MultiSnapping(singleSnapping.delta)
+                  @items.push existing
+                existing.addSnapping(singleSnapping)
+        p And finally the snapping logic itself
+        pre
+          code(class='language-coffeescript').
+            minDistance = 10
+            points = @square.getSnappingPoints()
+            singleSnaps = []
+            for point in points
+              for p in @snapTo
+                nearest = p.getNearestPoint(point)
+                delta = nearest.subtract(point)
+                if delta.length() < minDistance
+                  singleSnaps.push({point: point, delta: delta, primitive: p})
+            snaps = new SnapsDictionary()
+            for snap in singleSnaps
+              snaps.add(snap)
 
-                  if !firstSnap.delta.epsilonEquals(secondSnap.delta)
-                    pointsDelta = firstSnap.point.subtract(secondSnap.point)
-                    movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
-                    intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
-                    if intersection
-                      delta = intersection.subtract(firstSnap.point)
-                      snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
-                      snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+            for i in [0..singleSnaps.length - 1] by 1
+              firstSnap = singleSnaps[i]
+              for j in [i+1..singleSnaps.length - 1] by 1
+                secondSnap = singleSnaps[j]
 
-              nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
-              if nearestSnap == Infinity or nearestSnap == -Infinity
-                return num.Num2.zero
-              return nearestSnap.delta
-          p Voila!
-          canvas#demo8(width='900px', height='400px')
-          p.md-title Level 2
-          p Now it is time for a mind-blowing part. So, we have an algorithm which snaps a set of points to a set of some objects on 2d plane(we used only line segments, but it is possible to have anything for which we can find projection and intersection points with other objects). However, imagine if you are rotating object. It really feels that there should be something in common between snapping panning object and snapping rotating object. And there is!
-          p First, here is an idea that will help. When we snap and object, we do not have to find the vector by which we move the object. It would be sufficient to know the delta by which we 'correct' the mouse cursor position, that is such delta, that, when added to cursor position, would result in such cursor position that the moving object would be placed snapped. Every time the object is moved we are going to use such 'corrected' cursor position and as a result the object will be snapped.
-          p Lets consider rotation. To snap rotating object we first need to see if we can bring point to line by rotating it around rotation center and find the angle of this rotation. If we succeed, we now need to take current mouse position and rotate it around rotation center by the same angle. Image below illustrates this.
-          p
-            img(src='images/rotation.png', style='width: 100%')
-          p Remember the key idea of snapping multiple points to multiple lines. We are moving one snapped point to another snapped point, together with lines and then check if those lines intersect and if we can snap to that intersection. Extending this idea just a little, we can realize that we are not stuck with 'panning' movement here. All we actually need is a way to transform one point to another, such that the movement corresponds to the movement we are trying to implement.
-          p As you may notice all that logic specific to movement can be extracted to separate class and then different movement types may be used interchangeably in our snapping algorithm. Here how this class may look
-          pre
-            code(class='language-coffeescript').
-              class MovementProvider
-                getNearestPoint: (primitive, point) ->
-                  throw new Error()
-
-                getMouseDelta: (projection, point) ->
-                  throw new Error()
-
-                combineSnappings: (firstSnap, secondSnap) ->
-                  throw new Error()
-
-              class PanMovementProvider
-                getNearestPoints: (primitive, point) ->
-                  return [primitive.getNearestPoint(point)]
-
-                getMouseDelta: (projection, point) ->
-                  return projection.subtract(point)
-
-                combineSnappings: (firstSnap, secondSnap) ->
+                if !firstSnap.delta.epsilonEquals(secondSnap.delta)
                   pointsDelta = firstSnap.point.subtract(secondSnap.point)
                   movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
                   intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
                   if intersection
-                    return intersection.subtract(firstSnap.point)
-                  return null
+                    delta = intersection.subtract(firstSnap.point)
+                    snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+                    snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+
+            nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+            if nearestSnap == Infinity or nearestSnap == -Infinity
+              return num.Num2.zero
+            return nearestSnap.delta
+        p Voila!
+        canvas#demo8(width='900px', height='400px')
+        p.md-title Level 2
+        p Now it is time for a mind-blowing part. So, we have an algorithm which snaps a set of points to a set of some objects on 2d plane(we used only line segments, but it is possible to have anything for which we can find projection and intersection points with other objects). However, imagine if you are rotating object. It really feels that there should be something in common between snapping panning object and snapping rotating object. And there is!
+        p First, here is an idea that will help. When we snap and object, we do not have to find the vector by which we move the object. It would be sufficient to know the delta by which we 'correct' the mouse cursor position, that is such delta, that, when added to cursor position, would result in such cursor position that the moving object would be placed snapped. Every time the object is moved we are going to use such 'corrected' cursor position and as a result the object will be snapped.
+        p Lets consider rotation. To snap rotating object we first need to see if we can bring point to line by rotating it around rotation center and find the angle of this rotation. If we succeed, we now need to take current mouse position and rotate it around rotation center by the same angle. Image below illustrates this.
+        p
+          img(src='images/rotation.png', style='width: 100%')
+        p Remember the key idea of snapping multiple points to multiple lines. We are moving one snapped point to another snapped point, together with lines and then check if those lines intersect and if we can snap to that intersection. Extending this idea just a little, we can realize that we are not stuck with 'panning' movement here. All we actually need is a way to transform one point to another, such that the movement corresponds to the movement we are trying to implement.
+        p As you may notice all that logic specific to movement can be extracted to separate class and then different movement types may be used interchangeably in our snapping algorithm. Here how this class may look
+        pre
+          code(class='language-coffeescript').
+            class MovementProvider
+              getNearestPoint: (primitive, point) ->
+                throw new Error()
+
+              getMouseDelta: (projection, point) ->
+                throw new Error()
+
+              combineSnappings: (firstSnap, secondSnap) ->
+                throw new Error()
+
+            class PanMovementProvider
+              getNearestPoints: (primitive, point) ->
+                return [primitive.getNearestPoint(point)]
+
+              getMouseDelta: (projection, point) ->
+                return projection.subtract(point)
+
+              combineSnappings: (firstSnap, secondSnap) ->
+                pointsDelta = firstSnap.point.subtract(secondSnap.point)
+                movedSecondSnap = secondSnap.primitive.moveBy(pointsDelta)
+                intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+                if intersection
+                  return intersection.subtract(firstSnap.point)
+                return null
 
 
-              class RotateMovementProvider
-                constructor: (@center) ->
+            class RotateMovementProvider
+              constructor: (@center) ->
 
-                getNearestPoints: (primitive, point) ->
-                  radius = @center.distanceTo(point)
-                  intersections = num.findLineSegmentCircleIntersections(primitive.start, primitive.end,
-                    @center.x, @center.y, radius)
-                  return intersections
+              getNearestPoints: (primitive, point) ->
+                radius = @center.distanceTo(point)
+                intersections = num.findLineSegmentCircleIntersections(primitive.start, primitive.end,
+                  @center.x, @center.y, radius)
+                return intersections
 
-                _getMouseDelta: (angle) ->
-                  snappedPosition = @mousePosition.rotateAround(@center, angle)
-                  return snappedPosition.subtract(@mousePosition)
+              _getMouseDelta: (angle) ->
+                snappedPosition = @mousePosition.rotateAround(@center, angle)
+                return snappedPosition.subtract(@mousePosition)
 
-                getMouseDelta: (projection, point) ->
-                  throw new Error() if projection.x == undefined
-                  v1 = num.Num2.vectorFromPoints(@center, projection)
-                  v2 = num.Num2.vectorFromPoints(@center, point)
-                  angle = v2.angleTo(v1)
-                  return @_getMouseDelta(angle)
+              getMouseDelta: (projection, point) ->
+                throw new Error() if projection.x == undefined
+                v1 = num.Num2.vectorFromPoints(@center, projection)
+                v2 = num.Num2.vectorFromPoints(@center, point)
+                angle = v2.angleTo(v1)
+                return @_getMouseDelta(angle)
 
-                combineSnappings: (firstSnap, secondSnap) ->
-                  v1 = num.Num2.vectorFromPoints(@center, firstSnap.point)
-                  v2 = num.Num2.vectorFromPoints(@center, secondSnap.point)
-                  angle = v2.angleTo(v1)
-                  movedSecondSnap = secondSnap.primitive.rotateBy(@center, angle)
-                  intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
-                  if intersection and intersection.epsilonEquals(firstSnap.point)
-                    return @getMouseDelta(intersection, firstSnap.point)
-                  return null
-          p And the final version of snapping algorithm!
-          pre
-            code(class='language-coffeescript').
-              minDistance = 20
-              points = @getSnappingShape().wrapper.getSnappingPoints()
-              movementProvider = @getSnappingShape().wrapper.movementProvider
-              movementProvider.mousePosition = @mousePosition
-              singleSnaps = []
-              for point in points
-                for p in @snapTo
-                  nearest = movementProvider.getNearestPoints(p, point)
-                  for n in nearest
-                    delta = movementProvider.getMouseDelta(n, point)
-                    if delta.length() < minDistance
-                      singleSnaps.push({point: point, delta: delta, primitive: p})
-              snaps = new SnapsDictionary()
-              for snap in singleSnaps
-                snaps.add(snap)
+              combineSnappings: (firstSnap, secondSnap) ->
+                v1 = num.Num2.vectorFromPoints(@center, firstSnap.point)
+                v2 = num.Num2.vectorFromPoints(@center, secondSnap.point)
+                angle = v2.angleTo(v1)
+                movedSecondSnap = secondSnap.primitive.rotateBy(@center, angle)
+                intersection = movedSecondSnap.findIntersectionPoint(firstSnap.primitive)
+                if intersection and intersection.epsilonEquals(firstSnap.point)
+                  return @getMouseDelta(intersection, firstSnap.point)
+                return null
+        p And the final version of snapping algorithm!
+        pre
+          code(class='language-coffeescript').
+            minDistance = 20
+            points = @getSnappingShape().wrapper.getSnappingPoints()
+            movementProvider = @getSnappingShape().wrapper.movementProvider
+            movementProvider.mousePosition = @mousePosition
+            singleSnaps = []
+            for point in points
+              for p in @snapTo
+                nearest = movementProvider.getNearestPoints(p, point)
+                for n in nearest
+                  delta = movementProvider.getMouseDelta(n, point)
+                  if delta.length() < minDistance
+                    singleSnaps.push({point: point, delta: delta, primitive: p})
+            snaps = new SnapsDictionary()
+            for snap in singleSnaps
+              snaps.add(snap)
 
-              for i in [0..singleSnaps.length - 1] by 1
-                firstSnap = singleSnaps[i]
-                for j in [i+1..singleSnaps.length - 1] by 1
-                  secondSnap = singleSnaps[j]
+            for i in [0..singleSnaps.length - 1] by 1
+              firstSnap = singleSnaps[i]
+              for j in [i+1..singleSnaps.length - 1] by 1
+                secondSnap = singleSnaps[j]
 
-                  if !firstSnap.delta.epsilonEquals(secondSnap.delta)
-                    intersectionDelta = movementProvider.combineSnappings(firstSnap, secondSnap)
-                    if intersectionDelta
-                      delta = intersectionDelta
-                      snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
-                      snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
+                if !firstSnap.delta.epsilonEquals(secondSnap.delta)
+                  intersectionDelta = movementProvider.combineSnappings(firstSnap, secondSnap)
+                  if intersectionDelta
+                    delta = intersectionDelta
+                    snaps.add({delta: delta, point: firstSnap.point, primitive: firstSnap.primitive})
+                    snaps.add({delta: delta, point: secondSnap.point, primitive: secondSnap.primitive})
 
-              nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
-              if nearestSnap == Infinity or nearestSnap == -Infinity
-                return num.Num2.zero
-              return nearestSnap.delta
-          p Here is working demo of this code. You can move lines by dragging yellow squares. One rectangle is rotating other is panning. The brown cross indicates the 'snapped' position of mouse cursor.
-          canvas#demo10(width='900px', height='400px')
-          p.md-title Outroduction
-          ol
-            li Algorithm presented here is not intended to provide practical solution to snapping from UX perspective. Instead, it is a demonstration of some ideas, which I find interesting for solving a complicated algorithmical problem.
-            li All the code is working and you may use it in any possible way, but since it was written only for demonstration, it is below production level quality and likely to have bugs.
-            li You can comment through github issues, or contact me if you have questions/remarks. Feedback is, surely, welcome.
-            li
-              a(href='http://codemore.blogspot.com') My mini-blog.
+            nearestSnap = _.max(snaps.items, (snap) -> snap.getValue())
+            if nearestSnap == Infinity or nearestSnap == -Infinity
+              return num.Num2.zero
+            return nearestSnap.delta
+        p Here is working demo of this code. You can move lines by dragging yellow squares. One rectangle is rotating other is panning. The brown cross indicates the 'snapped' position of mouse cursor.
+        canvas#demo10(width='900px', height='400px')
+        p.md-title Outroduction
+        ol
+          li Algorithm presented here is not intended to provide practical solution to snapping from UX perspective. Instead, it is a demonstration of some ideas, which I find interesting for solving a complicated algorithmical problem.
+          li All the code is working and you may use it in any possible way, but since it was written only for demonstration, it is below production level quality and likely to have bugs.
+          li You can comment through github issues, or contact me if you have questions/remarks. Feedback is, surely, welcome.
+          li
+            a(href='http://codemore.blogspot.com') My mini-blog.
 
 
 
@@ -319,21 +317,29 @@ html(lang='en', ng-app='StarterApp')
       var _globals = {}
 
     // inline
-    script(src="../bower_components/prism/prism.js", inline='')
+    script(src="../build/bower_components/prism/prism.js", inline='')
     // inline
-    script(src="../bower_components/prism/components/prism-coffeescript.js", inline='')
+    script(src="../build/bower_components/prism/components/prism-coffeescript.js", inline='')
     // inline
-    script(src='../bower_components/victor/build/victor.js', inline='')
+    script(src='../build/bower_components/victor/build/victor.js', inline='')
     // inline
-    script(src='../bower_components/lodash/lodash.js', inline='')
+    script(src='../build/bower_components/lodash/lodash.js', inline='')
     // inline
-    script(src='../bower_components/jquery/dist/jquery.min.js', inline='')
+    script(src='../build/bower_components/jquery/dist/jquery.min.js', inline='')
     // inline
-    script(src='../bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    script(src='../build/bower_components/angular/angular.js')
     // inline
-    script(src='../bower_components/bluebird/js/browser/bluebird.js', inline='')
+    script(src='../build/bower_components/angular-animate/angular-animate.min.js')
     // inline
-    script(src='../bower_components/EaselJS/lib/easeljs-0.8.1.combined.js', inline='')
+    script(src='../build/bower_components/angular-aria/angular-aria.min.js')
+    // inline
+    script(src='../build/bower_components/angular-material/angular-material.min.js')
+    // inline
+    script(src='../build/bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
+    // inline
+    script(src='../build/bower_components/bluebird/js/browser/bluebird.js', inline='')
+    // inline
+    script(src='../build/bower_components/EaselJS/lib/easeljs-0.8.1.combined.js', inline='')
     // inline
     script(src='../vendor/gsap/TweenMax.js', inline='')
     // inline
@@ -347,6 +353,4 @@ html(lang='en', ng-app='StarterApp')
 
     script.
       _globals.do()
-
-
-
+      angular.module ('StarterApp', ['ngMaterial'])
