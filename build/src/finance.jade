@@ -7,8 +7,20 @@ html(lang='en', ng-app='StarterApp')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')  
 
+    script(src='./finance/drive.js')
+    script(src='https://apis.google.com/js/client.js?onload=checkAuth')
+
 
   body.md-default-theme(ng-controller='AppCtrl' style='overflow: hidden; height:100%')
+    #authorize-div(style='display: none')
+      span Authorize access to Drive API
+      // Button for the user to click to initiate auth sequence
+      button#authorize-button(onclick='insertFile("hello", {"hello": "world"})')
+        | Authorize
+    button#authorize2-button(onclick='insertFile("hello", {"hello": "world"})')
+      | save
+    pre#output
+
     div(style='width: 100%;' layout='row')
       div(layout='column')
         div(ng-include='"finance/controllers/AccountsList.html"' flex='33' layout='column')
