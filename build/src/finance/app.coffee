@@ -3,8 +3,17 @@ app = angular.module('StarterApp', [
   'ngMaterial'
   'ngMdIcons'
   'mdColorPicker'
+  # 'ui.router'
 ])
 
-app.controller 'AppCtrl', ($rootScope, $scope, $timeout) ->
+app.config () ->
+  # $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+  # $locationProvider.html5Mode(true)
+  # $urlRouterProvider.otherwise '/state'
+  # $stateProvider
+  #   .state('root', {
+  #     url: '/state'
+  #     templateUrl: 'state.html'
+  #     })
 
 window.app = app

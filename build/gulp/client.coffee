@@ -3,6 +3,7 @@ browserSync = require 'browser-sync'
 sequence = require 'run-sequence'
 fs = require('fs')
 inlinesource = require('gulp-inline-source')
+historyApiFallback = require('connect-history-api-fallback')
 
 isRelease = false
 
@@ -96,6 +97,8 @@ module.exports = (gulp, $, options) ->
         baseDir: dst
       online: false
       ghostMode: false
+      # minify: false
+      # middleware: [ historyApiFallback() ]
       )
     return
 

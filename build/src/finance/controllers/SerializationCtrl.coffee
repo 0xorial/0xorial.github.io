@@ -49,3 +49,11 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService) ->
     deserialize()
   $scope.saveData = ->
     serialize()
+
+  $scope.saveDrive = ->
+
+  $scope.copy = ->
+    serialize()
+    new Clipboard('#copy', {
+      text: -> $scope.serializedData
+      })

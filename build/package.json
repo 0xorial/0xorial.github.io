@@ -10,7 +10,7 @@
   "license": "ISC",
   "devDependencies": {
     "bluebird": "^2.9.34",
-    "browser-sync": "^2.8.2",
+    "browser-sync": "^2.11.0",
     "chance": "^0.7.6",
     "coffee-script": "^1.9.3",
     "del": "^1.2.1",
@@ -30,5 +30,8 @@
     "run-sequence": "^1.1.2",
     "sqlite3": "^3.0.10",
     "wiredep": "^3.0.0-beta"
+  },
+  "dependencies": {
+    "connect-history-api-fallback": "^1.1.0"
   }
 }
