@@ -29,14 +29,17 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
     if not context
       return
     state = context.currentAccountsState
-    date = _.last(context.transactions).date
+    lastSimulatedTransaction = _.last(context.transactions)
+    if lastSimulatedTransaction
+      date = lastSimulatedTransaction.date
+    else date = moment()
     if transaction
       state = transaction.accountState
       date = transaction.date
-    if $scope.accounts and $scope.accounts.length == state.accounts.length
-      stateMerge(state)
-    else
-      $scope.accounts = stateConvert state
+    # if $scope.accounts and $scope.accounts.length == state.accounts.length
+    #   stateMerge(state)
+    # else
+    $scope.accounts = stateConvert state
 
     $scope.date = date.toDate()
 

@@ -7,4 +7,6 @@ app.directive 'accountsDropDown', ->
     }
     controller: ($scope, DataService) ->
       $scope.accounts = DataService.getAccounts()
+      $scope.$on 'dataChanged', () ->
+        $scope.accounts = DataService.getAccounts()
   }

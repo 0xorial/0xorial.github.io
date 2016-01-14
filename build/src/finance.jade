@@ -7,8 +7,7 @@ html(lang='en', ng-app='StarterApp')
     //- inline ../app.css
     link(rel='stylesheet', href='../app.css', inline='')  
 
-    script(src='./finance/drive.js')
-    script(src='https://apis.google.com/js/client.js?onload=checkAuth')
+    //- script(src='https://apis.google.com/js/client.js?onload=checkAuth')
 
     //- base(href='/')
     
@@ -18,31 +17,26 @@ html(lang='en', ng-app='StarterApp')
           span Document:
           md-button.md-raised(ng-click='saveDrive()') Save
           md-button.md-raised#copy(ng-click='copy()') Copy Data
-          input#clipboard(ng-show='false' ng-model='serializedData')
+          md-button.md-raised(ng-click='loadData()') Load
+          input#clipboard(ng-show='true' ng-model='serializedData')
       div(style='width: 100%;' layout='row' layout-align=)
         md-tabs(flex='40' layout='column')
-          md-tab(label='Accounts' layout='column')
-            tab-body(flex='' layout='column')
-              div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
           md-tab(label='Payments' layout='column')
-            md-content(flex='66' )
+            md-content(flex='99' )
               .md-whiteframe-z1(style='margin:10px' layout='column')
                 div(ng-include='"finance/controllers/NewPayment.html"')
                 div(ng-include='"finance/controllers/PaymentsList.html"')
+          md-tab(label='Accounts' layout='column')
+            tab-body(flex='' layout='column')
+              div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
                   
-        div(ng-include='"finance/controllers/TransactionsList.html"')
-        
-        div(ng-controller='SerializationCtrl' layout='column' flex='')
-          textarea(ng-model='serializedData' flex='')
-          div(layout='row')
-            md-button.md-raised(ng-click='loadData()') Load
-            md-button.md-raised(ng-click='saveData()') Save
-    
+        div(ng-include='"finance/controllers/TransactionsList.html"' flex='')
+            
 
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' )
     div(ng-include='"state.html"')
     //- #authorize-div(style='display: none')
-    //-   span Authorize access to Drive API
+    //-   span Authorize access t o Drive API
     //-   // Button for the user to click to initiate auth sequence
     //-   button#authorize-button(onclick='insertFile("hello", {"hello": "world"})')
     //-     | Authorize
