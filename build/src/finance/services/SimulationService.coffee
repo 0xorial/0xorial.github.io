@@ -7,8 +7,12 @@ app.service 'SimulationService', ($rootScope, DataService) ->
 
   runSimulation = ->
     context = new SimulationContext(DataService.getAccounts())
-    for p in DataService.getPayments()
+    payments = DataService.getPayments()
+    for p in payments
       p.getTransactions(context)
+
+    t = new BeTaxSystem()
+    t.calculate(null, payments, context)
 
     context.executeTransactions()
 

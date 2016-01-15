@@ -37,7 +37,6 @@ class exports.Transaction
   constructor: (@date, @amount, @account, @description, @payment, @id) ->
 
 class exports.Payment
-  # returns generator returning transactions ordered by payment time
   getTransactions: (context) ->
     throw new Error('abstract method')
 
@@ -147,31 +146,85 @@ class exports.BorrowPayment extends exports.Payment
       json.description,
       json.interest)
 
+class exports.BeTaxSystem
+  calculate: (data, allPayments, context) ->
+    isTaxableIncome = (p) -> p instanceof exports.TaxableIncomePayment
+    payments = allPayments.filter(isTaxableIncome)
+    if payments.length > 0
+      account = _.first(payments).account
+    deductiblePayments = allPayments.filter((p) -> p.isDeductible)
+    deductibleExpensesByYear = _.groupBy(deductiblePayments, (p) -> p.date.year())
+    byYear = _.groupBy(payments, (p) -> p.params.earnedAt.year())
+    getDeductibaleVat = (p) -> (p.deductiblePercentage or 1)*p.amount*(p.vatPercentage or 0)
+    getDeductibaleNonVat = (p) -> (p.deductiblePercentage or 1)*p.amount*(1 - (p.vatPercentage or 0))
+    for year of byYear
+      yearPayments = byYear[year]
+      yearExpenses = deductibleExpensesByYear[year] or []
+
+      #amount without VAT
+      totalYearIncome = _.sumBy(yearPayments, (p) -> p.amount * (1 - (p.params.vatPercentage or 0)))
+      vatYearIncome = _.sumBy(yearPayments, (p) -> p.amount * p.params.vatPercentage)
+
+      deductibleVat = _.sumBy(yearExpenses, getDeductibaleVat)
+      deductibleNonVat = _.sumBy(yearExpenses, getDeductibaleNonVat)
+
+      # todo: does vat reduction increase personal income?...
+      # currently assume it does
+      totalYearIncome = totalYearIncome + deductibleVat
+
+      vatToPay = vatYearIncome - deductibleVat
+      vatToPay = 0 if vatToPay < 0
+
+      # todo: when to pay vat?
+      lastDayOfYear = moment({year: year+1}).subtract(1, 'days')
+      context.transaction(lastDayOfYear, vatToPay, account, 'vat payment', null)
+
+      social = 0.22
+      socialTaxToPay = totalYearIncome * social
+      context.transaction(lastDayOfYear, socialTaxToPay, account, 'social tax', null)
+
+      allowance = 7090
+      personalIncome = totalYearIncome - socialTaxToPay
+      taxablePersonalIncome = personalIncome - allowance
+      personalTaxRate = 0
+      if taxablePersonalIncome < 8680
+        personalTaxRate = 0.25
+      else if taxablePersonalIncome < 12360
+        personalTaxRate = 0.3
+      else if taxablePersonalIncome < 20600
+        personalTaxRate = 0.4
+      else if taxablePersonalIncome < 37750
+        personalTaxRate = 0.45
+      else
+        personalTaxRate = 0.5
+
+      personalTaxPayDate = moment({year: year + 1, month: 6})
+      context.transaction(lastDayOfYear, socialTaxToPay, account, 'personal income tax', null)
+
+
 class exports.TaxableIncomePayment extends exports.Payment
   constructor: (@account, @amount, @params) ->
     if !@params
       @params = {
         earnedAt: moment()
         paymentDate: moment()
+        deducibleExpenses: []
       }
+    # vatPercentage
     # earnedAt
     # paymentDate
     # description
+    # deducibleExpenses: {vatAmount: number, deduciblePercentage: number}
+
+
+    #vatAmount
+    #socialTaxAmount
+    #rest
+    @data = {
+    }
 
   getTransactions: (context) ->
     context.transaction(@params.paymentDate, @amount, @account, 'salary', @)
-    taxDate = @params.earnedAt.clone().add(1, 'month')
-    amount = @amount.amount
-    vat = 0.21
-    vatTaxAmount = @amount * (-vat)
-    context.transaction(taxDate, vatTaxAmount, @account, 'vat', @)
-    noVatAmount = @amount * (1 - vat)
-    social = 0.22
-    socialTaxAmount = noVatAmount * (-0.22)
-    context.transaction(taxDate, socialTaxAmount, @account, 'social tax', @)
-    incomeAmount = noVatAmount - socialTaxAmount
-    incomeTaxAmount = incomeAmount * (-0.5)
-    context.transaction(taxDate, incomeTaxAmount, @account, 'income tax', @)
 
   assignTo: (to) ->
     _.assign(to, @)
@@ -219,6 +272,7 @@ class exports.SimulationContext
       if a.date.isBefore(b.date)
         return -1
       return 1
+
     for t in @transactions
       newState = @currentAccountsState.execute(t.account, t.amount)
       t.accountState = newState
