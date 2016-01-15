@@ -108,7 +108,9 @@ class exports.PeriodicPayment extends exports.Payment
       json.description)
 
 class exports.BorrowPayment extends exports.Payment
-  constructor: (@account, @date, @returnDate, @amount, @description) ->
+  constructor: (@account, @date, @returnDate, @amount, @description, @interest) ->
+    if !interest
+      interest = 0
     if !@date
       @date = moment()
     if !@returnDate
@@ -116,7 +118,11 @@ class exports.BorrowPayment extends exports.Payment
 
   getTransactions: (context) ->
     context.transaction(@date, @amount, @account, 'borrow ' + @description, @)
-    returnAmount = @amount * (-1)
+    diff = @returnDate.diff(@date)
+    days = moment.duration(diff).asDays()
+    fraction = days/365
+    interest = fraction * @interest
+    returnAmount = @amount * (-1) * (1 + interest)
     context.transaction(@returnDate, returnAmount, @account, 'return ' + @description, @)
 
   assignTo: (to) ->
@@ -130,6 +136,7 @@ class exports.BorrowPayment extends exports.Payment
       returnDate: @returnDate.valueOf()
       amount: @amount
       description: @description
+      interest: @interest
     }
   @fromJson: (json, context) ->
     return new exports.BorrowPayment(
@@ -137,7 +144,8 @@ class exports.BorrowPayment extends exports.Payment
       moment(json.date),
       moment(json.returnDate),
       json.amount,
-      json.description)
+      json.description,
+      json.interest)
 
 class exports.TaxableIncomePayment extends exports.Payment
   constructor: (@account, @amount, @params) ->

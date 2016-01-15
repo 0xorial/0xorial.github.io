@@ -19,16 +19,20 @@ html(lang='en', ng-app='StarterApp')
           md-button.md-raised#copy(ng-click='copy()') Copy Data
           md-button.md-raised(ng-click='loadData()') Load
           input#clipboard(ng-show='true' ng-model='serializedData')
-      div(style='width: 100%;' layout='row' layout-align=)
-        md-tabs(flex='40' layout='column')
-          md-tab(label='Payments' layout='column')
-            md-content(flex='99' )
-              .md-whiteframe-z1(style='margin:10px' layout='column')
-                div(ng-include='"finance/controllers/NewPayment.html"')
-                div(ng-include='"finance/controllers/PaymentsList.html"')
-          md-tab(label='Accounts' layout='column')
-            tab-body(flex='' layout='column')
-              div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
+      div(style='width: 100%;' layout='row' layout-align='start start')
+        div(flex='40' layout='column')
+          md-tabs(flex='100')
+            md-tab
+              md-tab-label Payments
+              md-tab-body()
+                md-content
+                  .md-whiteframe-z1(style='margin:10px;' layout='column' )
+                    div(ng-include='"finance/controllers/NewPayment.html"')
+                    div(ng-include='"finance/controllers/PaymentsList.html"')
+            md-tab
+              md-tab-label Accounts
+              md-tab-body
+                div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
                   
         div(ng-include='"finance/controllers/TransactionsList.html"' flex='')
             

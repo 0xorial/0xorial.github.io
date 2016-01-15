@@ -6,6 +6,9 @@ div.md-inline-form(layout='column')
     md-input-container
       label Amount
       input(type='number' ng-model='payment.amount' style='width: 100px')
+    md-input-container
+      label Interest
+      input(type='number' ng-model='payment.interest' style='width: 100px')
     accounts-drop-down(selected-account='payment.account')
   div(layout='row')
     md-datepicker(ng-model='payment.dateJs')
