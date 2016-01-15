@@ -160,6 +160,7 @@ deserializePayment = (p) ->
     when Types.SimpleExpense then return new SimplePayment(account, date, -p.amount, p.description)
     when Types.TaxableIncome
       params =
+        vatPercentage: 0.21
         description: p.description
         earnedAt: date
         paymentDate: date

@@ -177,15 +177,17 @@ class exports.BeTaxSystem
 
       # todo: when to pay vat?
       lastDayOfYear = moment({year: year+1}).subtract(1, 'days')
-      context.transaction(lastDayOfYear, vatToPay, account, 'vat payment', null)
+      context.transaction(lastDayOfYear, -vatToPay, account, 'vat payment', null)
 
       social = 0.22
       socialTaxToPay = totalYearIncome * social
-      context.transaction(lastDayOfYear, socialTaxToPay, account, 'social tax', null)
+      context.transaction(lastDayOfYear, -socialTaxToPay, account, 'social tax', null)
 
       allowance = 7090
       personalIncome = totalYearIncome - socialTaxToPay
       taxablePersonalIncome = personalIncome - allowance
+      if taxablePersonalIncome < 0
+        taxablePersonalIncome = 0
       personalTaxRate = 0
       if taxablePersonalIncome < 8680
         personalTaxRate = 0.25
@@ -199,13 +201,15 @@ class exports.BeTaxSystem
         personalTaxRate = 0.5
 
       personalTaxPayDate = moment({year: year + 1, month: 6})
-      context.transaction(lastDayOfYear, socialTaxToPay, account, 'personal income tax', null)
+      personalIncomeTaxToPay = taxablePersonalIncome * personalTaxRate
+      context.transaction(lastDayOfYear, -personalTaxRate, account, 'personal income tax', null)
 
 
 class exports.TaxableIncomePayment extends exports.Payment
   constructor: (@account, @amount, @params) ->
     if !@params
       @params = {
+        vatPercentage: 0.21
         earnedAt: moment()
         paymentDate: moment()
         deducibleExpenses: []
@@ -214,14 +218,6 @@ class exports.TaxableIncomePayment extends exports.Payment
     # earnedAt
     # paymentDate
     # description
-    # deducibleExpenses: {vatAmount: number, deduciblePercentage: number}
-
-
-    #vatAmount
-    #socialTaxAmount
-    #rest
-    @data = {
-    }
 
   getTransactions: (context) ->
     context.transaction(@params.paymentDate, @amount, @account, 'salary', @)

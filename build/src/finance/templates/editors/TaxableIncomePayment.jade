@@ -3,10 +3,13 @@ div.md-inline-form(layout='column')
     md-input-container
       label Description
       input(ng-model='payment.params.description')
+    accounts-drop-down(selected-account='payment.account')
+  div(layout='row')
     md-input-container
       label Amount
       input(type='number' ng-model='payment.amount' style='width: 100px')
-    accounts-drop-down(selected-account='payment.account')
-  div(layout='row')
-    md-datepicker(ng-model='payment.earnedAtJs')
-    md-datepicker(ng-model='payment.paymentDateJs')
+    md-input-container
+      label VAT percentage
+      input(type='number' ng-model='payment.params.vatPercentage' style='width: 100px')
+    md-datepicker(ng-model='payment.params.earnedAtJs')
+    md-datepicker(ng-model='payment.params.paymentDateJs')
