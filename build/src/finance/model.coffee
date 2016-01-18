@@ -202,7 +202,7 @@ class exports.BeTaxSystem
 
       personalTaxPayDate = moment({year: year + 1, month: 6})
       personalIncomeTaxToPay = taxablePersonalIncome * personalTaxRate
-      context.transaction(lastDayOfYear, -personalTaxRate, account, 'personal income tax', null)
+      context.transaction(lastDayOfYear, -personalIncomeTaxToPay, account, 'personal income tax', null)
 
 
 class exports.TaxableIncomePayment extends exports.Payment
