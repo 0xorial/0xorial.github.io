@@ -10,7 +10,7 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
     currency = $scope.newAccountCurrency
     DataService.addAccount(new Account(currency, name, 'white'))
     $scope.newAccountName = ''
-    $scope.newAccountName = ''
+    $scope.newAccountCurrency = ''
 
   stateConvert = (state) ->
     acc = _.zip(state.accounts, state.balances)

@@ -33,6 +33,12 @@ class exports.AccountsState
         newBalances.push(b)
     return new exports.AccountsState(@accounts, newBalances)
 
+  getAccountBalance: (account) ->
+    index = _.indexOf(@accounts, account)
+    if index == -1
+      throw new Error('account not found')
+    return @balances[index]
+
 class exports.Transaction
   constructor: (@date, @amount, @account, @description, @payment, @id) ->
 
@@ -108,8 +114,8 @@ class exports.PeriodicPayment extends exports.Payment
 
 class exports.BorrowPayment extends exports.Payment
   constructor: (@account, @date, @returnDate, @amount, @description, @interest) ->
-    if !interest
-      interest = 0
+    if !@interest
+      @interest = 0
     if !@date
       @date = moment()
     if !@returnDate
@@ -176,7 +182,7 @@ class exports.BeTaxSystem
       vatToPay = 0 if vatToPay < 0
 
       # todo: when to pay vat?
-      lastDayOfYear = moment({year: year+1}).subtract(1, 'days')
+      lastDayOfYear = moment({year: year}).add(1, 'year').subtract(1, 'days')
       context.transaction(lastDayOfYear, -vatToPay, account, 'vat payment', null)
 
       social = 0.22

@@ -1,0 +1,8 @@
+div(ng-controller='BudgetOverviewChartCtrl' style='margin:10px' layout-padding='' layout='column' flex='')
+  //- div(layout='row')
+  //-   md-datepicker(ng-model='startDateJs')
+  //-   md-datepicker(ng-model='endDateJs')
+  div
+    //- canvas#chart.chart.chart-line(chart-data='data' chart-labels='labels' chart-series='series' chart-legend='true')
+    highchart#chart(config='chartConfig')
+
