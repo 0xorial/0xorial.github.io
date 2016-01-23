@@ -4,6 +4,8 @@ sequence = require 'run-sequence'
 fs = require('fs')
 inlinesource = require('gulp-inline-source')
 historyApiFallback = require('connect-history-api-fallback')
+express = require('express')
+
 
 isRelease = false
 
@@ -21,7 +23,7 @@ module.exports = (gulp, $, options) ->
   gulp.task 'client-sass-watch', ->
     $.watch ['./src/**/*.scss'], () ->
       gulp.start 'client-sass', ->
-        browserSync.reload("*.css")
+        $.livereload.reload("*.css")
     return
 
 
@@ -35,7 +37,7 @@ module.exports = (gulp, $, options) ->
   gulp.task 'client-coffee-watch', ->
     $.watch ['./src/**/*.coffee'], () ->
       gulp.start 'client-coffee', ->
-        browserSync.reload()
+        $.livereload.reload()
     return
 
 
@@ -67,7 +69,7 @@ module.exports = (gulp, $, options) ->
       #   console.log(file[k])
 
       gulp.start tn, ->
-        browserSync.reload()
+        $.livereload.reload()
     return
 
   copy = [
@@ -87,19 +89,21 @@ module.exports = (gulp, $, options) ->
   gulp.task 'client-copy-watch', ->
     $.watch copy, () ->
       gulp.start 'client-copy', ->
-        browserSync.reload()
+        $.livereload.reload()
     return
 
 
   gulp.task 'browser-sync', ->
-    browserSync(
-      server:
-        baseDir: dst
-      online: false
-      ghostMode: false
-      # minify: false
-      # middleware: [ historyApiFallback() ]
-      )
+    server = express()
+    server.use($.livereload.middleware({port: 3003}))
+    server.use(express.static(dst))
+    server.listen(3000)
+    $.livereload.listen({
+      port: 3003
+      host: 'localhost'
+      start: true
+      basePath: dst
+      })
     return
 
 
