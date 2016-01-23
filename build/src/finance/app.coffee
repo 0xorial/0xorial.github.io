@@ -4,17 +4,17 @@ app = angular.module('StarterApp', [
   'ngMdIcons'
   'mdColorPicker'
   'highcharts-ng'
-  # 'ui.router'
+  'ui.router'
 ])
 
-app.config () ->
+app.config ($stateProvider, $urlRouterProvider) ->
   # $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   # $locationProvider.html5Mode(true)
-  # $urlRouterProvider.otherwise '/state'
-  # $stateProvider
-  #   .state('root', {
-  #     url: '/state'
-  #     templateUrl: 'state.html'
-  #     })
+  $urlRouterProvider.otherwise '/state'
+  $stateProvider
+    .state('root', {
+      url: '/state'
+      templateUrl: 'state.html'
+      })
 
 window.app = app

@@ -42,7 +42,7 @@ html(lang='en', ng-app='StarterApp')
 
 
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' )
-    div(ng-include='"state.html"')
+    div(ui-view = '')
     //- #authorize-div(style='display: none')
     //-   span Authorize access t o Drive API
     //-   // Button for the user to click to initiate auth sequence
