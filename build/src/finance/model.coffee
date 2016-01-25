@@ -168,11 +168,11 @@ class exports.BeTaxSystem
       yearExpenses = deductibleExpensesByYear[year] or []
 
       #amount without VAT
-      totalYearIncome = _.sumBy(yearPayments, (p) -> p.amount * (1 - (p.params.vatPercentage or 0)))
-      vatYearIncome = _.sumBy(yearPayments, (p) -> p.amount * p.params.vatPercentage)
+      totalYearIncome = _.sumBy0(yearPayments, (p) -> p.amount * (1 - (p.params.vatPercentage or 0)))
+      vatYearIncome = _.sumBy0(yearPayments, (p) -> p.amount * p.params.vatPercentage)
 
-      deductibleVat = _.sumBy(yearExpenses, getDeductibaleVat)
-      deductibleNonVat = _.sumBy(yearExpenses, getDeductibaleNonVat)
+      deductibleVat = _.sumBy0(yearExpenses, getDeductibaleVat)
+      deductibleNonVat = _.sumBy0(yearExpenses, getDeductibaleNonVat)
 
       # todo: does vat reduction increase personal income?...
       # currently assume it does

@@ -14,8 +14,10 @@ Function::augmentDateDeep = (propertyName, getSetDate) ->
 exports = window
 
 _.mixin {
-  sumBy: (c, i) ->
-    _.sum(c.map(i))
+  sumBy0: (c, i) ->
+    r = _.sum(c.map(i))
+    r = 0 if !r
+    return r
 
   augmentDate: (o, datePropertyName) ->
     Object.defineProperty o, _.camelCase(datePropertyName + '_js'),
