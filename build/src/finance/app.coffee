@@ -8,12 +8,10 @@ app = angular.module('StarterApp', [
 ])
 
 app.config ($stateProvider, $urlRouterProvider) ->
-  # $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-  # $locationProvider.html5Mode(true)
-  $urlRouterProvider.otherwise '/state'
+  $urlRouterProvider.otherwise '/demo'
   $stateProvider
     .state('root', {
-      url: '/state'
+      url: '/:documentPath'
       templateUrl: 'state.html'
       })
 

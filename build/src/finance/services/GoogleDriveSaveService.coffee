@@ -1,4 +1,4 @@
-app.service 'googleDriveSaveService', ->
+app.service 'GoogleDriveSaveService', ->
   return {
-    
+
   }

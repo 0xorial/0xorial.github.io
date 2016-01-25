@@ -1,6 +1,6 @@
 dataContainer = {
-  accounts: allAccountsData
-  payments: payments
+  accounts: []
+  payments: []
 }
 
 app.service 'DataService', ($rootScope)->
@@ -28,5 +28,8 @@ app.service 'DataService', ($rootScope)->
 
     deletePayment: (payment) ->
       _.remove(dataContainer.payments, payment)
+      $rootScope.$broadcast 'dataChanged'
+
+    notifyChanged: ->
       $rootScope.$broadcast 'dataChanged'
     }

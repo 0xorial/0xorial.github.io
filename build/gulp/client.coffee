@@ -31,7 +31,7 @@ module.exports = (gulp, $, options) ->
     return gulp.src(['./src/**/*.coffee'])
       .pipe($.changed(dst))
       .pipe($.plumber())
-      .pipe($.coffee())
+      .pipe($['iced']())
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-coffee-watch', ->
