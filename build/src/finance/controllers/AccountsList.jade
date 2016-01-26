@@ -1,45 +1,27 @@
 div(ng-controller='AccountsListCtrl' style='margin:10px' layout-padding='' layout='column' flex='')
-  md-data-table-toolbar
+  div(layout='row')
     md-checkbox(ng-model='autoSelect') Auto
     md-datepicker(ng-model='date' ng-disabled='autoSelect')
-  md-content(flex='')
-    md-data-table-container
-      table(md-data-table='')
-        thead
-          tr
-            th
-            th(name='Color')
-            th(name='Name')
-            th(name='Balance')
-            th(name='Currency')
-        tbody
-          tr(ng-repeat='account in accounts')
-            td(style='padding-right: 0;')
-              span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": account.account.color}')
-            td(style='padding-left: 20px;')
-              md-input-container(style='padding: 2px; margin: 0;' layout-align='center center')
-                input(ng-model='account.account.color' style='width: 50px')
-            td
-              md-input-container(style='padding: 2px; margin: 0;')
-                input(ng-model='account.account.name' style='width: 150px')
-            td(style='min-width: 100px;') {{account.balance | number : 2}}
-            td {{account.account.currency}}
-            td
-              button(style='background: none; border: none;')
-                ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(account)')
-          tr
-            form(ng-submit='add()')
-              td
-              td 
-              td 
-                md-input-container
-                  label Name
-                  input(ng-model='newAccountName')
-              td 
-              td 
-                md-input-container
-                  label Currency
-                  input(ng-model='newAccountCurrency' style='width:40px')
-              td
-                button(type='submit' style='background: none; border: none;')
-                  ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' ng-click='add()')
+  md-content.account-list(flex='')
+    div(ng-repeat='account in accounts' layout='row')
+      div(style='width:20px; height: 20px' \
+        ng-style='{"background-color": account.account.color}')
+      md-input-container()
+        input(ng-model='account.account.color' style='width: 50px')
+      md-input-container()
+        input(ng-model='account.account.name' style='width: 150px')
+      div {{account.balance | number : 2}}
+      div {{account.account.currency}}
+      button(style='background: none; border: none;')
+        ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' \
+          ng-click='delete(account)')
+    div(layout='row')
+      form(ng-submit='add()')
+        md-input-container
+          label Name
+          input(ng-model='newAccountName')
+        md-input-container
+          label Currency
+          input(ng-model='newAccountCurrency' style='width:40px')
+        button(type='submit' style='background: none; border: none;')
+          ng-md-icon(icon='add' style="fill: #66ffcc; cursor:pointer;" size='24' ng-click='add()')
