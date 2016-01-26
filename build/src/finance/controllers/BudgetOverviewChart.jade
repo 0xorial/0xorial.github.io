@@ -2,7 +2,10 @@ div(ng-controller='BudgetOverviewChartCtrl' style='margin:10px' layout-padding='
   //- div(layout='row')
   //-   md-datepicker(ng-model='startDateJs')
   //-   md-datepicker(ng-model='endDateJs')
+  div(layout='row')
+    div(ng-repeat='account in accounts')
+      md-checkbox(ng-model='account.isSelected')
+        {{account.name}}
   div
     //- canvas#chart.chart.chart-line(chart-data='data' chart-labels='labels' chart-series='series' chart-legend='true')
     highchart#chart(config='chartConfig')
-

@@ -18,7 +18,6 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService, SavingServ
       SavingService.loadJson($scope.serializedData)
 
   $scope.copy = ->
-    serialize()
     new Clipboard('#copy', {
       text: -> $scope.serializedData
       })

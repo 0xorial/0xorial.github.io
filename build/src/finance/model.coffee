@@ -253,6 +253,18 @@ class exports.TaxableIncomePayment extends exports.Payment
       json.amount,
       params)
 
+exports.sortTransactions = (transactions) ->
+  transactions.sort (a,b) ->
+    if a.date.isSame(b.date)
+      if a.id == b.id
+        return 0
+      if a.id < b.id
+        return -1
+      return 1
+    if a.date.isBefore(b.date)
+      return -1
+    return 1
+
 class exports.SimulationContext
   constructor: (@accounts) ->
     @nextTransactionId = 0
@@ -264,16 +276,7 @@ class exports.SimulationContext
     @transactions.push t
 
   executeTransactions:  ->
-    @transactions.sort (a,b) ->
-      if a.date.isSame(b.date)
-        if a.id == b.id
-          return 0
-        if a.id < b.id
-          return -1
-        return 1
-      if a.date.isBefore(b.date)
-        return -1
-      return 1
+    exports.sortTransactions @transactions
 
     for t in @transactions
       newState = @currentAccountsState.execute(t.account, t.amount)

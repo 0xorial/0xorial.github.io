@@ -55,7 +55,7 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
         accounts = demoAccounts
         payments = demoPayments
       else if _.startsWith(path, 'drive:')
-        data = GoogleDriveSaveService.loadFile(path.substring(6))
+        await GoogleDriveSaveService.loadFile(path.substring(6), defer(data))
         root = deserialize(data)
       else
         throw new Error('unknown path')
