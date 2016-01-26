@@ -1,6 +1,5 @@
 app.controller 'SerializationCtrl', ($scope, $rootScope, DataService, SavingService, $state, $stateParams, $location) ->
 
-  # $state.go('.', {documentPath: 'xxx'})
   SavingService.loadFile($stateParams.documentPath)
 
   $scope.loadData = ->
