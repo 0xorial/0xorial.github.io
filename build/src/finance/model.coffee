@@ -183,11 +183,11 @@ class exports.BeTaxSystem
 
       # todo: when to pay vat?
       lastDayOfYear = moment({year: year}).add(1, 'year').subtract(1, 'days')
-      context.transaction(lastDayOfYear, -vatToPay, account, 'vat payment', null)
+      context.transaction(lastDayOfYear, -vatToPay, account, 'vat payment', undefined)
 
       social = 0.22
       socialTaxToPay = totalYearIncome * social
-      context.transaction(lastDayOfYear, -socialTaxToPay, account, 'social tax', null)
+      context.transaction(lastDayOfYear, -socialTaxToPay, account, 'social tax', undefined)
 
       allowance = 7090
       personalIncome = totalYearIncome - socialTaxToPay
@@ -208,7 +208,7 @@ class exports.BeTaxSystem
 
       personalTaxPayDate = moment({year: year + 1, month: 6})
       personalIncomeTaxToPay = taxablePersonalIncome * personalTaxRate
-      context.transaction(lastDayOfYear, -personalIncomeTaxToPay, account, 'personal income tax', null)
+      context.transaction(lastDayOfYear, -personalIncomeTaxToPay, account, 'personal income tax', undefined)
 
 
 class exports.TaxableIncomePayment extends exports.Payment

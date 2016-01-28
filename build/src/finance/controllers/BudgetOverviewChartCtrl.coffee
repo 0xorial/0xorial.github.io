@@ -86,10 +86,10 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
           pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
           valueDecimals: 2
       series: series,
-      size: {
-       width: 600,
-       height: 500
-      }
+      # size: {
+      #  width: 600,
+      #  height: 500
+      # }
     }
   update()
 

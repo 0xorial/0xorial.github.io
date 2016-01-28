@@ -22,7 +22,7 @@ html(lang='en', ng-app='StarterApp')
           input#clipboard(ng-show='true' ng-model='serializedData')
       div(style='width: 100%;' layout='row' layout-align='start start')
         div(flex='50' layout='column')
-          md-tabs(flex='90')
+          md-tabs(flex='100' md-dynamic-height='')
             md-tab(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
               md-tab-label Payments
               md-tab-body
@@ -37,19 +37,17 @@ html(lang='en', ng-app='StarterApp')
                   .md-whiteframe-z1(style='margin:10px;' layout='column' )
                     div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
         div(flex='50' layout='column')
-          md-tabs(flex='90')
+          md-tabs(flex='100' md-dynamic-height='')
             md-tab(md-on-select='onOverviewSelected()' md-active='overviewActive()')
               md-tab-label Overview
               md-tab-body
-                md-content
-                  .md-whiteframe-z1(style='margin:10px;' layout='column' )
-                    div(ng-include='"finance/controllers/BudgetOverviewChart.html"')
+                .md-whiteframe-z1(style='margin:10px;' layout='column' flex='')
+                  div(ng-include='"finance/controllers/BudgetOverviewChart.html"' flex='80')
             md-tab(md-on-select='onTransactionsSelected()' md-active='transactionsActive()')
               md-tab-label Transactions
               md-tab-body
-                md-content
-                  .md-whiteframe-z1(style='margin:10px;' layout='column' )
-                    div(ng-include='"finance/controllers/TransactionsList.html"' flex='100' layout='column')
+                .md-whiteframe-z1(style='margin:10px;' layout='column' flex='100')
+                  div(ng-include='"finance/controllers/TransactionsList.html"' flex='80' layout='column')
 
 
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' )
