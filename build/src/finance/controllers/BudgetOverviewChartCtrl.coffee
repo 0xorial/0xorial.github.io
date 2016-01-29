@@ -2,14 +2,13 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
 
   $scope.$watch 'accounts', ( -> update()), true
 
-  $scope.accounts = DataService.getAccounts().map (a) -> {
-    name: a.name
-    color: a.color
-    isSelected: true
-    account: a
-  }
-
   update = ->
+    $scope.accounts = DataService.getAccounts().map (a) -> {
+      name: a.name
+      color: a.color
+      isSelected: true
+      account: a
+    }
 
     context = SimulationService.getLastSimulation()
     if !context
