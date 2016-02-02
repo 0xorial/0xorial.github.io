@@ -7,7 +7,11 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     payments = DataService.getPayments()
 
     accounts = accounts.map (a) -> a.toJson(ctx)
-    payments = payments.map (p) -> p.toJson(ctx)
+    payments = payments.map (p) ->
+      json = p.toJson(ctx)
+      if !json.id
+        json.id = p.id
+      return json
 
     root = {
       accounts: accounts,
@@ -21,6 +25,7 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     accounts = []
     for a in root.accounts
       account = Account.fromJson(a, ctx)
+      account.id = a.id
       accounts.push account
 
     payments = []
@@ -37,7 +42,7 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
           payment = TaxableIncomePayment.fromJson(p, ctx)
         else
           throw new Error()
-
+      payment.id = p.id
       payments.push payment
 
     DataService.setAccounts(accounts)

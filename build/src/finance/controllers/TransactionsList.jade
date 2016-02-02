@@ -1,16 +1,8 @@
-div(ng-controller='TransactionsListCtrl' layout='column' flex='')
-  md-data-table-container
-    table(md-data-table='')
-      thead()
-        tr
-          th
-          th(name='Description')
-          th(name='Amount')
-          th(name='Date')
-      tbody
-        tr(md-auto-select='', ng-repeat='transaction in allTransactions' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
-          td(style='padding-right: 0;')
-            span(style='display: inline-block; width: 20px; height: 20px; cursor: pointer', ng-style='{"background-color": transaction.account.color}')
-          td {{transaction.description}}
-          td {{transaction.amount | currency}}
-          td {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+md-content.transactions-list(ng-controller='TransactionsListCtrl' layout='column' flex='')
+  div.transaction(ng-repeat='transaction in allTransactions track by transaction.id' layout='row' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' \ 
+  layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
+    //- div
+      //- span.color(ng-style='{"background-color": transaction.account.color}')
+    div.description {{transaction.description}}
+    div.currency {{transaction.amount | currency}}
+    div.date {{transaction.jsDate | date : 'dd/MM/yyyy'}}  

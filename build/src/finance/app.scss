@@ -8,3 +8,18 @@
     min-height: 0;
   }
 }
+
+.transactions-list {
+  .transaction {
+    // margin: 6px;
+    .color {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    div {
+      padding: 0;
+    }
+  }
+}

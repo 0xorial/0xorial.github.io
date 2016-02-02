@@ -1,9 +1,15 @@
-div.md-inline-form(layout='row')
-  md-input-container
-    label Description
-    input(ng-model='payment.description')
-  md-datepicker(ng-model='payment.dateJs')
-  md-input-container
-    label Amount
-    input(type='number' ng-model='payment.amount' style='width: 100px')
-  accounts-drop-down(selected-account='payment.account')
+div(layout='column')
+  div.md-inline-form(layout='row')
+    md-input-container
+      label Description
+      input(ng-model='payment.description')
+    md-datepicker(ng-model='payment.dateJs')
+    md-input-container
+      label Amount
+      input(type='number' ng-model='payment.amount' style='width: 100px')
+    accounts-drop-down(selected-account='payment.account')
+  div.md-inline-form(layout='row')
+    md-checkbox(ng-model='payment.isDeductible') Is deductible expense
+    md-input-container(ng-show='payment.isDeductible')
+      label Percentage
+      input(type='number' ng-model='payment.deductiblePercentage' style='width: 100px')

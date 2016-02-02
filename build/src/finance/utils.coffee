@@ -51,20 +51,19 @@ console.warn = (message) ->
 
 class exports.SerializationContext
   constructor: ->
-    @objects = []
+    @objects = {}
 
-  registerObject: (object) ->
-    @objects.push(object)
-    return @objects.length - 1
-
+  # registerObject: (object) ->
+  #   @objects.push(object)
+  #   return @objects.length - 1
+  #
   registerObjectWithId: (id, object) ->
     @objects[id] = object
 
   getObjectId: (object) ->
-    for o,id in @objects
-      if o == object
-        return id
-    throw new Error()
+    if !object.id
+      throw new Error()
+    return object.id
 
   resolveObject: (id) ->
     return @objects[id]

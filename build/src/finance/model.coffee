@@ -5,8 +5,10 @@ class exports.Account
   constructor: (@currency, @name, @color) ->
 
   toJson: (context) ->
+    if !@id
+      throw new Error()
     return {
-      id: context.registerObject(@)
+      id: context.registerObjectWithId(@, @id)
       currency: @currency
       name: @name
       color: @color
@@ -52,7 +54,7 @@ class exports.Payment
     return c
 
 class exports.SimplePayment extends exports.Payment
-  constructor: (@account, @date, @amount, @description) ->
+  constructor: (@account, @date, @amount, @description, @isDeductible, @deductiblePercentage) ->
     if !@date
       @date = moment()
 
@@ -69,13 +71,17 @@ class exports.SimplePayment extends exports.Payment
       amount: @amount
       accountId: context.getObjectId(@account)
       description: @description
+      isDeductible: @isDeductible
+      deductiblePercentage: @deductiblePercentage
     }
   @fromJson: (json, context) ->
     return new exports.SimplePayment(
       context.resolveObject(json.accountId),
       moment(json.date),
       json.amount,
-      json.description)
+      json.description,
+      json.isDeductible,
+      json.deductiblePercentage)
 
 class exports.PeriodicPayment extends exports.Payment
   constructor: (@account, @startDate, @endDate, @period, @amount, @description) ->
@@ -177,6 +183,8 @@ class exports.BeTaxSystem
       # todo: does vat reduction increase personal income?...
       # currently assume it does
       totalYearIncome = totalYearIncome + deductibleVat
+
+      totalYearIncome = totalYearIncome - deductibleNonVat
 
       vatToPay = vatYearIncome - deductibleVat
       vatToPay = 0 if vatToPay < 0
