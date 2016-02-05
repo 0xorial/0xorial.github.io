@@ -2,7 +2,7 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
   getFirstAccount = ->
     DataService.getAccounts()[0]
   paymentTypes = {
-    simplePayment: -> new SimplePayment(getFirstAccount(), moment(), 100, 'description', false, 1 )
+    simplePayment: -> new SimplePayment(getFirstAccount(), moment(), 100, 'description', false, 1)
     borrowPayment: -> new BorrowPayment(getFirstAccount(), moment(), moment(), 100, 'description')
     periodicPayment: -> new PeriodicPayment(getFirstAccount(), moment(), moment(), {quantity: 1, units: 'months'}, 100, 'description')
     taxableIncomePayment: -> new TaxableIncomePayment(getFirstAccount(), 100)

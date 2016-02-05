@@ -9,6 +9,24 @@
   }
 }
 
+.payments-list {
+  .edit {
+    background-color: rgb(239, 244, 249);
+    md-datepicker {
+      background-color: transparent;
+      .md-datepicker-input {
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 .transactions-list {
   .transaction {
     // margin: 6px;
