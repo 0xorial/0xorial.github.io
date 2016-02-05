@@ -26,6 +26,7 @@ app.service 'SimulationService', ($rootScope, DataService) ->
     lastSimulation = context
     $rootScope.$broadcast 'simulationRan', lastSimulation
     return
+  runSimulation()
 
   return {
     runSimulation: ->

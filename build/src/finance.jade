@@ -2,9 +2,7 @@ html(lang='en', ng-app='StarterApp')
   head
     //- inline ./build/bower_components/angular-material/angular-material.min.css
     link(rel='stylesheet', href='./build/bower_components/angular-material/angular-material.min.css', inline='')
-    link(rel='stylesheet', href='./build/bower_components/angular-material-data-table/dist/md-data-table.min.css', inline='')
     link(rel='stylesheet', href='./build/bower_components/md-color-picker/dist/mdColorPicker.min.css', inline='')
-    link(rel='stylesheet', href='./build/bower_components/angular-chart.js/dist/angular-chart.css', inline='')
     //- inline ../app.css
     link(rel='stylesheet', href='../finance/app.css', inline='')
 
@@ -22,7 +20,7 @@ html(lang='en', ng-app='StarterApp')
           input#clipboard(ng-show='true' ng-model='serializedData')
       div(style='width: 100%;' layout='row' layout-align='start start')
         div(flex='50' layout='column')
-          md-tabs(flex='100' md-dynamic-height='')
+          md-tabs(flex='100')
             md-tab(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
               md-tab-label Payments
               md-tab-body
@@ -71,13 +69,12 @@ html(lang='en', ng-app='StarterApp')
 
     script(src='./build/bower_components/angular/angular.js')
     script(src='./build/bower_components/angular-messages/angular-messages.js')
-    script(src='./build/bower_components/angular-ui-router/release/angular-ui-router.min.js')
+    script(src='./build/bower_components/angular-ui-router/release/angular-ui-router.js')
     script(src='./build/bower_components/ui-router-extras/release/ct-ui-router-extras.js')
-    script(src='./build/bower_components/angular-animate/angular-animate.min.js')
-    script(src='./build/bower_components/angular-aria/angular-aria.min.js')
-    script(src='./build/bower_components/angular-material/angular-material.min.js')
-    script(src='./build/bower_components/angular-material-icons/angular-material-icons.min.js')
-    script(src='./build/bower_components/angular-material-data-table/dist/md-data-table.min.js')
+    script(src='./build/bower_components/angular-animate/angular-animate.js')
+    script(src='./build/bower_components/angular-aria/angular-aria.js')
+    script(src='./build/bower_components/angular-material/angular-material.js')
+    script(src='./build/bower_components/angular-material-icons/angular-material-icons.js')
     script(src='./build/bower_components/tinycolor/dist/tinycolor-min.js')
     script(src='./build/bower_components/md-color-picker/dist/mdColorPicker.min.js')
     script(src='./build/bower_components/highcharts/highstock.js')

@@ -8,8 +8,9 @@ window.makeEditor = (name) ->
         payment: '='
       }
       controller: ($scope) ->
-        $scope.$watch 'payment', (p) ->
+        onPaymentChanged = (p) ->
           _.augmentDatesDeep p
+        $scope.$watch 'payment', onPaymentChanged, true 
     }
 
 makeEditor 'simplePayment'

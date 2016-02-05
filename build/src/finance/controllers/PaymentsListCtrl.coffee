@@ -60,6 +60,9 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
     $scope.payments =  payments.map getPaymentInfo
   update()
 
+  $scope.$on 'dataChanged', ->
+    update()
+
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
   $scope.leftPayment = (payment) ->

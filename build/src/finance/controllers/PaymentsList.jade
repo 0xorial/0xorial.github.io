@@ -15,10 +15,10 @@ md-content(layout='column' ng-controller='PaymentsListCtrl' )
     div(style='padding-left: 0;')
       button(style='background: none; border: none;')
         ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
-  div(ng-repeat-end='' ng-show='p.showEdit' layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)')
-    div(ng-if='p.showEdit')
+  div(ng-repeat-end='' ng-show='p.showEdit')
+    div(layout-padding='' style='border-top: solid 1px rgba(0, 0, 0, 0.117647)' layout='column')
       div(directive='templateFor(p.payment)' ng-attr-payment='p.editPayment')
-      
-    md-content(layout='row' layout-align='end center')
-      md-button.md-raised(ng-click='cancelEdit(p)') Cancel
-      md-button.md-raised(ng-click='saveEdit(p)') Save
+        
+      md-content(layout='row' layout-align='end center')
+        md-button.md-raised(ng-click='cancelEdit(p)') Cancel
+        md-button.md-raised(ng-click='saveEdit(p)') Save

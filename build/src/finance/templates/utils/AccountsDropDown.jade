@@ -1,4 +1,4 @@
-md-select(ng-model='selectedAccount' )
-  md-option(ng-repeat='a in accounts' ng-value='a')
+md-select(ng-model='selectedAccount' ng-model-options="{trackBy: '$value.id'}")
+  md-option(ng-repeat='a in accounts track by a.id' ng-value='a')
     span(style='display: inline-block; width: 20px; height: 20px;', ng-style='{"background-color": a.color}')
     span {{a.name + ' (' + a.currency + ')'}}

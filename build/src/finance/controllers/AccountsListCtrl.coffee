@@ -45,6 +45,9 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
 
   update()
 
+  $scope.$on 'dataChanged', ->
+    update()
+
   $scope.$on 'simulationRan', (__, c) ->
     context = c
     update()

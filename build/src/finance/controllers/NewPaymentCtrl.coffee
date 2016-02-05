@@ -1,9 +1,11 @@
 app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
+  getFirstAccount = ->
+    DataService.getAccounts()[0]
   paymentTypes = {
-    simplePayment: SimplePayment
-    borrowPayment: BorrowPayment
-    periodicPayment: PeriodicPayment
-    taxableIncomePayment: TaxableIncomePayment
+    simplePayment: -> new SimplePayment(getFirstAccount(), moment(), 100, 'description', false, 1 )
+    borrowPayment: -> new BorrowPayment(getFirstAccount(), moment(), moment(), 100, 'description')
+    periodicPayment: -> new PeriodicPayment(getFirstAccount(), moment(), moment(), {quantity: 1, units: 'months'}, 100, 'description')
+    taxableIncomePayment: -> new TaxableIncomePayment(getFirstAccount(), 100)
   }
   $scope.anyVisible = false
   $scope.visibility = {}
@@ -27,9 +29,16 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
         return kk
     return null
 
+  hideEditor = ->
+    for kk of $scope.visibility
+      $scope.visibility[kk] = false
+    $scope.anyVisible = false
+
+
   $scope.addPayment = ->
     k = getVisible()
     payment = $scope.template[k]
     DataService.addPayment(payment)
     $scope.template[k] = new paymentTypes[k]
+    hideEditor()
   return

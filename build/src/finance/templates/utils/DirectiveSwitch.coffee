@@ -1,3 +1,5 @@
+cache = {}
+
 app.directive 'directive', ($compile) ->
   return {
     restrict: 'A'
@@ -10,5 +12,10 @@ app.directive 'directive', ($compile) ->
           if k != 'directive'
             attr.push attributes.$attr[k] + '="' + attributes[k] + '"'
         attributesString = attr.join ' '
-        element.append($compile('<' + value + ' ' + attributesString + '></' + value + '>')($scope))
+        str = '<' + value + ' ' + attributesString + '></' + value + '>'
+        if !cache[str]
+          cache[str] = $compile(str)
+        compiled = cache[str]
+        compiled $scope, (clonedElement, scope) ->
+          element.append(clonedElement)
   }
