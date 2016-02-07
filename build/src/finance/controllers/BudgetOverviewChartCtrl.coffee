@@ -89,7 +89,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         navigator:
           enabled: true
         tooltip:
-          headerFormat: '{series.description}<br>{point.date}'
+          # headerFormat: '{series.description}<br>{series.date}'
           pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
           valueDecimals: 2
       series: series,

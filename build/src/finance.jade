@@ -18,6 +18,8 @@ html(lang='en', ng-app='StarterApp')
           md-button.md-raised#copy(ng-click='copy()') Copy Data
           md-button.md-raised(ng-click='loadData()') Load
           input#clipboard(ng-show='true' ng-model='serializedData')
+          md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
+          md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
       div(style='width: 100%;' layout='row' layout-align='start start')
         div(flex='50' layout='column')
           md-tabs(flex='100')

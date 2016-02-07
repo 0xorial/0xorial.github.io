@@ -26,8 +26,8 @@ _.mixin {
 
   augmentDatesDeep: (o) ->
     _.traverse o, (val, key, obj) ->
-      if obj.$$dateAugmented
-        return
+      # if obj.$$dateAugmented
+      #   return
       obj.$$dateAugmented = true
       if moment.isMoment(val)
         _.augmentDate(obj, key)
