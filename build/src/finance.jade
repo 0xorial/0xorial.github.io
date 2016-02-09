@@ -6,7 +6,12 @@ html(lang='en', ng-app='StarterApp')
     //- inline ../app.css
     link(rel='stylesheet', href='../finance/app.css', inline='')
 
-    //- script(src='https://apis.google.com/js/client.js?onload=checkAuth')
+    script(type='text/javascript').
+      var g_gapiClientLoaded;
+      var g_gapiClientLoadedCb;
+      var onGapiClientloaded = function(){ g_gapiClientLoaded = true; 
+        if (g_gapiClientLoadedCb){g_gapiClientLoadedCb();} }
+    script(src='https://apis.google.com/js/client.js?onload=onGapiClientloaded')
 
     //- base(href='/')
 
@@ -20,6 +25,7 @@ html(lang='en', ng-app='StarterApp')
           input#clipboard(ng-show='true' ng-model='serializedData')
           md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
           md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
+          img.loader(src='/finance/495.gif' style='margin: 10px;')
       div(style='width: 100%;' layout='row' layout-align='start start')
         div(flex='50' layout='column')
           md-tabs(flex='100')
