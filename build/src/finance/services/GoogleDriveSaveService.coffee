@@ -15,24 +15,28 @@ app.service 'GoogleDriveSaveService', ->
         window.g_gapiClientLoadedCb = null
 
   authAndLoadApi = (cb)->
+    progress('Loading client...')
     await loadClient(defer())
+    progress('Authorizing...')
     await gapi.auth.authorize {
       'client_id': CLIENT_ID
       'scope': SCOPES.join(' ')
       'immediate': true
     }, defer(authResult)
     if authResult and !authResult.error
+      progress('Loading drive API...')
       await gapi.client.load 'drive', 'v2', defer()
       cb()
     else
+      progress('Authorize error: ' + authResult.error)
       console.log('could not authorise')
       console.log(authResult)
     return
 
   initWaiters = []
   initFinished = false
-  waitForInit = (cb) ->
-    initWaiters.push cb
+  waitForInit = (listener) ->
+    initWaiters.push listener
 
   initStarted = false
   init = ->
@@ -40,20 +44,74 @@ app.service 'GoogleDriveSaveService', ->
       return
     initStarted = true
     await authAndLoadApi(defer())
-    for cb in initWaiters
-      cb()
+    for waiter in initWaiters
+      waiter.done()
 
-  ensureInitCompleted = (cb) ->
+  progress = (m) ->
+    for waiter in initWaiters
+      waiter.progress(m)
+    return
+
+  ensureInitCompleted = (loadListener) ->
     if initFinished
-      cb()
+      loadListener.done()
     else
       init()
-      waitForInit(cb)
+      waitForInit(loadListener)
+
+  insertFile = (name, fileData, callback) ->
+    boundary = '-------314159265358979323846'
+    delimiter = '\r\n--' + boundary + '\r\n'
+    close_delim = '\r\n--' + boundary + '--'
+
+    contentType = 'application/json'
+    metadata =
+      'title': name
+      'mimeType': contentType
+    base64Data = btoa(fileData)
+    multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: ' + contentType + '\r\n' + 'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
+    request = gapi.client.request(
+      'path': '/upload/drive/v2/files'
+      'method': 'POST'
+      'params': 'uploadType': 'multipart'
+      'headers': 'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+      'body': multipartRequestBody)
+    if !callback
+      callback = (file) ->
+        console.log file
+        return
+
+    request.execute callback
+    return
+
+  downloadFile = (id, callback, progress) ->
+    request = gapi.client.drive.files.get('fileId': id)
+    await request.execute defer(file)
+    url = file.downloadUrl
+    accessToken = gapi.auth.getToken().access_token
+    xhr = new XMLHttpRequest
+    xhr.open 'GET', url
+    xhr.setRequestHeader 'Authorization', 'Bearer ' + accessToken
+    progress('Downloading file...')
+    xhr.onload = ->
+      callback file, xhr.responseText
+      return
+    xhr.onerror = ->
+      console.log(arguments)
+      progress('Error downloading file')
+      return
+    xhr.send()
 
   return {
-    loadFile: (path, callback) ->
-      await ensureInitCompleted(defer())
-      request = gapi.client.drive.files.list()
-      await request.execute(defer(r))
-      console.log r
+    loadFile: (id, callback, progress) ->
+      await ensureInitCompleted({done: defer(), progress: progress})
+      await downloadFile(id, defer(file, data), progress)
+      callback(file, data)
+    newFile: (name, data, done, progress) ->
+      await ensureInitCompleted({done: defer(), progress: progress})
+      progress('Saving file...')
+      await insertFile(name, data, defer(arg))
+      console.log arg
+      progress('File saved.')
+      done(arg)
   }

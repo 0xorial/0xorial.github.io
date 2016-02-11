@@ -18,14 +18,16 @@ html(lang='en', ng-app='StarterApp')
     script(type='text/ng-template' id='state.html')
       md-toolbar
         .md-toolbar-tools(ng-controller='SerializationCtrl')
-          span Document:
           md-button.md-raised(ng-click='saveDrive()') Save
+          md-button.md-raised(ng-click='saveDriveNew()') Make drive copy
+          input(ng-model='driveFileName')
           md-button.md-raised#copy(ng-click='copy()') Copy Data
           md-button.md-raised(ng-click='loadData()') Load
-          input#clipboard(ng-show='true' ng-model='serializedData')
+          input#clipboard(ng-model='serializedData')
           md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
           md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
-          img.loader(src='/finance/495.gif' style='margin: 10px;')
+          img(src='/finance/495.gif' ng-show='isLoading')
+          div {{status}}
       div(style='width: 100%;' layout='row' layout-align='start start')
         div(flex='50' layout='column')
           md-tabs(flex='100')

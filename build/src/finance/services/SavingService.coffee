@@ -53,21 +53,28 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
   return {
     loadJson: (json) -> deserialize(json)
     saveJson: () -> return serialize()
-    loadFile: (path) ->
+    saveNewDrive: (name, done, progress) ->
+      data = serialize()
+      GoogleDriveSaveService.newFile(name, data, done, progress)
+
+    loadFile: (path, cb, progress) ->
       accounts = null
       payments = null
       if path == 'demo'
         accounts = demoAccounts
         payments = demoPayments
+        DataService.setAccounts(accounts)
+        DataService.setPayments(payments)
+        DataService.notifyChanged()
+        cb('demo')
       else if _.startsWith(path, 'drive:')
-        await GoogleDriveSaveService.loadFile(path.substring(6), defer(data))
-        root = deserialize(data)
+        await GoogleDriveSaveService.loadFile(path.substring(6), defer(file, data), progress)
+        deserialize(data)
+        console.log file
+        cb(file.title)
       else
         throw new Error('unknown path')
 
-      DataService.setAccounts(accounts)
-      DataService.setPayments(payments)
-      DataService.notifyChanged()
     documentChanged: (path) ->
     # updateDocument() ->
   }

@@ -1,4 +1,4 @@
-app.controller 'SerializationCtrl', ($scope, $rootScope, DataService, SavingService, $state, $stateParams, $location) ->
+app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, SavingService, $state, $stateParams, $location) ->
 
   undoStack = []
   undoPointer = -1
@@ -6,7 +6,20 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService, SavingServ
   $scope.canUndo = false
   $scope.canRedo = false
 
-  SavingService.loadFile($stateParams.documentPath)
+  $scope.isLoading = true
+  $scope.status = 'Loading...'
+  progress = (m) ->
+    $timeout ->
+      $scope.$apply -> $scope.status = m
+
+  SavingService.loadFile($stateParams.documentPath,
+    ( (name) ->
+      $timeout ->
+        $scope.$apply ->
+          $scope.driveFileName = name
+          $scope.isLoading = false
+          $scope.status = 'Ready'),
+    progress)
 
   $scope.loadData = ->
     deserialize()
@@ -14,6 +27,12 @@ app.controller 'SerializationCtrl', ($scope, $rootScope, DataService, SavingServ
     serialize()
 
   $scope.saveDrive = ->
+
+  $scope.saveDriveNew = ->
+    if !$scope.driveFileName
+      progress('Enter file name.')
+    await SavingService.saveNewDrive($scope.driveFileName, defer(file), progress)
+    $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
 
   $scope.canUndo = ->
     undoPointer > 1
