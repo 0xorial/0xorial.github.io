@@ -44,6 +44,7 @@ app.service 'GoogleDriveSaveService', ->
       return
     initStarted = true
     await authAndLoadApi(defer())
+    initFinished = true
     for waiter in initWaiters
       waiter.done()
 
@@ -84,9 +85,39 @@ app.service 'GoogleDriveSaveService', ->
     request.execute callback
     return
 
+  doUpdateFile = (id, fileData, callback) ->
+    boundary = '-------314159265358979323846'
+    delimiter = '\r\n--' + boundary + '\r\n'
+    close_delim = '\r\n--' + boundary + '--'
+
+    contentType = 'application/json'
+    metadata = {}
+    base64Data = btoa(fileData)
+    multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: ' + contentType + '\r\n' + 'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
+    request = gapi.client.request(
+      'path': '/upload/drive/v2/files/' + id
+      'method': 'PUT'
+      'params': {'uploadType': 'multipart', 'alt': 'json'}
+      'headers': 'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+      'body': multipartRequestBody)
+
+    request.then(
+      (response) ->
+        callback()
+      (reason) ->
+        console.log reason
+        callback(reason)
+    )
+
+    return
+
   downloadFile = (id, callback, progress) ->
     request = gapi.client.drive.files.get('fileId': id)
-    await request.execute defer(file)
+    progress('Opening file...')
+    await request.then defer(result), (e) ->
+      console.log(e)
+      callback(e)
+    file = result.result
     url = file.downloadUrl
     accessToken = gapi.auth.getToken().access_token
     xhr = new XMLHttpRequest
@@ -94,19 +125,20 @@ app.service 'GoogleDriveSaveService', ->
     xhr.setRequestHeader 'Authorization', 'Bearer ' + accessToken
     progress('Downloading file...')
     xhr.onload = ->
-      callback file, xhr.responseText
+      callback null, file, xhr.responseText
       return
-    xhr.onerror = ->
+    xhr.onerror = (e) ->
       console.log(arguments)
-      progress('Error downloading file')
+      callback(e)
       return
     xhr.send()
 
   return {
     loadFile: (id, callback, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
-      await downloadFile(id, defer(file, data), progress)
-      callback(file, data)
+      await downloadFile(id, defer(error, file, data), progress)
+      callback(error, file, data)
+
     newFile: (name, data, done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
       progress('Saving file...')
@@ -114,4 +146,12 @@ app.service 'GoogleDriveSaveService', ->
       console.log arg
       progress('File saved.')
       done(arg)
+
+    updateFile: (id, data, done, progress) ->
+      await ensureInitCompleted({done: defer(), progress: progress})
+      progress('Saving file...')
+      await doUpdateFile(id, data, defer(error))
+      if !error
+        progress('File saved.')
+      done()
   }

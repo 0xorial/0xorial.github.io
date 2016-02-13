@@ -13,20 +13,21 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
       $scope.$apply -> $scope.status = m
 
   SavingService.loadFile($stateParams.documentPath,
-    ( (name) ->
+    ( (error, name) ->
       $timeout ->
         $scope.$apply ->
           $scope.driveFileName = name
           $scope.isLoading = false
-          $scope.status = 'Ready'),
+          if !error
+            $scope.status = 'Ready'),
     progress)
 
   $scope.loadData = ->
-    deserialize()
+
   $scope.saveData = ->
-    serialize()
 
   $scope.saveDrive = ->
+    await SavingService.saveDrive($stateParams.documentPath, defer(file), progress)
 
   $scope.saveDriveNew = ->
     if !$scope.driveFileName
