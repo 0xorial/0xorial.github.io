@@ -60,7 +60,7 @@ class exports.SimplePayment extends exports.Payment
     @deductiblePercentage |= 0
 
   getTransactions: (context) ->
-    context.transaction(@date, @amount, @account, @description, @)
+    context.transaction(@date, -@amount, @account, @description, @)
 
   assignTo: (to) ->
     _.assign(to, @)

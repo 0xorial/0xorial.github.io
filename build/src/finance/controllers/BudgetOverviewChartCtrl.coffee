@@ -37,9 +37,11 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       transactionsByDate = _.groupBy(transactions, (t) -> t.date.valueOf())
       for d of transactionsByDate
         dateTransactions = transactionsByDate[d]
-        t = dateTransactions[0]
+        sortTransactions(dateTransactions)
+        t = _.last(dateTransactions)
         balance = t.accountState.getAccountBalance(t.account)
         data.push({
+          transaction: t,
           description: t.description,
           amount: t.amount
           x: t.date.valueOf(),
@@ -60,12 +62,15 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       transactions = allTransactionsByDate[d]
       sortTransactions(transactions)
       lastTransaction = _.last(transactions)
+      account = lastTransaction.account
       sum = _.sum(lastTransaction.accountState.balances)
+
       sumData.push({
         x: lastTransaction.date.valueOf()
         y: sum
         amount: sum
         description: 'sum'
+        accountState: lastTransaction.accountState
         })
 
     series.push({
@@ -89,9 +94,20 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         navigator:
           enabled: true
         tooltip:
-          # headerFormat: '{series.description}<br>{series.date}'
-          pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
-          valueDecimals: 2
+          useHTML: true
+          formatter: ->
+            console.log(this)
+            result = ''
+            result += moment(@x).format('DD MMMM YYYY') + '</br>'
+            sumPoint = _.find(@points, (p) -> p.point.accountState).point
+            result += "<span style='color:red'>TOTAL:</span>" + sumPoint.y + '</br>'
+            for a, i in sumPoint.accountState.accounts
+              balance = sumPoint.accountState.balances[i]
+              result += "<span style='color: #{a.color}; margin-top: 10px; display:inline-block'>" + a.name + '</span>: ' + balance + ' ' + a.currency + '</br>'
+              accountPoints = this.points.filter((p) -> p.point.transaction and p.point.transaction.account.id == a.id)
+              for point in accountPoints
+                result += "<span style='width:20px; display:inline-block;'></span>" + point.point.transaction.description + ': ' + point.point.transaction.amount + '</br>'
+            return result
       series: series,
       # size: {
       #  width: 600,
