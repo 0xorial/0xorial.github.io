@@ -41,7 +41,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         t = _.last(dateTransactions)
         balance = t.accountState.getAccountBalance(t.account)
         data.push({
-          transaction: t,
+          transactions: dateTransactions,
           description: t.description,
           amount: t.amount
           x: t.date.valueOf(),
@@ -103,10 +103,15 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
             result += "<span style='color:red'>TOTAL:</span>" + sumPoint.y + '</br>'
             for a, i in sumPoint.accountState.accounts
               balance = sumPoint.accountState.balances[i]
-              result += "<span style='color: #{a.color}; margin-top: 10px; display:inline-block'>" + a.name + '</span>: ' + balance + ' ' + a.currency + '</br>'
-              accountPoints = this.points.filter((p) -> p.point.transaction and p.point.transaction.account.id == a.id)
+              result += "<span style='color: #{a.color}; margin-top: 10px; display:inline-block'>" +
+                a.name + '</span>: ' + balance + ' ' + a.currency + '</br>'
+              accountPoints = this.points.filter(
+                (p) ->
+                  p.point.transactions and p.point.transactions.find(
+                    (t) -> t.account.id == a.id))
               for point in accountPoints
-                result += "<span style='width:20px; display:inline-block;'></span>" + point.point.transaction.description + ': ' + point.point.transaction.amount + '</br>'
+                for t in point.point.transactions
+                  result += "<span style='width:20px; display:inline-block;'></span>" + t.description + ': ' + t.amount + '</br>'
             return result
       series: series,
       # size: {

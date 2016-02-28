@@ -11,7 +11,7 @@ html(lang='en', ng-app='StarterApp')
       var g_gapiClientLoadedCb;
       var onGapiClientloaded = function(){ g_gapiClientLoaded = true; 
         if (g_gapiClientLoadedCb){g_gapiClientLoadedCb();} }
-    script(src='https://apis.google.com/js/client.js?onload=onGapiClientloaded')
+    //- script(src='https://apis.google.com/js/client.js?onload=onGapiClientloaded')
 
     //- base(href='/')
 
@@ -29,18 +29,18 @@ html(lang='en', ng-app='StarterApp')
           img(src='/finance/495.gif' ng-show='isLoading')
           div {{status}}
       div(style='width: 100%;' layout='row' layout-align='start start')
-        div(flex='50' layout='column')
-          md-tabs(flex='100')
-            md-tab(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
-              md-tab-label Payments
-              md-tab-body
+        md-content(flex='50' layout='column')
+          kmd-tabs(flex='100')
+            kmd-tab(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
+              kmd-tab-label Payments
+              kmd-tab-body
                 md-content
                   .md-whiteframe-z1(style='margin:10px;' layout='column' )
                     div(ng-include='"finance/controllers/NewPayment.html"')
                     div(ng-include='"finance/controllers/PaymentsList.html"')
-            md-tab(md-on-select='onAccountsSelected()' md-active='accountsActive()')
-              md-tab-label Accounts
-              md-tab-body
+            kmd-tab(md-on-select='onAccountsSelected()' md-active='accountsActive()')
+              kmd-tab-label Accounts
+              kmd-tab-body
                 md-content
                   .md-whiteframe-z1(style='margin:10px;' layout='column' )
                     div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')

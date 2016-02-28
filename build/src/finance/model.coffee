@@ -94,7 +94,7 @@ class exports.PeriodicPayment extends exports.Payment
   getTransactions: (context) ->
     date = @startDate.clone()
     while date.isBefore(@endDate)
-      context.transaction(date.clone(), @amount, @account, @description, @)
+      context.transaction(date.clone(), -@amount, @account, @description, @)
       date.add(@period.quantity, @period.units)
 
   assignTo: (to) ->
@@ -167,7 +167,7 @@ class exports.BeTaxSystem
       account = _.first(payments).account
     deductiblePayments = allPayments.filter((p) -> p.isDeductible)
     deductibleExpensesByYear = _.groupBy(deductiblePayments, (p) -> p.date.year())
-    byYear = _.groupBy(payments, (p) -> p.params.earnedAt.year())
+    byYear = _.groupBy(payments, (p) -> p.params.paymentDate.year())
     getDeductibaleVat = (p) -> (p.deductiblePercentage or 1)*p.amount*(p.vatPercentage or 0)
     getDeductibaleNonVat = (p) -> (p.deductiblePercentage or 1)*p.amount*(1 - (p.vatPercentage or 0))
     for year of byYear
@@ -225,12 +225,10 @@ class exports.TaxableIncomePayment extends exports.Payment
     if !@params
       @params = {
         vatPercentage: 0.21
-        earnedAt: moment()
         paymentDate: moment()
         deducibleExpenses: []
       }
     # vatPercentage
-    # earnedAt
     # paymentDate
     # description
 
@@ -245,7 +243,6 @@ class exports.TaxableIncomePayment extends exports.Payment
 
   toJson: (context) ->
     params = _.clone(@params)
-    params.earnedAt = params.earnedAt.valueOf()
     params.paymentDate = params.paymentDate.valueOf()
     return {
       type: 'TaxableIncomePayment'
@@ -255,7 +252,6 @@ class exports.TaxableIncomePayment extends exports.Payment
     }
   @fromJson: (json, context) ->
     params = _.clone(json.params)
-    params.earnedAt = moment(params.earnedAt)
     params.paymentDate = moment(params.paymentDate)
     return new exports.TaxableIncomePayment(
       context.resolveObject(json.accountId),

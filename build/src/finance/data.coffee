@@ -162,7 +162,6 @@ deserializePayment = (p) ->
       params =
         vatPercentage: 0.21
         description: p.description
-        earnedAt: date
         paymentDate: date
       return new TaxableIncomePayment(account, p.amount, params)
 
