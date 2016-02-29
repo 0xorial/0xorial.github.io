@@ -1,4 +1,21 @@
-app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
+app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
+
+  jQuery(document).on 'keypress', (e) ->
+    console.log e
+    if e.keyCode == 110 # 'n'
+      $scope.showMenu()
+    if e.keyCode == 115 # 's'
+      $scope.newSimplePayment(e)
+    if e.keyCode == 98 # 'b'
+      $scope.newBorrowPayment(e)
+    if e.keyCode == 112 # 'p'
+      $scope.newPeriodicPayment(e)
+    if e.keyCode == 105 # 'i'
+      $scope.newTaxableIncomePayment(e)
+
+  $scope.showMenu = ($mdOpenMenu, ev) ->
+    $mdOpenMenu(ev)
+
   getFirstAccount = ->
     DataService.getAccounts()[0]
   paymentTypes = {
@@ -10,17 +27,32 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService) ->
   $scope.anyVisible = false
   $scope.visibility = {}
   $scope.template = {}
+  _scope = $scope
   for k of paymentTypes
     ( (k) ->
       $scope.template[k] = new paymentTypes[k]
       $scope.visibility[k] = false
-      $scope[_.camelCase('new_' + k)] = ->
+      $scope[_.camelCase('new_' + k)] = (ev) ->
         for kk of $scope.visibility
-          if kk == k
-            $scope.visibility[k] = !$scope.visibility[k]
-          else
-            $scope.visibility[kk] = false
-        $scope.anyVisible = $scope.visibility[k]
+          $scope.visibility[kk] = false
+        $scope.visibility[k] = true
+
+        $mdDialog.show({
+          controller: ($scope, $mdDialog) ->
+            $scope.template = _scope.template
+            $scope.visibility = _scope.visibility
+            $scope.ok = ->
+              $mdDialog.hide()
+              _scope.addPayment()
+            $scope.cancel = ->
+              $mdDialog.cancel()
+
+
+          templateUrl: 'dialog.html',
+          parent: angular.element(document.body),
+          targetEvent: ev,
+          clickOutsideToClose:true
+        })
     )(k)
 
   getVisible = ->

@@ -30,20 +30,15 @@ html(lang='en', ng-app='StarterApp')
           div {{status}}
       div(style='width: 100%;' layout='row' layout-align='start start')
         md-content(flex='50' layout='column')
-          kmd-tabs(flex='100')
-            kmd-tab(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
-              kmd-tab-label Payments
-              kmd-tab-body
-                md-content
-                  .md-whiteframe-z1(style='margin:10px;' layout='column' )
-                    div(ng-include='"finance/controllers/NewPayment.html"')
-                    div(ng-include='"finance/controllers/PaymentsList.html"')
-            kmd-tab(md-on-select='onAccountsSelected()' md-active='accountsActive()')
-              kmd-tab-label Accounts
-              kmd-tab-body
-                md-content
-                  .md-whiteframe-z1(style='margin:10px;' layout='column' )
-                    div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
+          div(flex='100')
+            div(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
+              md-content
+                .md-whiteframe-z1(style='margin:10px;' layout='column' )
+                  div(ng-include='"finance/controllers/PaymentsList.html"')
+            div(md-on-select='onAccountsSelected()' md-active='accountsActive()')
+              md-content
+                .md-whiteframe-z1(style='margin:10px;' layout='column' )
+                  div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
         div(flex='50' layout='column')
           md-tabs(flex='100' md-dynamic-height='')
             md-tab(md-on-select='onOverviewSelected()' md-active='overviewActive()')
@@ -60,14 +55,6 @@ html(lang='en', ng-app='StarterApp')
 
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' )
     div(ui-view = '' ng-controller='LayoutCtrl')
-    //- #authorize-div(style='display: none')
-    //-   span Authorize access t o Drive API
-    //-   // Button for the user to click to initiate auth sequence
-    //-   button#authorize-button(onclick='insertFile("hello", {"hello": "world"})')
-    //-     | Authorize
-    //- button#authorize2-button(onclick='insertFile("hello", {"hello": "world"})')
-    //-   | save
-    //- pre#output
 
     script(src='./build/bower_components/lodash/lodash.js', inline='')
     script(src='./build/bower_components/jquery/dist/jquery.min.js', inline='')

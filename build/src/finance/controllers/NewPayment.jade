@@ -1,13 +1,24 @@
-div(layout='column' ng-controller='NewPaymentCtrl')
-  div(layout='row')
-    md-button.md-raised(ng-click='newSimplePayment()') Simple
-    md-button.md-raised(ng-click='newPeriodicPayment()') Periodic
-    md-button.md-raised(ng-click='newBorrowPayment()') Borrow
-    md-button.md-raised(ng-click='newTaxableIncomePayment()') Income
-  div(layout='column')
+script(type='text/ng-template' id='dialog.html')
+  md-dialog(layout='column' layout-padding='')
     simple-payment(payment='template.simplePayment' ng-show='visibility.simplePayment')
     periodic-payment(payment='template.periodicPayment' ng-show='visibility.periodicPayment')
     borrow-payment(payment='template.borrowPayment' ng-show='visibility.borrowPayment')
     taxable-income-payment(payment='template.taxableIncomePayment' ng-show='visibility.taxableIncomePayment')
-  div(layout='row' layout-align='end center' ng-show='anyVisible')
-    md-button.md-raised(ng-click='addPayment()') Add
+    div(layout='row')
+      md-button.md-raised(ng-click='cancel()') Cancel
+      md-button.md-raised(ng-click='ok()') Ok
+  
+
+div(layout='column' ng-controller='NewPaymentCtrl')
+  div(layout='row' layout-align='end center')
+    md-menu
+      md-button(ng-click='showMenu($mdOpenMenu, $event)') new!
+      md-menu-content(width='4')
+        md-menu-item
+          md-button.md-raised(ng-click='newSimplePayment($event)') Simple
+        md-menu-item
+          md-button.md-raised(ng-click='newPeriodicPayment($event)') Periodic
+        md-menu-item
+          md-button.md-raised(ng-click='newBorrowPayment($event)') Borrow
+        md-menu-item
+          md-button.md-raised(ng-click='newTaxableIncomePayment($event)') Income

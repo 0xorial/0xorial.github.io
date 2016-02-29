@@ -47,7 +47,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
       return {
         payment: p
         description: p.params.description
-        type: 'Income(taxable)'
+        type: 'Income'
         date: p.params.paymentDate.toDate()
         amount: p.amount
         currency: a.currency
