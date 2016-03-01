@@ -1,0 +1,54 @@
+body {
+  font-size: 13px; }
+
+.account-list md-input-container {
+  padding: 0;
+  margin: 0; }
+
+.account-list .md-errors-spacer {
+  height: 0;
+  min-height: 0; }
+
+.payments-list .edit {
+  background-color: #eff4f9; }
+  .payments-list .edit md-datepicker {
+    background-color: transparent; }
+    .payments-list .edit md-datepicker .md-datepicker-input {
+      background-color: transparent; }
+
+.payments-list .md-menu {
+  padding: 0; }
+  .payments-list .md-menu button {
+    margin: 0; }
+
+.payments-list .muted {
+  background-color: #eceded;
+  color: #919191; }
+
+.payments-list .payment > div {
+  margin-left: 2px;
+  margin-right: 2px; }
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer; }
+
+.transactions-list .transaction .color {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  cursor: pointer; }
+
+.transactions-list .transaction div {
+  padding: 0; }
+
+.link-button {
+  color: blue; }
+  .link-button:hover {
+    text-decoration: underline;
+    cursor: pointer; }
+
+md-checkbox {
+  padding: 0;
+  margin: 0; }

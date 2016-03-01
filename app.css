@@ -1,0 +1,26 @@
+body {
+  font-family: 'Roboto Condensed', sans-serif; }
+
+md-menu-content {
+  background-color: transparent; }
+
+ng-md-icon {
+  margin: auto;
+  background-repeat: no-repeat no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+  height: 24px;
+  width: 24px; }
+
+md-menu-item.active {
+  background-color: white; }
+
+md-sidenav {
+  background-color: #E6E6E6; }
+
+canvas {
+  border: 1px solid black; }
+
+.article-content {
+  max-width: 960px; }
