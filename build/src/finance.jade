@@ -16,45 +16,44 @@ html(lang='en', ng-app='StarterApp')
     //- base(href='/')
 
     script(type='text/ng-template' id='state.html')
-      md-toolbar
-        .md-toolbar-tools(ng-controller='SerializationCtrl')
-          md-button.md-raised(ng-click='saveDrive()') Save
-          md-button.md-raised(ng-click='saveDriveNew()') Save as:
-          input(ng-model='driveFileName')
-          md-button.md-raised#copy(ng-click='copy()') Copy Data
-          md-button.md-raised(ng-click='loadData()') Load
-          input#clipboard(ng-model='serializedData')
-          md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
-          md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
-          img(src='/finance/495.gif' ng-show='isLoading')
-          div {{status}}
-      div(style='width: 100%;' layout='row' layout-align='start start')
-        md-content(flex='50' layout='column')
-          div(flex='100')
-            div(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
-              md-content
+      div(layout='column' flex='')
+        md-toolbar
+          .md-toolbar-tools(ng-controller='SerializationCtrl')
+            md-button.md-raised(ng-click='saveDrive()') Save
+            md-button.md-raised(ng-click='saveDriveNew()') Save as:
+            input(ng-model='driveFileName')
+            md-button.md-raised#copy(ng-click='copy()') Copy Data
+            md-button.md-raised(ng-click='loadData()') Load
+            input#clipboard(ng-model='serializedData')
+            md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
+            md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
+            img(src='/finance/495.gif' ng-show='isLoading')
+            div {{status}}
+        div(flex='' layout='row' )
+          md-content(flex='50' layout='column')
+            div(flex='100')
+              div(md-on-select='onPaymentsSelected()' md-active='paymentsActive()')
                 .md-whiteframe-z1(style='margin:10px;' layout='column' )
                   div(ng-include='"finance/controllers/PaymentsList.html"')
-            div(md-on-select='onAccountsSelected()' md-active='accountsActive()')
-              md-content
+              div(md-on-select='onAccountsSelected()' md-active='accountsActive()')
                 .md-whiteframe-z1(style='margin:10px;' layout='column' )
-                  div(ng-include='"finance/controllers/AccountsList.html"' flex='100' layout='column')
-        div(flex='50' layout='column')
-          md-tabs(flex='100' md-dynamic-height='')
-            md-tab(md-on-select='onOverviewSelected()' md-active='overviewActive()')
-              md-tab-label Overview
-              md-tab-body
-                .md-whiteframe-z1(style='margin:10px;' layout='column' flex='')
-                  div(ng-include='"finance/controllers/BudgetOverviewChart.html"' flex='80')
-            md-tab(md-on-select='onTransactionsSelected()' md-active='transactionsActive()')
-              md-tab-label Transactions
-              md-tab-body
-                .md-whiteframe-z1(style='margin:10px;' layout='column' flex='100')
-                  div(ng-include='"finance/controllers/TransactionsList.html"' flex='80' layout='column')
+                  div(ng-include='"finance/controllers/AccountsList.html"' layout='column')
+          div(flex='50' layout='column')
+            md-tabs(flex='100' md-dynamic-height='')
+              md-tab(md-on-select='onOverviewSelected()' md-active='overviewActive()')
+                md-tab-label Overview
+                md-tab-body
+                  .md-whiteframe-z1(style='margin:10px;' layout='column' flex='')
+                    div(ng-include='"finance/controllers/BudgetOverviewChart.html"' flex='80')
+              md-tab(md-on-select='onTransactionsSelected()' md-active='transactionsActive()')
+                md-tab-label Transactions
+                md-tab-body
+                  .md-whiteframe-z1(style='margin:10px;' layout='column' flex='100')
+                    div(ng-include='"finance/controllers/TransactionsList.html"' flex='80' layout='column')
 
 
-  body.md-default-theme(style='overflow: hidden; height:100% width:100%' )
-    div(ui-view = '' ng-controller='LayoutCtrl')
+  body.md-default-theme(style='overflow: hidden; height:100% width:100%' layout='column')
+    div(ui-view = '' ng-controller='LayoutCtrl' flex='' layout='column')
 
     script(src='./build/bower_components/lodash/lodash.js', inline='')
     script(src='./build/bower_components/numeral/numeral.js', inline='')

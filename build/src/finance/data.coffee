@@ -28,6 +28,8 @@ transactions = [
   {"id": 2, "type": Types.Borrow, "date": "3/12/2015", "returnDate": "11/12/2015", "amount": 100, "description": "Tom", "account": account1},
   {"id": 1, "type": Types.Simple, "date": "1/12/2015", "amount": 1000, "description": "initial money", "account": account1},
   {"id": 7, "type": Types.SimpleExpense, "date": "3/12/2015", "amount": 1050, "description": "bought bike", "account": account1}
+  {"id": 1, "type": Types.Simple, "date": "1/12/2015", "amount": 1000, "description": "initial money", "account": account1},
+  {"id": 7, "type": Types.SimpleExpense, "date": "3/12/2015", "amount": 1050, "description": "bought bike", "account": account1}
   {"id": 7, "type": Types.PeriodicPayment, "startDate": "14/1/2015", "endDate": "25/2/2016", "period":{quantity: 1, units: "months"}, "amount": -100, "description": "alimony", "account": account1}
   {"id": 5, "type": Types.TaxableIncome, "date": "10/12/2015", "amount": 1000, "description": "payment for hard work", "account": account3}
   {"id": 3, "type": Types.Borrow, "date": "4/12/2015", "returnDate": "11/12/2015",  "amount": 150, "description": "Wim", "account": account1},

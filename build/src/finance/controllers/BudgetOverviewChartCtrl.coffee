@@ -112,10 +112,9 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         func: (chart) ->
           chart.redraw()
       series: series,
-      # size: {
-      #  width: 600,
-      #  height: 500
-      # }
+      size: {
+       height: 400
+      }
     }
   update()
 
