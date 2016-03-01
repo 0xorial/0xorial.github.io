@@ -1,23 +1,22 @@
 app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataService) ->
 
   $scope.$watch 'accounts', ( -> update()), true
+  $scope.accounts = []
 
   update = ->
-    $scope.accounts = DataService.getAccounts().map (a) ->
 
-      setProperties = (proxy, account) ->
+    _.merge {
+      src: DataService.getAccounts()
+      dst: $scope.accounts
+      make: -> {isSelected: true}
+      equals: (x, y) -> x.id == y.id
+      assign: (proxy, account) ->
         proxy.id = account.id
         proxy.name = account.name
         proxy.color = account.color
         proxy.account = account
-
-      existingAccount = _.find $scope.accounts, (t) ->
-        t.id == a.id
-      if !existingAccount
-        existingAccount = {isSelected: true}
-      setProperties(existingAccount, a)
-      return existingAccount
-
+    }
+    
     context = SimulationService.getLastSimulation()
     if !context
       context = SimulationService.runSimulation()
