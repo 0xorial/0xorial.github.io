@@ -1,4 +1,4 @@
-app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
+app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService) ->
 
   getPaymentInfo = (p) ->
     if p.account
@@ -57,11 +57,9 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
   update = ->
     payments = DataService.getPayments()
-    $scope.payments =  payments.map getPaymentInfo
+    $scope.payments = payments.map getPaymentInfo
+    $scope.payments = _.sortBy($scope.payments, 'date')
   update()
-
-  $scope.$on 'dataChanged', ->
-    update()
 
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
@@ -94,6 +92,15 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService) ->
 
   $scope.$on 'simulationRan', (__, c) ->
     update()
-
-  $scope.newSimplePayment = ->
-    $scope.payments.splice(0, 0, getPaymentInfo(new SimplePayment()))
+    fullState = SimulationService.getLastSimulation().currentAccountsState
+    for p in $scope.payments
+      otherPayments = _.except($scope.payments, p)
+      r = SimulationService.runSimulationFor(otherPayments.map (p) -> p.payment)
+      state = r.currentAccountsState
+      difference = 0
+      for a, i in state.accounts
+        b = state.balances[i]
+        d = fullState.balances[i] - b
+        difference += d
+      p.effect = numeral(difference).format('+0.00')
+    return

@@ -1,7 +1,7 @@
 md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )                
 
   div(layout='row' layout-align='space-between center' style='padding: 8px;')
-    div
+    div(layout='row')
     div(flex='')
     div
       div(ng-include='"finance/controllers/NewPayment.html"')
@@ -14,6 +14,7 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
     div(flex='10' style='max-width: 70px') {{p.type}}
     div(flex='10' style='min-width: 70px') {{p.date | date : 'dd/MM/yyyy'}}
     div(flex='15' style='min-width: 70px; text-align:right;') {{p.amount | number : 2}}
+    div(flex='10' style='min-width: 70px; text-align:left;') ({{p.effect}})
     div(flex='7') {{p.currency}}
     div(flex='15' layout='row' layout-align='start center')
       div(style='width:15px; height:15px; margin-right: 10px;' ng-style='{"background-color": p.color}')

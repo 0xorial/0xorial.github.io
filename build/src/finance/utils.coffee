@@ -45,6 +45,14 @@ _.mixin {
             _.traverse(el, cb)
       else if myIsObject(obj[key])
         _.traverse(obj[key], cb)
+
+  except: (c, predicate) ->
+    iteratee = _.iteratee(predicate)
+    if _.isFunction(predicate)
+      return _.filter(c, (p) -> predicate(p))
+    else
+      return _.filter(c, (p) -> p != predicate)
+
   }
 
 console.realWarn = console.warn;

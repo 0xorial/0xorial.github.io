@@ -3,11 +3,16 @@ app.service 'SimulationService', ($rootScope, DataService) ->
   lastSimulation = null
 
   $rootScope.$on 'dataChanged', ->
-    runSimulation()
+    runSimulationGlobal()
 
-  runSimulation = ->
-    context = new SimulationContext(DataService.getAccounts())
+  runSimulationGlobal = ->
     payments = DataService.getPayments()
+    lastSimulation = runSimulation(payments)
+    $rootScope.$broadcast 'simulationRan', lastSimulation
+
+  runSimulation = (payments) ->
+    accounts = DataService.getAccounts()
+    context = new SimulationContext(accounts)
     for p in payments
       p.getTransactions(context)
 
@@ -23,15 +28,19 @@ app.service 'SimulationService', ($rootScope, DataService) ->
       t.jsDate = t.date.toDate()
       t.color = t.account.color
 
-    lastSimulation = context
-    $rootScope.$broadcast 'simulationRan', lastSimulation
-    return
-  runSimulation()
+    return context
+
+  runSimulationGlobal()
 
   return {
+    runSimulationFor: (payments) ->
+      # allAccounts = payments.map((p) -> p.account)
+      return runSimulation(payments)
+
     runSimulation: ->
-      runSimulation()
+      runSimulationGlobal()
       return lastSimulation
+
     getLastSimulation: ->
       return lastSimulation
   }
