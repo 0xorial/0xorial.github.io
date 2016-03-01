@@ -51,9 +51,6 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         color: tinycolor(account.color).toHexString()
         name: account.name
         data: data
-        marker:
-            enabled: true
-            radius: 4
       })
 
     sumData = []
@@ -77,9 +74,6 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       color: tinycolor('red').toHexString()
       name: 'Sum'
       data: sumData
-      marker:
-          enabled: true
-          radius: 4
     })
 
     $scope.chartConfig = {
@@ -93,10 +87,12 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
           selected:0
         navigator:
           enabled: true
+          series:
+            data: sumData
         tooltip:
           useHTML: true
           formatter: ->
-            console.log(this)
+            # console.log(this)
             result = ''
             result += moment(@x).format('DD MMMM YYYY') + '</br>'
             sumPoint = _.find(@points, (p) -> p.point.accountState).point
@@ -113,6 +109,8 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
                 for t in point.point.transactions
                   result += "<span style='width:20px; display:inline-block;'></span>" + t.description + ': ' + t.amount + '</br>'
             return result
+        func: (chart) ->
+          chart.redraw()
       series: series,
       # size: {
       #  width: 600,
