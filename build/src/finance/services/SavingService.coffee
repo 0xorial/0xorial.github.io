@@ -4,7 +4,7 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     ctx = new SerializationContext()
 
     accounts = DataService.getAccounts()
-    payments = DataService.getPayments()
+    payments = DataService.getAllPayments()
 
     accounts = accounts.map (a) -> a.toJson(ctx)
     payments = payments.map (p) ->

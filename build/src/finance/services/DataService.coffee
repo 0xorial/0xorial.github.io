@@ -53,8 +53,11 @@ app.service 'DataService', ($rootScope) ->
       ensureIds()
       $rootScope.$broadcast 'dataChanged'
 
-    getPayments: ->
+    getAllPayments: ->
       return dataContainer.payments
+
+    getUnmutedPayments: ->
+      return dataContainer.payments.filter (p) -> !p.isMuted
 
     setPayments: (value) ->
       dataContainer.payments = value

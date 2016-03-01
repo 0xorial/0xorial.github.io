@@ -2,6 +2,11 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
 
   div(layout='row' layout-align='space-between center' style='padding: 8px;')
     div(layout='row')
+      button.icon-button(ng-click='muteAll()')
+        ng-md-icon(icon='volume_off' style="fill: #ff8c66; cursor:pointer;" size='20')
+      button.icon-button(ng-click='unmuteAll()')
+        ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
+      
     div(flex='')
     div
       div(ng-include='"finance/controllers/NewPayment.html"')
@@ -9,7 +14,12 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
   div.payment(ng-repeat-start='p in payments track by p.payment.id' 
       ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)' ng-hide='p.showEdit'
       layout='row' layout-align='space-between center' 
-      style='border-top: solid 1px rgba(0, 0, 0, 0.117647); padding: 4px; padding-left:8px;')
+      style='border-top: solid 1px rgba(0, 0, 0, 0.117647); padding: 4px; padding-left:8px;'
+      ng-class='{muted : p.payment.isMuted}')
+    button.icon-button(ng-click='mute(p)' ng-hide='p.payment.isMuted')
+      ng-md-icon(icon='volume_off' style="fill: #ff8c66; cursor:pointer;" size='20')
+    button.icon-button(ng-click='unmute(p)' ng-show='p.payment.isMuted')
+      ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
     div(flex='') {{p.description}}
     div(flex='10' style='max-width: 70px') {{p.type}}
     div(flex='10' style='min-width: 70px') {{p.date | date : 'dd/MM/yyyy'}}

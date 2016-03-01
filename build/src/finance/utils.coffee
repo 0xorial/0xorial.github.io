@@ -49,10 +49,22 @@ _.mixin {
   except: (c, predicate) ->
     iteratee = _.iteratee(predicate)
     if _.isFunction(predicate)
-      return _.filter(c, (p) -> predicate(p))
+      return _.filter(c, (p) -> !predicate(p))
     else
       return _.filter(c, (p) -> p != predicate)
 
+  merge: (options) ->
+    {src, dst, make, equals, assign} = options
+    for i in src
+      existing = _.find(dst, (e) -> equals(i, e))
+      if !existing
+        existing = make()
+        dst.push(existing)
+      assign(existing, i)
+
+    toRemove = _.differenceWith(dst, src, (x, y) -> equals(y, x))
+    for i in toRemove
+      _.remove(dst, i)
   }
 
 console.realWarn = console.warn;

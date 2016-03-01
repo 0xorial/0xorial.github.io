@@ -1,6 +1,7 @@
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService) ->
 
-  getPaymentInfo = (p) ->
+  $scope.payments = []
+  convertPayment = (p, r) ->
     if p.account
       a = {
         currency: p.account.currency
@@ -10,55 +11,55 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     else
       a = {}
 
+    r.payment = p
+    r.amount = p.amount
+    r.currency = a.currency
+    r.accountName = a.accountName
+    r.color = a.color
+
     if p instanceof SimplePayment
-      return {
-        payment: p
-        description: p.description
-        type: 'Simple'
-        date: p.date.toDate()
-        amount: p.amount
-        currency: a.currency
-        accountName: a.accountName
-        color: a.color
-      }
+      r.description = p.description
+      r.type = 'Simple'
+      r.date = p.date.toDate()
     if p instanceof BorrowPayment
-      return {
-        payment: p
-        description: p.description
-        type: 'Loan'
-        date: p.date.toDate()
-        amount: p.amount
-        currency: a.currency
-        accountName: a.accountName
-        color: a.color
-      }
+      r.description = p.description
+      r.type = 'Loan'
+      r.date = p.date.toDate()
     if p instanceof PeriodicPayment
-      return {
-        payment: p
-        description: p.description
-        type: 'Periodic'
-        date: p.startDate.toDate()
-        amount: p.amount
-        currency: a.currency
-        accountName: a.accountName
-        color: a.color
-      }
+      r.description = p.description
+      r.type = 'Periodic'
+      r.date = p.startDate.toDate()
     if p instanceof TaxableIncomePayment
-      return {
-        payment: p
-        description: p.params.description
-        type: 'Income'
-        date: p.params.paymentDate.toDate()
-        amount: p.amount
-        currency: a.currency
-        accountName: a.accountName
-        color: a.color
-      }
+      r.description = p.params.description
+      r.type = 'Income'
+      r.date = p.params.paymentDate.toDate()
 
   update = ->
-    payments = DataService.getPayments()
-    $scope.payments = payments.map getPaymentInfo
+    payments = DataService.getAllPayments()
+
+    _.merge {
+      src: payments,
+      dst: $scope.payments
+      make: -> {}
+      equals: (x, y) -> x.id == y.payment.id
+      assign: (dst, src) -> convertPayment(src, dst)
+      }
     $scope.payments = _.sortBy($scope.payments, 'date')
+
+    fullState = SimulationService.getLastSimulation().currentAccountsState
+    unmuted = DataService.getUnmutedPayments()
+    for p in $scope.payments.filter( (pp) -> !pp.payment.isMuted)
+      otherPayments = _.except(unmuted, (pp) -> pp.id == p.payment.id)
+      r = SimulationService.runSimulationFor(otherPayments)
+      state = r.currentAccountsState
+      difference = 0
+      for a, i in state.accounts
+        b = state.balances[i]
+        d = fullState.balances[i] - b
+        difference += d
+      p.effect = numeral(difference).format('+0.00')
+    return
+
   update()
 
   $scope.enteredPayment = (payment) ->
@@ -90,17 +91,27 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
   $scope.delete = (payment) ->
     DataService.deletePayment(payment.payment)
 
+  $scope.mute = (payment) ->
+    payment.payment.isMuted = true
+    DataService.notifyChanged()
+    update()
+
+  $scope.unmute = (payment) ->
+    payment.payment.isMuted = false
+    DataService.notifyChanged()
+    update()
+
+  $scope.muteAll = ->
+    for p in $scope.payments
+      p.payment.isMuted = true
+    DataService.notifyChanged()
+    update()
+
+  $scope.unmuteAll = ->
+    for p in $scope.payments
+      p.payment.isMuted = false
+    DataService.notifyChanged()
+    update()
+
   $scope.$on 'simulationRan', (__, c) ->
     update()
-    fullState = SimulationService.getLastSimulation().currentAccountsState
-    for p in $scope.payments
-      otherPayments = _.except($scope.payments, p)
-      r = SimulationService.runSimulationFor(otherPayments.map (p) -> p.payment)
-      state = r.currentAccountsState
-      difference = 0
-      for a, i in state.accounts
-        b = state.balances[i]
-        d = fullState.balances[i] - b
-        difference += d
-      p.effect = numeral(difference).format('+0.00')
-    return

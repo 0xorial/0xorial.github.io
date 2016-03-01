@@ -6,7 +6,7 @@ app.service 'SimulationService', ($rootScope, DataService) ->
     runSimulationGlobal()
 
   runSimulationGlobal = ->
-    payments = DataService.getPayments()
+    payments = DataService.getUnmutedPayments()
     lastSimulation = runSimulation(payments)
     $rootScope.$broadcast 'simulationRan', lastSimulation
 
