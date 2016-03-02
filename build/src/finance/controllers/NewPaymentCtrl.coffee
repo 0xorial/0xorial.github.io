@@ -1,16 +1,20 @@
 app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
 
-  jQuery(document).on 'keypress', (e) ->
+  $(document).on 'keydown', 'input', (e) ->
+    e.stopPropagation()
+    return
+
+  $(document).on 'keydown', (e) ->
     console.log e
-    if e.keyCode == 110 # 'n'
+    if e.keyCode == 78 # 'n'
       $scope.showMenu()
-    if e.keyCode == 115 # 's'
+    if e.keyCode == 83 # 's'
       $scope.newSimplePayment(e)
-    if e.keyCode == 98 # 'b'
+    if e.keyCode == 66 # 'b'
       $scope.newBorrowPayment(e)
-    if e.keyCode == 112 # 'p'
+    if e.keyCode == 80 # 'p'
       $scope.newPeriodicPayment(e)
-    if e.keyCode == 105 # 'i'
+    if e.keyCode == 84 # 'i'
       $scope.newTaxableIncomePayment(e)
 
   $scope.showMenu = ($mdOpenMenu, ev) ->
