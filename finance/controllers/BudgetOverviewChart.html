@@ -1,1 +1,0 @@
-<div ng-controller="BudgetOverviewChartCtrl" style="margin:10px" layout-padding="" layout="column" flex=""><div layout="row"><div ng-repeat="account in accounts track by account.account.id"><md-checkbox ng-model="account.isSelected">{{account.name}}</md-checkbox></div></div><div><highchart id="chart" config="chartConfig"></highchart></div></div>
