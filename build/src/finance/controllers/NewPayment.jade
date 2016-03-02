@@ -1,9 +1,6 @@
 script(type='text/ng-template' id='dialog.html')
-  md-dialog(layout='column' layout-padding='')
-    simple-payment(payment='template.simplePayment' ng-show='visibility.simplePayment')
-    periodic-payment(payment='template.periodicPayment' ng-show='visibility.periodicPayment')
-    borrow-payment(payment='template.borrowPayment' ng-show='visibility.borrowPayment')
-    taxable-income-payment(payment='template.taxableIncomePayment' ng-show='visibility.taxableIncomePayment')
+  md-dialog#new-payment(layout='column' layout-padding='')
+    div(directive='templateName' ng-attr-payment='template')
     div(layout='row')
       md-button.md-raised(ng-click='cancel()') Cancel
       md-button.md-raised(ng-click='ok()') Ok

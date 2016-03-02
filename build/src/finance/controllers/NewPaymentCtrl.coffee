@@ -34,7 +34,7 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
   _scope = $scope
   for k of paymentTypes
     ( (k) ->
-      $scope.template[k] = new paymentTypes[k]
+      $scope.template[k] = paymentTypes[k]()
       $scope.visibility[k] = false
       $scope[_.camelCase('new_' + k)] = (ev) ->
         for kk of $scope.visibility
@@ -43,8 +43,8 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
 
         $mdDialog.show({
           controller: ($scope, $mdDialog) ->
-            $scope.template = _scope.template
-            $scope.visibility = _scope.visibility
+            $scope.template = _scope.template[k]
+            $scope.templateName = _.kebabCase(k)
             $scope.ok = ->
               $mdDialog.hide()
               _scope.addPayment()

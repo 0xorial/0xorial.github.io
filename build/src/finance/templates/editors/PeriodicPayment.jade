@@ -2,7 +2,7 @@ div.md-inline-form(layout='column')
   div(layout='row')
     md-input-container
       label Description
-      input(ng-model='payment.description')
+      input(ng-model='payment.description'  md-autofocus)
     md-input-container
       label Amount
       input(type='number' ng-model='payment.amount' style='width: 100px')
