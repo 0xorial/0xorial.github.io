@@ -1,4 +1,7 @@
+
 app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
+
+  currentData = ''
 
   serialize = ->
     ctx = new SerializationContext()
@@ -17,9 +20,11 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
       accounts: accounts,
       payments: payments
     }
-    return JSON.stringify(root, null, '  ')
+    currentData = JSON.stringify(root, null, '  ')
+    return currentData
 
   deserialize = (jsonString) ->
+    currentData = jsonString
     root = JSON.parse(jsonString)
     ctx = new SerializationContext()
     accounts = []
@@ -51,6 +56,7 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     return
 
   return {
+    getCurrentJson: -> currentData
     loadJson: (json) -> deserialize(json)
     saveJson: () -> return serialize()
     saveDrive: (documentPath, done, progress) ->

@@ -57,7 +57,7 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
       undoStack.push $scope.serializedData
       undoPointer++
 
-    if $scope.serializedData
+    if $scope.serializedData != SavingService.getCurrentJson()
       SavingService.loadJson($scope.serializedData)
 
   $scope.copy = ->
