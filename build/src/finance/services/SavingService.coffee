@@ -71,13 +71,9 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
       GoogleDriveSaveService.newFile(name, data, done, progress)
 
     loadFile: (path, cb, progress) ->
-      accounts = null
-      payments = null
       if path == 'demo'
-        accounts = demoAccounts
-        payments = demoPayments
-        DataService.setAccounts(accounts)
-        DataService.setPayments(payments)
+        DataService.setAccounts(demoAccounts)
+        DataService.setPayments(demoPayments)
         DataService.notifyChanged()
         cb(null, 'demo')
       else if _.startsWith(path, 'drive:')

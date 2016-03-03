@@ -8,19 +8,6 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
 
   $scope.isLoading = true
   $scope.status = 'Loading...'
-  progress = (m) ->
-    $timeout ->
-      $scope.$apply -> $scope.status = m
-
-  SavingService.loadFile($stateParams.documentPath,
-    ( (error, name) ->
-      $timeout ->
-        $scope.$apply ->
-          $scope.driveFileName = name
-          $scope.isLoading = false
-          if !error
-            $scope.status = 'Ready'),
-    progress)
 
   $scope.loadData = ->
 
@@ -64,3 +51,17 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
     new Clipboard('#copy', {
       text: -> $scope.serializedData
       })
+
+  progress = (m) ->
+    $timeout ->
+      $scope.$apply -> $scope.status = m
+
+  SavingService.loadFile($stateParams.documentPath,
+    ( (error, name) ->
+      $timeout ->
+        $scope.$apply ->
+          $scope.driveFileName = name
+          $scope.isLoading = false
+          if !error
+            $scope.status = 'Ready'),
+    progress)
