@@ -6,17 +6,37 @@ SCOPES = [
 
 app.service 'GoogleDriveSaveService', ->
 
+  gapiClientLoaded = false
+  gapiClientLoadedCb = ->
+  window.onGapiClientloaded = ->
+    gapiClientLoaded = true;
+    gapiClientLoadedCb()
+
+
   loadClient = (cb) ->
-    if g_gapiClientLoaded
-      cb()
+    if gapiClientLoaded
+      cb(null)
     else
-      window.g_gapiClientLoadedCb = ->
-        cb()
-        window.g_gapiClientLoadedCb = null
+      gapiClientLoadedCb = ->
+        gapiClientLoaded = true
+        cb(null)
+        gapiClientLoadedCb = null
+      $.ajax({
+        url: 'https://apis.google.com/js/client.js?onload=onGapiClientloaded'
+        dataType: 'script'
+        cache: true
+      })
+      .fail ->
+        console.log arguments
+        cb('Error loading drive client')
+
 
   authAndLoadApi = (cb)->
     progress('Loading client...')
-    await loadClient(defer())
+    await loadClient(defer(error))
+    if error
+      cb(error)
+      return
     progress('Authorizing...')
     await gapi.auth.authorize {
       'client_id': CLIENT_ID
