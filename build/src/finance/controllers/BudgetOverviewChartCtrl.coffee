@@ -1,4 +1,4 @@
-app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataService) ->
+app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataService, TransactionsPopupService) ->
 
   $scope.$watch 'accounts', ( -> update()), true
   $scope.accounts = []
@@ -16,7 +16,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         proxy.color = account.color
         proxy.account = account
     }
-    
+
     context = SimulationService.getLastSimulation()
     if !context
       context = SimulationService.runSimulation()
@@ -75,10 +75,23 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       data: sumData
     })
 
+    lastToolTip = null
+
+    showTransactions = ->
+      console.log(lastToolTip)
+      transactionsNested = _.map lastToolTip.points, (p) -> p.point.transactions
+      # filter out sum point
+      transactionsNested = _.filter transactionsNested, (t) -> t
+      transactions = _.flatten transactionsNested
+      TransactionsPopupService.show transactions
+
     $scope.chartConfig = {
       useHighStocks: true
       options:
         chart:
+          events:
+            click: ->
+              showTransactions()
           type: 'line'
           xAxis:
             type: 'datetime'
@@ -91,7 +104,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         tooltip:
           useHTML: true
           formatter: ->
-            # console.log(this)
+            lastToolTip = this
             result = ''
             result += moment(@x).format('DD MMMM YYYY') + '</br>'
             sumPoint = _.find(@points, (p) -> p.point.accountState).point
@@ -108,8 +121,6 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
                 for t in point.point.transactions
                   result += "<span style='width:20px; display:inline-block;'></span>" + t.description + ': ' + t.amount + '</br>'
             return result
-        func: (chart) ->
-          chart.redraw()
       series: series,
       size: {
        height: 400

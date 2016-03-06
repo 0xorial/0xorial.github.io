@@ -1,8 +1,13 @@
-md-content.transactions-list(ng-controller='TransactionsListCtrl' layout='column' flex='')
-  div.transaction(ng-repeat='transaction in allTransactions track by transaction.id' layout='row' ng-mouseenter='simulateUntil(transaction)' ng-mouseleave='simulateAll()' \ 
-  layout-padding='' ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
-    //- div
-      //- span.color(ng-style='{"background-color": transaction.account.color}')
-    div.description {{transaction.description}}
-    div.currency {{transaction.amount | currency}}
-    div.date {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+div(layout='column')
+  div.transactions-list(layout='column')
+    div.transaction(ng-repeat='transaction in transactions track by transaction.id' 
+      layout='row' layout-padding=''
+      ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
+      //- div
+        //- span.color(ng-style='{"background-color": transaction.account.color}')
+      div.description {{transaction.description}}
+      div.currency {{transaction.amount | currency}}
+      div.date {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+  
+  div(layout='row')
+    md-button.md-raised(ng-click='ok()') OK
