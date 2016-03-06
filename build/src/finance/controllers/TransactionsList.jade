@@ -1,13 +1,16 @@
-div(layout='column')
-  div.transactions-list(layout='column')
-    div.transaction(ng-repeat='transaction in transactions track by transaction.id' 
-      layout='row' layout-padding=''
-      ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
-      //- div
-        //- span.color(ng-style='{"background-color": transaction.account.color}')
-      div.description {{transaction.description}}
-      div.currency {{transaction.amount | currency}}
-      div.date {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+div(layout='column' style='width: 700px; height: 450px')
+  md-content(flex='')
+    div.transactions-list(layout='column')
+      div.transaction(ng-repeat='transaction in transactions track by transaction.id' 
+        layout='row'
+        ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
+        div
+          span.color(ng-style='{"background-color": transaction.account.color}')
+        div.description(style='width: 50px') {{transaction.description}}
+        div(flex='15' style='min-width: 70px; text-align:right;') {{transaction.amount | number : 2}}
+        div(flex='7') {{transaction.account.currency}}
+        div.date(style='min-width: 50px') {{transaction.jsDate | date : 'dd/MM/yyyy'}}  
+        div.additionalInfo(flex='') {{transaction.additionalInfo}}
   
-  div(layout='row')
+  div(layout='row' layout-align='end end')
     md-button.md-raised(ng-click='ok()') OK

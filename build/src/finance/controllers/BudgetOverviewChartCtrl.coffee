@@ -78,12 +78,16 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
     lastToolTip = null
 
     showTransactions = ->
-      console.log(lastToolTip)
       transactionsNested = _.map lastToolTip.points, (p) -> p.point.transactions
       # filter out sum point
       transactionsNested = _.filter transactionsNested, (t) -> t
       transactions = _.flatten transactionsNested
       TransactionsPopupService.show transactions
+
+    $scope.showAllTransactions = ->
+      transactions = SimulationService.getLastSimulation().transactions
+      TransactionsPopupService.show transactions
+
 
     $scope.chartConfig = {
       useHighStocks: true

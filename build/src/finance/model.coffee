@@ -217,7 +217,8 @@ class exports.BeTaxSystem
 
       personalTaxPayDate = moment({year: year + 1, month: 6})
       personalIncomeTaxToPay = taxablePersonalIncome * personalTaxRate
-      context.transaction(lastDayOfYear, -personalIncomeTaxToPay, account, 'personal income tax', undefined)
+      t = context.transaction(lastDayOfYear, -personalIncomeTaxToPay, account, 'personal income tax', undefined)
+      t.additionalInfo = 'Taxable personal income was: ' + taxablePersonalIncome + '. Tax rate applied was: ' + personalTaxRate
 
 
 class exports.TaxableIncomePayment extends exports.Payment
@@ -279,6 +280,7 @@ class exports.SimulationContext
   transaction: (date, amount, account, description, payment) ->
     t = new exports.Transaction(date, amount, account, description, payment, @nextTransactionId++)
     @transactions.push t
+    return t
 
   executeTransactions:  ->
     exports.sortTransactions @transactions
