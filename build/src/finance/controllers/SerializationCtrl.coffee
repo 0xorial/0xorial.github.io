@@ -9,9 +9,8 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
   $scope.isLoading = true
   $scope.status = 'Loading...'
 
-  $scope.loadData = ->
-
-  $scope.saveData = ->
+  $scope.openDrive = ->
+    await SavingService.openDrive(defer(error, file), progress)
 
   $scope.saveDrive = ->
     await SavingService.saveDrive($stateParams.documentPath, defer(file), progress)
@@ -52,16 +51,22 @@ app.controller 'SerializationCtrl', ($scope, $timeout, $rootScope, DataService, 
       text: -> $scope.serializedData
       })
 
-  progress = (m) ->
+  $scope.authorizeInDrive = () ->
+    await SavingService.authorizeInDrive(defer(error), progress)
+    loadCurrentFile()
+
+  progress = (m, showButton) ->
     $timeout ->
       $scope.$apply -> $scope.status = m
+      $scope.needDriveAuthorization = showButton
 
-  SavingService.loadFile($stateParams.documentPath,
-    ( (error, name) ->
-      $timeout ->
-        $scope.$apply ->
-          $scope.driveFileName = name
-          $scope.isLoading = false
-          if !error
-            $scope.status = 'Ready'),
-    progress)
+  loadCurrentFile = ->
+    await SavingService.loadFile($stateParams.documentPath, defer(error, name), progress)
+    $timeout ->
+      $scope.$apply ->
+        $scope.driveFileName = name
+        $scope.isLoading = false
+        if !error
+          $scope.status = 'Ready'
+
+  loadCurrentFile()

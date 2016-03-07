@@ -55,6 +55,13 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     DataService.notifyChanged()
     return
 
+  getIndex = ->
+    accounts = DataService.getAccounts()
+    payments = DataService.getAllPayments()
+    accountsText = accounts.map((a) -> a.name).join(',')
+    paymentsText = payments.map((p) -> p.description).join(',')
+    return accountsText + ',' + paymentsText
+
   return {
     getCurrentJson: -> currentData
     loadJson: (json) -> deserialize(json)
@@ -64,11 +71,14 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
         throw new Erorr()
       id = documentPath.substring(6)
       data = serialize()
-      GoogleDriveSaveService.updateFile(id, data, done, progress)
+      GoogleDriveSaveService.updateFile(id, data, getIndex(), done, progress)
+
+    openDrive: (done, progress) ->
+      GoogleDriveSaveService.showPicker(done, progress)
 
     saveNewDrive: (name, done, progress) ->
       data = serialize()
-      GoogleDriveSaveService.newFile(name, data, done, progress)
+      GoogleDriveSaveService.newFile(name, data, getIndex(), done, progress)
 
     loadFile: (path, cb, progress) ->
       if path == 'demo'
@@ -87,6 +97,9 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
           cb(error)
       else
         throw new Error('unknown path')
+
+    authorizeInDrive: -> (cb, progress) ->
+      GoogleDriveSaveService.authorizeInDrive(cb, progress)
 
     documentChanged: (path) ->
     # updateDocument() ->

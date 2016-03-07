@@ -1,25 +1,26 @@
 html(lang='en', ng-app='StarterApp')
   head
-    //- inline ./build/bower_components/angular-material/angular-material.min.css
     link(rel='stylesheet', href='./build/bower_components/angular-material/angular-material.min.css', inline='')
     link(rel='stylesheet', href='./build/bower_components/md-color-picker/dist/mdColorPicker.min.css', inline='')
-    //- inline ../app.css
     link(rel='stylesheet', href='../finance/app.css', inline='')
 
     script(type='text/ng-template' id='state.html')
       div(layout='column' flex='')
         md-toolbar
           .md-toolbar-tools(ng-controller='SerializationCtrl')
+            md-button.md-raised(ng-click='openDrive()') Open
             md-button.md-raised(ng-click='saveDrive()') Save
             md-button.md-raised(ng-click='saveDriveNew()') Save as:
             input(ng-model='driveFileName')
             md-button.md-raised#copy(ng-click='copy()') Copy Data
             md-button.md-raised(ng-click='loadData()') Load
-            input#clipboard(ng-model='serializedData')
+            input#clipboard(ng-model='serializedData' style='width: 30px')
             md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
             md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
             img(src='/finance/495.gif' ng-show='isLoading')
-            div {{status}}
+            div(ng-hide='needDriveAuthorization') {{status}}
+            md-button.md-raised(ng-show='needDriveAuthorization', ng-click='authorizeInDrive()') 'Authorize in Drive'
+            
         div(flex='' layout='row' )
           md-content(flex='50' layout='column')
             div(flex='100')
@@ -34,7 +35,7 @@ html(lang='en', ng-app='StarterApp')
               div(ng-include='"finance/controllers/BudgetOverviewChart.html"' flex='80')
               
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' layout='column')
-    div(ui-view = '' ng-controller='LayoutCtrl' flex='' layout='column')
+    div(ui-view = '' flex='' layout='column')
 
     script(src='./build/bower_components/lodash/lodash.js', inline='')
     script(src='./build/bower_components/numeral/numeral.js', inline='')

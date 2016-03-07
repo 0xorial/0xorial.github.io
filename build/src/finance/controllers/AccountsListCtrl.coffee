@@ -29,19 +29,7 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
     if not context
       return
     state = context.currentAccountsState
-    lastSimulatedTransaction = _.last(context.transactions)
-    if lastSimulatedTransaction
-      date = lastSimulatedTransaction.date
-    else date = moment()
-    if transaction
-      state = transaction.accountState
-      date = transaction.date
-    # if $scope.accounts and $scope.accounts.length == state.accounts.length
-    #   stateMerge(state)
-    # else
     $scope.accounts = stateConvert state
-
-    $scope.date = date.toDate()
 
   update()
 
@@ -50,10 +38,4 @@ app.controller 'AccountsListCtrl', ($scope, SimulationService, DataService) ->
 
   $scope.$on 'simulationRan', (__, c) ->
     context = c
-    update()
-
-  $scope.$on 'enterTransaction', (__, t) ->
-    if !$scope.autoSelect
-      return
-    transaction = t
     update()

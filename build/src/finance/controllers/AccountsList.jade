@@ -1,7 +1,4 @@
 div(ng-controller='AccountsListCtrl' style='margin:10px' layout-padding='' layout='column')
-  div(layout='row')
-    md-checkbox(ng-model='autoSelect') Auto
-    md-datepicker(ng-model='date' ng-disabled='autoSelect')
   md-content.account-list()
     div(ng-repeat='account in accounts track by account.account.id' layout='row')
       div(style='width:20px; height: 20px' \

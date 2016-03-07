@@ -1,5 +1,10 @@
 CLIENT_ID = '738883605733-b6bc7deeulg034sncifk1upknib3b0n0.apps.googleusercontent.com'
+APP_ID = '738883605733'
+API_KEY = 'AIzaSyDbiOruHeMzOa2K32MVMnK7q0WVxv-AZQY'
+MIME_BASE = 'application/vnd.google-apps.drive-sdk.'
+MIME = MIME_BASE + APP_ID
 SCOPES = [
+  'https://www.googleapis.com/auth/drive'
   'https://www.googleapis.com/auth/drive.metadata.readonly'
   'https://www.googleapis.com/auth/drive.file'
 ]
@@ -30,8 +35,9 @@ app.service 'GoogleDriveSaveService', ->
         console.log arguments
         cb('Error loading drive client')
 
+  oauthToken = null
 
-  authAndLoadApi = (cb)->
+  authAndLoadApi = (async, cb)->
     progress('Loading client...')
     await loadClient(defer(error))
     if error
@@ -41,15 +47,23 @@ app.service 'GoogleDriveSaveService', ->
     await gapi.auth.authorize {
       'client_id': CLIENT_ID
       'scope': SCOPES.join(' ')
-      'immediate': true
+      'immediate': !async
     }, defer(authResult)
+
+    if !async and authResult.error
+      progress('', true)
+
+    oauthToken = authResult.access_token
+
     if authResult and !authResult.error
       progress('Loading drive API...')
       await gapi.client.load 'drive', 'v2', defer()
+      progress('Loading picker API...')
+      await gapi.load('picker', {'callback': defer()})
       cb()
     else
       progress('Authorize error: ' + authResult.error)
-      console.log('could not authorise')
+      console.log('could not authorize')
       console.log(authResult)
     return
 
@@ -59,11 +73,11 @@ app.service 'GoogleDriveSaveService', ->
     initWaiters.push listener
 
   initStarted = false
-  init = ->
+  init = (async) ->
     if initStarted
       return
     initStarted = true
-    await authAndLoadApi(defer())
+    await authAndLoadApi(async, defer())
     initFinished = true
     for waiter in initWaiters
       waiter.done()
@@ -77,10 +91,10 @@ app.service 'GoogleDriveSaveService', ->
     if initFinished
       loadListener.done()
     else
-      init()
+      init(loadListener.async)
       waitForInit(loadListener)
 
-  insertFile = (name, fileData, callback) ->
+  insertFile = (name, fileData, index, callback) ->
     boundary = '-------314159265358979323846'
     delimiter = '\r\n--' + boundary + '\r\n'
     close_delim = '\r\n--' + boundary + '--'
@@ -88,9 +102,14 @@ app.service 'GoogleDriveSaveService', ->
     contentType = 'application/json'
     metadata =
       'title': name
-      'mimeType': contentType
+      'mimeType': 'application/json,' + MIME
+      'indexableText':
+        'text': index
     base64Data = btoa(fileData)
-    multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: ' + contentType + '\r\n' + 'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
+    multipartRequestBody = delimiter +
+      'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter +
+      'Content-Type: ' + contentType + '\r\n' +
+      'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
     request = gapi.client.request(
       'path': '/upload/drive/v2/files'
       'method': 'POST'
@@ -105,15 +124,21 @@ app.service 'GoogleDriveSaveService', ->
     request.execute callback
     return
 
-  doUpdateFile = (id, fileData, callback) ->
+  doUpdateFile = (id, fileData, index, callback) ->
     boundary = '-------314159265358979323846'
     delimiter = '\r\n--' + boundary + '\r\n'
     close_delim = '\r\n--' + boundary + '--'
 
     contentType = 'application/json'
-    metadata = {}
+    metadata = {
+      'indexableText':
+        'text': index
+    }
     base64Data = btoa(fileData)
-    multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: ' + contentType + '\r\n' + 'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
+    multipartRequestBody = delimiter +
+      'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter +
+      'Content-Type: ' + contentType + '\r\n' +
+      'Content-Transfer-Encoding: base64\r\n' + '\r\n' + base64Data + close_delim
     request = gapi.client.request(
       'path': '/upload/drive/v2/files/' + id
       'method': 'PUT'
@@ -153,25 +178,50 @@ app.service 'GoogleDriveSaveService', ->
       return
     xhr.send()
 
+  pickerCallback = ->
+    console.log arguments
+
+  createPicker = ->
+    view = new (google.picker.View)(google.picker.ViewId.DOCS)
+    view.setMimeTypes MIME
+    picker = (new (google.picker.PickerBuilder))
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .setAppId('738883605733')
+      .setOAuthToken(oauthToken)
+      .addView(view)
+      .addView(new (google.picker.DocsUploadView))
+      .setDeveloperKey(API_KEY)
+      .setCallback(pickerCallback)
+      .build()
+    picker.setVisible true
+
   return {
     loadFile: (id, callback, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
       await downloadFile(id, defer(error, file, data), progress)
       callback(error, file, data)
 
-    newFile: (name, data, done, progress) ->
+    newFile: (name, data, index, done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
       progress('Saving file...')
-      await insertFile(name, data, defer(arg))
+      await insertFile(name, data, index, defer(arg))
       console.log arg
       progress('File saved.')
       done(arg)
 
-    updateFile: (id, data, done, progress) ->
+    updateFile: (id, data, index, done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
       progress('Saving file...')
-      await doUpdateFile(id, data, defer(error))
+      await doUpdateFile(id, data, index, defer(error))
       if !error
         progress('File saved.')
       done()
+
+    showPicker: (done, progress) ->
+      await ensureInitCompleted({done: defer(), progress: progress})
+      createPicker()
+
+    authorizeInDrive: (cb, progress) ->
+
   }
