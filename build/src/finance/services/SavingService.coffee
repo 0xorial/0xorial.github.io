@@ -1,59 +1,20 @@
+app.service 'SavingService', (DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
 
-app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
-
-  currentData = ''
-
-  serialize = ->
-    ctx = new SerializationContext()
-
-    accounts = DataService.getAccounts()
-    payments = DataService.getAllPayments()
-
-    accounts = accounts.map (a) -> a.toJson(ctx)
-    payments = payments.map (p) ->
-      json = p.toJson(ctx)
-      if !json.id
-        json.id = p.id
-      return json
-
-    root = {
-      accounts: accounts,
-      payments: payments
-    }
-    currentData = JSON.stringify(root, null, '  ')
-    return currentData
+  serialize = () ->
+    currentData = HistoryService.getData()
+    return JSON.stringify(currentData, null, '  ')
 
   deserialize = (jsonString) ->
-    currentData = jsonString
-    root = JSON.parse(jsonString)
-    ctx = new SerializationContext()
-    accounts = []
-    for a in root.accounts
-      account = Account.fromJson(a, ctx)
-      account.id = a.id
-      accounts.push account
+    parsed = JSON.parse(jsonString)
+    HistoryService.setData(parsed)
+    applyLatestStateInHistory()
 
-    payments = []
-    for p in root.payments
-      payment = null
-      switch p.type
-        when 'SimplePayment'
-          payment = SimplePayment.fromJson(p, ctx)
-        when 'BorrowPayment'
-          payment = BorrowPayment.fromJson(p, ctx)
-        when 'PeriodicPayment'
-          payment = PeriodicPayment.fromJson(p, ctx)
-        when 'TaxableIncomePayment'
-          payment = TaxableIncomePayment.fromJson(p, ctx)
-        else
-          throw new Error()
-      payment.id = p.id
-      payments.push payment
-
-    DataService.setAccounts(accounts)
-    DataService.setPayments(payments)
+  applyLatestStateInHistory = ->
+    jsonState = HistoryService.peekState()
+    state = JsonSerializationService.deserialize({payments: jsonState.payments, accounts: jsonState.accounts})
+    DataService.setAccounts(state.accounts)
+    DataService.setPayments(state.payments)
     DataService.notifyChanged()
-    return
 
   getIndex = ->
     accounts = DataService.getAccounts()
@@ -63,9 +24,9 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
     return accountsText + ',' + paymentsText
 
   return {
-    getCurrentJson: -> currentData
+    # getCurrentJson: -> currentData
     loadJson: (json) -> deserialize(json)
-    saveJson: () -> return serialize()
+    getSerializedData: () -> return serialize()
     saveDrive: (documentPath, done, progress) ->
       if !_.startsWith(documentPath, 'drive:')
         throw new Erorr()
@@ -82,25 +43,26 @@ app.service 'SavingService', (DataService, GoogleDriveSaveService) ->
 
     loadFile: (path, cb, progress) ->
       if path == 'demo'
-        DataService.setAccounts(demoAccounts)
-        DataService.setPayments(demoPayments)
-        DataService.notifyChanged()
+        jsonState = JsonSerializationService.serialize({payments: demoPayments, accounts: demoAccounts})
+        HistoryService.resetState()
+        HistoryService.setInitialState(jsonState)
         cb(null, 'demo')
       else if _.startsWith(path, 'drive:')
-        await GoogleDriveSaveService.loadFile(path.substring(6), defer(error, file, data), progress)
-        if !error
-          deserialize(data)
-          console.log file
-          cb(error, file.title)
-        else
+        await GoogleDriveSaveService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
+        if error
           progress('Error loading file.')
+          console.log error
           cb(error)
+          return
+        console.log file
+        jsonData = JSON.parse(jsonStringData)
+        HistoryService.setData(jsonData)
+        cb(null, file.title)
       else
         throw new Error('unknown path')
 
+      applyLatestStateInHistory()
+
     authorizeInDrive: -> (cb, progress) ->
       GoogleDriveSaveService.authorizeInDrive(cb, progress)
-
-    documentChanged: (path) ->
-    # updateDocument() ->
   }
