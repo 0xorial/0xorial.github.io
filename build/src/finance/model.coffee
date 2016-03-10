@@ -2,7 +2,7 @@
 exports = window;
 
 class exports.Account
-  constructor: (@currency, @name, @color) ->
+  constructor: (@currency, @name, @color, @id) ->
 
   toJson: (context) ->
     if !@id

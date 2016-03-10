@@ -9,7 +9,7 @@ script(type='text/ng-template' id='dialog.html')
 div(layout='column' ng-controller='NewPaymentCtrl')
   div(layout='row' layout-align='end center')
     md-menu
-      md-button(ng-click='showMenu($mdOpenMenu, $event)') new!
+      md-button.md-raised(ng-click='showMenu($mdOpenMenu, $event)') new!
       md-menu-content(width='4')
         md-menu-item
           md-button.md-raised(ng-click='newSimplePayment($event)') Simple
