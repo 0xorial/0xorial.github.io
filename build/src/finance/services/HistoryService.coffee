@@ -33,9 +33,12 @@ app.service 'HistoryService', ->
       currentIndex = currentStateWithHistory.history.length - 1
       currentState = currentStateWithHistory.state
       while currentIndex > index
-        currentState = jsondiffpatch.reverse(currentState, currentStateWithHistory.history[currentIndex])
+        currentState = jsondiffpatch.reverse(currentState, currentStateWithHistory.history[currentIndex].delta)
 
       return currentState
+
+    getStateHistoryCount: ->
+      return currentStateWithHistory.history.length
 
     getData: ->
       return currentStateWithHistory

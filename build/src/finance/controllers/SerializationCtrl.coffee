@@ -18,15 +18,19 @@ app.controller 'SerializationCtrl', (
     $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
 
   $scope.canUndo = ->
+    SavingService.canUndo()
 
   $scope.canRedo = ->
+    SavingService.canRedo()
 
   $scope.undo = ->
+    SavingService.undo()
 
   $scope.redo = ->
+    SavingService.redo()
 
   $scope.$on 'dataChanged', ->
-    $scope.serializedData = SavingService.getSerializedData()
+    $scope.serializedData = SavingService.getRawData()
 
   $scope.copy = ->
     new Clipboard('#copy', {
@@ -58,3 +62,10 @@ app.controller 'SerializationCtrl', (
 
   $scope.loadData = ->
     SavingService.loadJson($scope.serializedData)
+
+  $scope.$on 'dataChanged', ->
+    SavingService.acceptChanges()
+    $scope.serializedData = SavingService.getRawData()
+
+  $scope.new = ->
+    SavingService.newFile()

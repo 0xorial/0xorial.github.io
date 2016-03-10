@@ -1,5 +1,7 @@
 app.service 'SavingService', (DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
 
+  undoPointer = -1
+
   serialize = () ->
     currentData = HistoryService.getData()
     return JSON.stringify(currentData, null, '  ')
@@ -7,14 +9,22 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
   deserialize = (jsonString) ->
     parsed = JSON.parse(jsonString)
     HistoryService.setData(parsed)
-    applyLatestStateInHistory()
+    applyFromHistoryToDataService()
 
-  applyLatestStateInHistory = ->
-    jsonState = HistoryService.peekState()
+  applyFromHistoryToDataService = (pointer) ->
+    jsonState = HistoryService.peekState(pointer)
     state = JsonSerializationService.deserialize({payments: jsonState.payments, accounts: jsonState.accounts})
     DataService.setAccounts(state.accounts)
     DataService.setPayments(state.payments)
     DataService.notifyChanged()
+
+  applyFromDataToHistoryService = ->
+    state = {
+      payments: DataService.getAllPayments()
+      accounts: DataService.getAccounts()
+      }
+    jsonState = JsonSerializationService.serialize(state)
+    HistoryService.acceptNewState(jsonState)
 
   getIndex = ->
     accounts = DataService.getAccounts()
@@ -24,9 +34,13 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
     return accountsText + ',' + paymentsText
 
   return {
-    # getCurrentJson: -> currentData
     loadJson: (json) -> deserialize(json)
-    getSerializedData: () -> return serialize()
+    getRawData: () -> return serialize()
+    acceptChanges: ->
+      applyFromDataToHistoryService()
+      undoPointer = HistoryService.getStateHistoryCount() - 1
+      return
+
     saveDrive: (documentPath, done, progress) ->
       if !_.startsWith(documentPath, 'drive:')
         throw new Erorr()
@@ -46,6 +60,7 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
         jsonState = JsonSerializationService.serialize({payments: demoPayments, accounts: demoAccounts})
         HistoryService.resetState()
         HistoryService.setInitialState(jsonState)
+        undoIndex = -1
         cb(null, 'demo')
       else if _.startsWith(path, 'drive:')
         await GoogleDriveSaveService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
@@ -57,12 +72,41 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
         console.log file
         jsonData = JSON.parse(jsonStringData)
         HistoryService.setData(jsonData)
+        undoPointer = HistoryService.getStateHistoryCount() - 1
         cb(null, file.title)
       else
         throw new Error('unknown path')
 
-      applyLatestStateInHistory()
+      applyFromHistoryToDataService()
 
     authorizeInDrive: -> (cb, progress) ->
       GoogleDriveSaveService.authorizeInDrive(cb, progress)
+
+    newFile: ->
+      jsonState = JsonSerializationService.serialize({payments: [], accounts: []})
+      undoIndex = -1
+      HistoryService.resetState()
+      HistoryService.setInitialState(jsonState)
+      applyFromHistoryToDataService()
+
+    canUndo: ->
+      return undoPointer >= 0
+
+    undo: ->
+      undoPointer--
+      # take state from history and set it to data service
+      applyFromHistoryToDataService(undoPointer)
+      # append state to the end of history
+      applyFromDataToHistoryService()
+
+    canRedo: ->
+      return undoPointer < HistoryService.getStateHistoryCount() - 1
+
+    redo: ->
+      undoPointer++
+      # take state from history and set it to data service
+      applyFromHistoryToDataService(undoPointer)
+      # append state to the end of history
+      applyFromDataToHistoryService()
+
   }

@@ -10,6 +10,7 @@ html(lang='en', ng-app='StarterApp')
           .md-toolbar-tools(ng-controller='SerializationCtrl')
             md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
             md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
+            md-button.md-raised(ng-click='new()') New
             md-button.md-raised(ng-click='openDrive()') Open
             md-button.md-raised(ng-click='saveDrive()') Save
             md-button.md-raised(ng-click='saveDriveNew()') Save as:
@@ -20,20 +21,7 @@ html(lang='en', ng-app='StarterApp')
             img(src='/finance/495.gif' ng-show='isLoading')
             div(ng-hide='needDriveAuthorization') {{status}}
             md-button.md-raised(ng-show='needDriveAuthorization', ng-click='authorizeInDrive()') 'Authorize in Drive'
-            
-            
-            //- md-button.md-raised(ng-click='saveDrive()') Save
-            //- md-button.md-raised(ng-click='saveDriveNew()') Save as:
-            //- input(ng-model='driveFileName')
-            //- md-button.md-raised#copy(ng-click='copy()') Copy Data
-            //- md-button.md-raised(ng-click='loadData()') Load
-            //- input#clipboard(ng-model='serializedData' style='width: 30px')
-            //- md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
-            //- md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
-            //- img(src='/finance/495.gif' ng-show='isLoading')
-            //- div(ng-hide='needDriveAuthorization') {{status}}
-            //- md-button.md-raised(ng-show='needDriveAuthorization', ng-click='authorizeInDrive()') 'Authorize in Drive'
-            
+                        
         div(flex='' layout='row' )
           md-content(flex='50' layout='column')
             div(flex='100')
@@ -52,7 +40,7 @@ html(lang='en', ng-app='StarterApp')
 
     script(src='./build/bower_components/lodash/lodash.js', inline='')
     script(src='./build/bower_components/numeral/numeral.js', inline='')
-    script(src='./build/bower_components/jsondiffpatch/public/build/jsondiffpatch-full.min.js', inline='')
+    script(src='./build/bower_components/jsondiffpatch/public/build/jsondiffpatch-full.js', inline='')
     script(src='./build/bower_components/jquery/dist/jquery.min.js', inline='')
     script(src='./build/bower_components/jquery-mousewheel/jquery.mousewheel.min.js', inline='')
     script(src='./build/bower_components/bluebird/js/browser/bluebird.js', inline='')

@@ -168,5 +168,8 @@ deserializePayment = (p) ->
       return new TaxableIncomePayment(account, p.amount, params)
 
 
-exports.demoPayments = transactions.map (t) -> deserializePayment(t)
+exports.demoPayments = transactions.map (t) ->
+  r = deserializePayment(t)
+  r.id = t.id
+  return r
 exports.demoAccounts = allAccountsData
