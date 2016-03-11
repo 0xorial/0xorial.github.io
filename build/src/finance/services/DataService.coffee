@@ -46,12 +46,12 @@ app.service 'DataService', ($rootScope) ->
     deleteAccount: (account) ->
       _.remove(dataContainer.accounts, account)
       ensureIds()
-      $rootScope.$broadcast 'dataChanged'
+      $rootScope.$broadcast 'dataEdited'
 
     addAccount: (account) ->
       dataContainer.accounts.push(account)
       ensureIds()
-      $rootScope.$broadcast 'dataChanged'
+      $rootScope.$broadcast 'dataEdited'
 
     getAllPayments: ->
       return dataContainer.payments
@@ -66,14 +66,18 @@ app.service 'DataService', ($rootScope) ->
     addPayment: (payment) ->
       dataContainer.payments.push payment
       ensureIds()
-      $rootScope.$broadcast 'dataChanged'
+      $rootScope.$broadcast 'dataEdited'
 
     deletePayment: (payment) ->
       _.remove(dataContainer.payments, payment)
       ensureIds()
-      $rootScope.$broadcast 'dataChanged'
+      $rootScope.$broadcast 'dataEdited'
 
     notifyChanged: ->
       $rootScope.$broadcast 'dataChanged'
+
+    notifyEdited: ->
+      $rootScope.$broadcast 'dataChanged'
+      $rootScope.$broadcast 'dataEdited'
 
     }

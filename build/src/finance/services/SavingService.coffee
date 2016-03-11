@@ -19,13 +19,13 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
     DataService.setPayments(state.payments)
     DataService.notifyChanged()
 
-  applyFromDataToHistoryService = ->
+  applyFromDataToHistoryService = (description) ->
     state = {
       payments: DataService.getAllPayments()
       accounts: DataService.getAccounts()
       }
     jsonState = JsonSerializationService.serialize(state)
-    HistoryService.acceptNewState(jsonState)
+    HistoryService.acceptNewState(jsonState, description)
 
   getIndex = ->
     accounts = DataService.getAccounts()
@@ -99,7 +99,7 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
       # take state from history and set it to data service
       applyFromHistoryToDataService(undoPointer)
       # append state to the end of history
-      applyFromDataToHistoryService()
+      applyFromDataToHistoryService('undo')
 
     canRedo: ->
       return possibleRedos > 0
@@ -110,6 +110,6 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
       # take state from history and set it to data service
       applyFromHistoryToDataService(undoPointer)
       # append state to the end of history
-      applyFromDataToHistoryService()
+      applyFromDataToHistoryService('redo')
 
   }

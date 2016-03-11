@@ -84,7 +84,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     payment.editPayment.assignTo(payment.payment)
     payment.editPayment = null
     payment.showEdit = false
-    $rootScope.$broadcast 'dataChanged'
+    DataService.notifyEdited()
 
   $scope.delete = (payment) ->
     DataService.deletePayment(payment.payment)

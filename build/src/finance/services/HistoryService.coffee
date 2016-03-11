@@ -10,11 +10,12 @@ app.service 'HistoryService', ->
 
   return {
 
-    acceptNewState: (state) ->
+    acceptNewState: (state, description) ->
       delta = new jsondiffpatch.DiffPatcher().diff(currentStateWithHistory.state, state)
       if delta
         currentStateWithHistory.history.push({
           delta: delta
+          description: description
           })
         currentStateWithHistory.state = state
 
