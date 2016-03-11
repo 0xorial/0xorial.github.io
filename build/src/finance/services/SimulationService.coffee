@@ -5,6 +5,9 @@ app.service 'SimulationService', ($rootScope, DataService) ->
   $rootScope.$on 'dataChanged', ->
     runSimulationGlobal()
 
+  $rootScope.$on 'dataEdited', ->
+    runSimulationGlobal()
+
   runSimulationGlobal = ->
     payments = DataService.getUnmutedPayments()
     lastSimulation = runSimulation(payments)
