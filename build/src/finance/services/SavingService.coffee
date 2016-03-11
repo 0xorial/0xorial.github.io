@@ -87,7 +87,7 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
       jsonState = JsonSerializationService.serialize({payments: [], accounts: []})
       undoPointer = -1
       HistoryService.resetState()
-      HistoryService.acceptChanges(jsonState)
+      HistoryService.acceptNewState(jsonState)
       applyFromHistoryToDataService()
 
     canUndo: ->
