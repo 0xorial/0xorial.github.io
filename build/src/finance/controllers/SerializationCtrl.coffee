@@ -17,6 +17,8 @@ app.controller 'SerializationCtrl', (
     await SavingService.saveNewDrive($scope.driveFileName, defer(file), progress)
     $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
 
+  isUndoRedo = false
+
   $scope.canUndo = ->
     SavingService.canUndo()
 
@@ -24,10 +26,14 @@ app.controller 'SerializationCtrl', (
     SavingService.canRedo()
 
   $scope.undo = ->
+    isUndoRedo = true
     SavingService.undo()
+    isUndoRedo = false
 
   $scope.redo = ->
+    isUndoRedo = true
     SavingService.redo()
+    isUndoRedo = false
 
   $scope.$on 'dataChanged', ->
     $scope.serializedData = SavingService.getRawData()
@@ -64,6 +70,8 @@ app.controller 'SerializationCtrl', (
     SavingService.loadJson($scope.serializedData)
 
   $scope.$on 'dataChanged', ->
+    if isUndoRedo
+      return
     SavingService.acceptChanges()
     $scope.serializedData = SavingService.getRawData()
 

@@ -10,13 +10,8 @@ app.service 'HistoryService', ->
 
   return {
 
-    setInitialState: (state) ->
-      if currentStateWithHistory.history.length
-        throw new Error()
-      currentStateWithHistory.state = state
-
     acceptNewState: (state) ->
-      delta = jsondiffpatch.diff(state, currentStateWithHistory.state)
+      delta = new jsondiffpatch.DiffPatcher().diff(currentStateWithHistory.state, state)
       if delta
         currentStateWithHistory.history.push({
           delta: delta
@@ -31,9 +26,10 @@ app.service 'HistoryService', ->
         index = currentStateWithHistory.history.length - 1
 
       currentIndex = currentStateWithHistory.history.length - 1
-      currentState = currentStateWithHistory.state
+      currentState = JSON.parse(JSON.stringify(currentStateWithHistory.state))
       while currentIndex > index
-        currentState = jsondiffpatch.reverse(currentState, currentStateWithHistory.history[currentIndex].delta)
+        new jsondiffpatch.DiffPatcher().unpatch(currentState, currentStateWithHistory.history[currentIndex].delta)
+        currentIndex--
 
       return currentState
 

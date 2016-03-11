@@ -1,6 +1,7 @@
 app.service 'SavingService', (DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
 
   undoPointer = -1
+  possibleRedos = 0
 
   serialize = () ->
     currentData = HistoryService.getData()
@@ -59,8 +60,8 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
       if path == 'demo'
         jsonState = JsonSerializationService.serialize({payments: demoPayments, accounts: demoAccounts})
         HistoryService.resetState()
-        HistoryService.setInitialState(jsonState)
-        undoIndex = -1
+        HistoryService.acceptNewState(jsonState)
+        undoPointer = HistoryService.getStateHistoryCount() - 1
         cb(null, 'demo')
       else if _.startsWith(path, 'drive:')
         await GoogleDriveSaveService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
@@ -84,26 +85,28 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
 
     newFile: ->
       jsonState = JsonSerializationService.serialize({payments: [], accounts: []})
-      undoIndex = -1
+      undoPointer = -1
       HistoryService.resetState()
-      HistoryService.setInitialState(jsonState)
+      HistoryService.acceptChanges(jsonState)
       applyFromHistoryToDataService()
 
     canUndo: ->
-      return undoPointer >= 0
+      return undoPointer > 0
 
     undo: ->
       undoPointer--
+      possibleRedos++
       # take state from history and set it to data service
       applyFromHistoryToDataService(undoPointer)
       # append state to the end of history
       applyFromDataToHistoryService()
 
     canRedo: ->
-      return undoPointer < HistoryService.getStateHistoryCount() - 1
+      return possibleRedos > 0
 
     redo: ->
       undoPointer++
+      possibleRedos--
       # take state from history and set it to data service
       applyFromHistoryToDataService(undoPointer)
       # append state to the end of history
