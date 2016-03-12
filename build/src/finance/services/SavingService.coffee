@@ -1,7 +1,20 @@
-app.service 'SavingService', (DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
+app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
 
   undoPointer = -1
   possibleRedos = 0
+
+  throttledUpdate = null
+
+  updateInDrive = (documentPath, done, progress) ->
+    if !_.startsWith(documentPath, 'drive:')
+      throw new Erorr()
+    id = documentPath.substring(6)
+    data = serialize()
+    GoogleDriveSaveService.updateFile(id, data, getIndex(), done, progress)
+
+  $rootScope.$on 'dataEdited', ->
+    if throttledUpdate
+      throttledUpdate()
 
   serialize = () ->
     currentData = HistoryService.getData()
@@ -34,6 +47,13 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
     paymentsText = payments.map((p) -> p.description).join(',')
     return accountsText + ',' + paymentsText
 
+  saveContinuously = (name, done, progress) ->
+    driveDocumentName = name
+    isDrive = true
+    update = ->
+      updateInDrive(name, done, progress)
+    throttledUpdate = _.throttle(update, 2000)
+
   return {
     loadJson: (json) -> deserialize(json)
     getRawData: () -> return serialize()
@@ -43,18 +63,16 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
       return
 
     saveDrive: (documentPath, done, progress) ->
-      if !_.startsWith(documentPath, 'drive:')
-        throw new Erorr()
-      id = documentPath.substring(6)
-      data = serialize()
-      GoogleDriveSaveService.updateFile(id, data, getIndex(), done, progress)
+      updateInDrive(documentPath, done, progress)
 
     openDrive: (done, progress) ->
       GoogleDriveSaveService.showPicker(done, progress)
+      saveContinuously(null, done, progress)
 
     saveNewDrive: (name, done, progress) ->
       data = serialize()
       GoogleDriveSaveService.newFile(name, data, getIndex(), done, progress)
+      saveContinuously(name, done, progress)
 
     loadFile: (path, cb, progress) ->
       if path == 'demo'
@@ -74,6 +92,7 @@ app.service 'SavingService', (DataService, HistoryService, JsonSerializationServ
         jsonData = JSON.parse(jsonStringData)
         HistoryService.setData(jsonData)
         undoPointer = HistoryService.getStateHistoryCount() - 1
+        saveContinuously('drive:' + file.id, cb, progress)
         cb(null, file.title)
       else
         throw new Error('unknown path')
