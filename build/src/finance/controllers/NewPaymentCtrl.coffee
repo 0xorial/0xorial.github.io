@@ -14,7 +14,7 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
       $scope.newBorrowPayment(e)
     if e.keyCode == 80 # 'p'
       $scope.newPeriodicPayment(e)
-    if e.keyCode == 84 # 'i'
+    if e.keyCode == 73 # 'i'
       $scope.newTaxableIncomePayment(e)
 
   $scope.showMenu = ($mdOpenMenu, ev) ->

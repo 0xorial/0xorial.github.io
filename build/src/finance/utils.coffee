@@ -20,15 +20,15 @@ _.mixin {
     return r
 
   augmentDate: (o, datePropertyName) ->
-    Object.defineProperty o, _.camelCase(datePropertyName + '_js'),
+    propertyName = _.camelCase(datePropertyName + '_js')
+    if o.hasOwnProperty propertyName
+      return
+    Object.defineProperty o, propertyName,
       get: -> @[datePropertyName].toDate()
       set: (value) -> @[datePropertyName] = moment(value)
 
   augmentDatesDeep: (o) ->
     _.traverse o, (val, key, obj) ->
-      # if obj.$$dateAugmented
-      #   return
-      obj.$$dateAugmented = true
       if moment.isMoment(val)
         _.augmentDate(obj, key)
 
