@@ -13,9 +13,11 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
 
     r.payment = p
     r.amount = p.amount
+    r.amountFormatted = numeral(p.amount).format('+0,0.00')
     r.currency = a.currency
     r.accountName = a.accountName
     r.color = a.color
+    r.id = p.id
 
     if p instanceof SimplePayment
       r.description = p.description
@@ -45,6 +47,8 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
       assign: (dst, src) -> convertPayment(src, dst)
       }
     $scope.payments = sortByDateAndId($scope.payments, (t) -> moment(t.date))
+    sortedByDate = _.clone($scope.payments)
+    $scope.payments.reverse()
 
     wrappers = {}
     for w in $scope.payments
@@ -52,7 +56,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
 
     fullState = SimulationService.getLastSimulation().currentAccountsState
     unmuted = DataService.getUnmutedPayments()
-    for p in $scope.payments.filter( (pp) -> !pp.payment.isMuted)
+    for p in $scope.payments
       otherPayments = _.except(unmuted, (pp) -> pp.id == p.payment.id)
       r = SimulationService.runSimulationFor(otherPayments)
       state = r.currentAccountsState
@@ -61,16 +65,12 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
         b = state.balances[i]
         d = fullState.balances[i] - b
         difference += d
-      p.absoluteEffect = numeral(difference).format('+0.00')
-
-
-    unmuted = DataService.getUnmutedPayments()
-    unmuted = sortByDateAndId(unmuted, (t) -> moment(wrappers[t.id].date))
+      p.absoluteEffect = numeral(difference).format('+0,0.00')
 
     first = 1
     lastState = null
-    for p in $scope.payments
-      otherPayments = _.take(unmuted, first)
+    for p in sortedByDate
+      otherPayments = _.take(sortedByDate.map( (p) -> p.payment ), first)
       first++
       r = SimulationService.runSimulationFor(otherPayments)
       state = r.currentAccountsState
@@ -80,7 +80,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
         lastBalance = if lastState then lastState.balances[i] else 0
         d = b - lastBalance
         difference += d
-      p.chronoEffect = numeral(difference).format('+0.00')
+      p.chronoEffect = numeral(difference).format('+0,0.00')
       lastState = state
     return
 

@@ -91,3 +91,5 @@ class exports.SerializationContext
 
   resolveObject: (id) ->
     return @objects[id]
+
+numeral.languageData().delimiters.thousands = ' '
