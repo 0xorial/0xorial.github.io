@@ -3,6 +3,7 @@ div(layout='column' style='width: 700px; height: 450px')
     div.transactions-list(layout='column')
       div.transaction(ng-repeat='transaction in transactions track by transaction.id' 
         layout='row'
+        style='border-top: solid 1px rgba(0, 0, 0, 0.117647);'
         ng-style='{"background-color": transaction.higlight ? "#b3ffb3" : null }')
         div
           span.color(ng-style='{"background-color": transaction.account.color}')
