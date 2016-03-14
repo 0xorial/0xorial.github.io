@@ -53,6 +53,12 @@ app.service 'DataService', ($rootScope) ->
       ensureIds()
       $rootScope.$broadcast 'dataEdited'
 
+    updateAccount: (account) ->
+      existing = _.findIndex(dataContainer.accounts, (a) -> a.id == account.id)
+      if existing == -1
+        throw new Error('account not found')
+      dataContainer.accounts[existing] = account
+
     getAllPayments: ->
       return dataContainer.payments
 
@@ -72,6 +78,12 @@ app.service 'DataService', ($rootScope) ->
       _.remove(dataContainer.payments, payment)
       ensureIds()
       $rootScope.$broadcast 'dataEdited'
+
+    updatePayment: (payment) ->
+      existing = _.findIndex(dataContainer.payments, (a) -> a.id == payment.id)
+      if existing == -1
+        throw new Error('payment not found')
+      dataContainer.payments[existing] = payment
 
     notifyChanged: ->
       $rootScope.$broadcast 'dataChanged'
