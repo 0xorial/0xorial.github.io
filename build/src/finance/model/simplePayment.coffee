@@ -11,22 +11,3 @@ class exports.SimplePayment extends exports.Payment
 
   assignTo: (to) ->
     _.assign(to, @)
-
-  toJson: (context) ->
-    return {
-      type: 'SimplePayment'
-      date: @date.valueOf()
-      amount: @amount
-      accountId: context.getObjectId(@account)
-      description: @description
-      isDeductible: @isDeductible
-      deductiblePercentage: @deductiblePercentage
-    }
-  @fromJson: (json, context) ->
-    return new exports.SimplePayment(
-      context.resolveObject(json.accountId),
-      moment(json.date),
-      json.amount,
-      json.description,
-      json.isDeductible,
-      json.deductiblePercentage)

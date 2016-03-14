@@ -17,25 +17,3 @@ class exports.BorrowPayment extends exports.Payment
     interest = fraction * @interest
     returnAmount = @amount * (-1) * (1 + interest)
     context.transaction(@returnDate, returnAmount, @account, 'return ' + @description, @)
-
-  assignTo: (to) ->
-    _.assign(to, @)
-
-  toJson: (context) ->
-    return {
-      type: 'BorrowPayment'
-      accountId: context.getObjectId(@account)
-      date: @date.valueOf()
-      returnDate: @returnDate.valueOf()
-      amount: @amount
-      description: @description
-      interest: @interest
-    }
-  @fromJson: (json, context) ->
-    return new exports.BorrowPayment(
-      context.resolveObject(json.accountId),
-      moment(json.date),
-      moment(json.returnDate),
-      json.amount,
-      json.description,
-      json.interest)
