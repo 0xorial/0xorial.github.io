@@ -1,13 +1,18 @@
 exports = window
 
-exports.sortTransactions = (transactions) ->
-  transactions.sort (a,b) ->
-    if a.date.isSame(b.date)
+exports.sortByDateAndId = (items, dateSelector) ->
+  items.sort (a,b) ->
+    aDate = dateSelector(a)
+    bDate = dateSelector(b)
+    if aDate.isSame(bDate)
       if a.id == b.id
         return 0
       if a.id < b.id
         return -1
       return 1
-    if a.date.isBefore(b.date)
+    if aDate.isBefore(bDate)
       return -1
     return 1
+
+exports.sortTransactions = (transactions) ->
+  exports.sortByDateAndId(transactions, (t) -> t.date)

@@ -44,7 +44,11 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
       equals: (x, y) -> x.id == y.payment.id
       assign: (dst, src) -> convertPayment(src, dst)
       }
-    $scope.payments = _.sortBy($scope.payments, 'date')
+    $scope.payments = sortByDateAndId($scope.payments, (t) -> moment(t.date))
+
+    wrappers = {}
+    for w in $scope.payments
+      wrappers[w.payment.id] = w
 
     fullState = SimulationService.getLastSimulation().currentAccountsState
     unmuted = DataService.getUnmutedPayments()
@@ -57,7 +61,27 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
         b = state.balances[i]
         d = fullState.balances[i] - b
         difference += d
-      p.effect = numeral(difference).format('+0.00')
+      p.absoluteEffect = numeral(difference).format('+0.00')
+
+
+    unmuted = DataService.getUnmutedPayments()
+    unmuted = sortByDateAndId(unmuted, (t) -> moment(wrappers[t.id].date))
+
+    first = 1
+    lastState = null
+    for p in $scope.payments
+      otherPayments = _.take(unmuted, first)
+      first++
+      r = SimulationService.runSimulationFor(otherPayments)
+      state = r.currentAccountsState
+      difference = 0
+      for a, i in state.accounts
+        b = state.balances[i]
+        lastBalance = if lastState then lastState.balances[i] else 0
+        d = b - lastBalance
+        difference += d
+      p.chronoEffect = numeral(difference).format('+0.00')
+      lastState = state
     return
 
   update()
