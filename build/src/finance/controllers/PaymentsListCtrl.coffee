@@ -1,6 +1,27 @@
 app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService) ->
 
   $scope.payments = []
+  $scope.visiblePayments = []
+
+  updateVisible = ->
+    $scope.visiblePayments = []
+    evaluator = -> true
+    try
+      if $scope.filterFunction.length > 0
+        predicate = eval('(function(p){' + $scope.filterFunction + ';})')
+        if _.isFunction predicate
+          evaluator = predicate
+    catch e
+      console.warn(e)
+    for p in $scope.payments
+      show = true
+      try
+        show = evaluator(p)
+      catch
+      p.visible = show
+      if show
+        $scope.visiblePayments.push p
+
   convertPayment = (p, r) ->
     if p.account
       a = {
@@ -82,9 +103,14 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
         difference += d
       p.chronoEffect = numeral(difference).format('+0,0.00')
       lastState = state
+
+    updateVisible()
     return
 
   update()
+
+  $scope.$watch 'filterFunction', ->
+    updateVisible()
 
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
@@ -133,6 +159,13 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
   $scope.unmuteAll = ->
     for p in $scope.payments
       p.payment.isMuted = false
+    DataService.notifyChanged()
+    update()
+
+  $scope.muteHidden = ->
+    for p in $scope.payments
+      if !p.visible
+        p.payment.isMuted = true
     DataService.notifyChanged()
     update()
 
