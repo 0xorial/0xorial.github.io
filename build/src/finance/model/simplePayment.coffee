@@ -8,6 +8,3 @@ class exports.SimplePayment extends exports.Payment
 
   getTransactions: (context) ->
     context.transaction(@date, -@amount, @account, @description, @)
-
-  assignTo: (to) ->
-    _.assign(to, @)
