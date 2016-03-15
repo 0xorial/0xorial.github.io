@@ -93,16 +93,20 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     for p in sortedByDate
       otherPayments = _.take(sortedByDate.map( (p) -> p.payment ), first)
       first++
-      r = SimulationService.runSimulationFor(otherPayments)
-      state = r.currentAccountsState
-      difference = 0
-      for a, i in state.accounts
-        b = state.balances[i]
-        lastBalance = if lastState then lastState.balances[i] else 0
-        d = b - lastBalance
-        difference += d
-      p.chronoEffect = numeral(difference).format('+0,0.00')
-      lastState = state
+      if !p.payment.isMuted
+        otherUnmuted = otherPayments.filter (p) -> !p.isMuted
+        r = SimulationService.runSimulationFor(otherUnmuted)
+        state = r.currentAccountsState
+        difference = 0
+        for a, i in state.accounts
+          b = state.balances[i]
+          lastBalance = if lastState then lastState.balances[i] else 0
+          d = b - lastBalance
+          difference += d
+        p.chronoEffect = numeral(difference).format('+0,0.00')
+        lastState = state
+      else
+        p.chronoEffect = numeral(0).format('+0,0.00')
 
     updateVisible()
     return
