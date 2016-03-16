@@ -16,8 +16,8 @@ exports = window
 
 exports.sortByDateAndId = (items, dateSelector) ->
   items.sort (a,b) ->
-    aDate = dateSelector(a).valueOf()
-    bDate = dateSelector(b).valueOf()
+    aDate = dateSelector(a)
+    bDate = dateSelector(b)
     if aDate == bDate
       if a.id == b.id
         return 0
@@ -30,4 +30,6 @@ exports.sortByDateAndId = (items, dateSelector) ->
 
 
 exports.sortTransactions = (transactions) ->
-  exports.sortByDateAndId(transactions, (t) -> t.date)
+  for t in transactions
+    t.dateValue = t.date.valueOf()
+  exports.sortByDateAndId(transactions, (t) -> t.dateValue)

@@ -33,8 +33,9 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
       a = {}
 
     r.payment = p
+    if r.amount != p.amount
+      r.amountFormatted = numeral(p.amount).format('+0,0.00')
     r.amount = p.amount
-    r.amountFormatted = numeral(p.amount).format('+0,0.00')
     r.currency = a.currency
     r.accountName = a.accountName
     r.color = a.color
@@ -67,7 +68,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
       equals: (x, y) -> x.id == y.payment.id
       assign: (dst, src) -> convertPayment(src, dst)
       }
-    $scope.payments = sortByDateAndId($scope.payments, (t) -> moment(t.date))
+    $scope.payments = sortByDateAndId($scope.payments, (t) -> t.date.getTime())
     sortedByDate = _.clone($scope.payments)
     $scope.payments.reverse()
 
@@ -86,27 +87,32 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
         b = state.balances[i]
         d = fullState.balances[i] - b
         difference += d
-      p.absoluteEffect = numeral(difference).format('+0,0.00')
+      if difference != p.absoluteEffectNum
+        p.absoluteEffect = numeral(difference).format('+0,0.00')
+        p.absoluteEffectNum = difference
 
     first = 1
     lastState = null
     for p in sortedByDate
       otherPayments = _.take(sortedByDate.map( (p) -> p.payment ), first)
       first++
+      difference = 0
       if !p.payment.isMuted
         otherUnmuted = otherPayments.filter (p) -> !p.isMuted
         r = SimulationService.runSimulationFor(otherUnmuted)
         state = r.currentAccountsState
-        difference = 0
         for a, i in state.accounts
           b = state.balances[i]
           lastBalance = if lastState then lastState.balances[i] else 0
           d = b - lastBalance
           difference += d
-        p.chronoEffect = numeral(difference).format('+0,0.00')
         lastState = state
       else
-        p.chronoEffect = numeral(0).format('+0,0.00')
+        difference = 0
+      if difference != p.chronoEffectNum
+        p.chronoEffect = numeral(difference).format('+0,0.00')
+        p.chronoEffectNum = difference
+
 
     updateVisible()
     return
@@ -148,31 +154,25 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     console.log 'muting...'
     payment.payment.isMuted = true
     DataService.notifyChanged()
-    update()
+    # update()
 
   $scope.unmute = (payment) ->
     payment.payment.isMuted = false
     DataService.notifyChanged()
-    update()
-
-  $scope.muteAll = ->
-    for p in $scope.payments
-      p.payment.isMuted = true
-    DataService.notifyChanged()
-    update()
+    # update()
 
   $scope.unmuteAll = ->
     for p in $scope.payments
       p.payment.isMuted = false
     DataService.notifyChanged()
-    update()
+    # update()
 
   $scope.muteHidden = ->
     for p in $scope.payments
       if !p.visible
         p.payment.isMuted = true
     DataService.notifyChanged()
-    update()
+    # update()
 
   $scope.$on 'simulationRan', (__, c) ->
     update()
