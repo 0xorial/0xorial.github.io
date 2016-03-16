@@ -2,7 +2,6 @@ app = angular.module('StarterApp', [
   'ngMaterial'
   'ngMdIcons'
   'mdColorPicker'
-  'highcharts-ng'
   'ui.router'
 ])
 

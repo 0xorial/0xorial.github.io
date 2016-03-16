@@ -7,7 +7,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     $scope.visiblePayments = []
     evaluator = -> true
     try
-      if $scope.filterFunction.length > 0
+      if $scope.filterFunction and $scope.filterFunction.length > 0
         predicate = eval('(function(p){' + $scope.filterFunction + ';})')
         if _.isFunction predicate
           evaluator = predicate

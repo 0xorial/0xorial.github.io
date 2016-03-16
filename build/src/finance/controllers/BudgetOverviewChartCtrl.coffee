@@ -89,47 +89,53 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       TransactionsPopupService.show transactions
 
 
-    $scope.chartConfig = {
-      useHighStocks: true
-      options:
-        chart:
+    options =
+      chart:
+        renderTo: 'chart'
+        events:
+          click: ->
+            showTransactions()
+        type: 'line'
+        xAxis:
+          type: 'datetime'
+      rangeSelctor:
+        selected:0
+      navigator:
+        enabled: true
+        series:
+          data: sumData
+      series: series
+      plotOptions:
+        line:
+          animation: false
           events:
             click: ->
               showTransactions()
-          type: 'line'
-          xAxis:
-            type: 'datetime'
-        rangeSelctor:
-          selected:0
-        navigator:
-          enabled: true
-          series:
-            data: sumData
-        tooltip:
-          useHTML: true
-          formatter: ->
-            lastToolTip = this
-            result = ''
-            result += moment(@x).format('DD MMMM YYYY') + '</br>'
-            sumPoint = _.find(@points, (p) -> p.point.accountState).point
-            result += "<span style='color:red'>TOTAL:</span>" + numeral(sumPoint.y).format('+0,0.00') + '</br>'
-            for a, i in sumPoint.accountState.accounts
-              balance = sumPoint.accountState.balances[i]
-              result += "<span style='color: #{a.color}; margin-top: 10px; display:inline-block'>" +
-                a.name + '</span>: ' + numeral(balance).format('+0,0.00') + ' ' + a.currency + '</br>'
-              accountPoints = this.points.filter(
-                (p) ->
-                  p.point.transactions and p.point.transactions.find(
-                    (t) -> t.account.id == a.id))
-              for point in accountPoints
-                for t in point.point.transactions
-                  result += "<span style='width:20px; display:inline-block;'></span>" + t.description + ': ' + numeral(t.amount).format('+0,0.00') + '</br>'
-            return result
-      series: series,
-      size: {
-       height: 400
-      }
-    }
+      tooltip:
+        useHTML: true
+        formatter: ->
+          lastToolTip = this
+          result = ''
+          result += moment(@x).format('DD MMMM YYYY') + '</br>'
+          sumPoint = _.find(@points, (p) -> p.point.accountState).point
+          result += "<span style='color:red'>TOTAL:</span>" + numeral(sumPoint.y).format('+0,0.00') + '</br>'
+          for a, i in sumPoint.accountState.accounts
+            balance = sumPoint.accountState.balances[i]
+            result += "<span style='color: #{a.color}; margin-top: 10px; display:inline-block'>" +
+              a.name + '</span>: ' + numeral(balance).format('+0,0.00') + ' ' + a.currency + '</br>'
+            accountPoints = this.points.filter(
+              (p) ->
+                p.point.transactions and p.point.transactions.find(
+                  (t) -> t.account.id == a.id))
+            for point in accountPoints
+              for t in point.point.transactions
+                result += "<span style='width:20px; display:inline-block;'></span>" + t.description + ': ' + numeral(t.amount).format('+0,0.00') + '</br>'
+          return result
+
+    if theChart
+      theChart.destroy()
+    theChart = new Highcharts.StockChart(options)
+
   update()
 
   $scope.$on 'simulationRan', (__, c) ->
