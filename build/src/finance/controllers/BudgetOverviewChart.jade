@@ -7,5 +7,5 @@ div(ng-controller='BudgetOverviewChartCtrl' style='margin:10px' layout-padding='
       md-checkbox(ng-model='account.isSelected') {{account.name}}
     div
       md-button.md-raised(ng-click='showAllTransactions()') Transactions
-  div(layout='row')
+  div(layout='row' flex='')
     #chart(flex='')

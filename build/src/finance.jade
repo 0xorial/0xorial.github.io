@@ -33,7 +33,7 @@ html(lang='en', ng-app='StarterApp')
                   div(ng-include='"finance/controllers/AccountsList.html"' layout='column')
           div(flex='50' layout='column')
             .md-whiteframe-z1(style='margin:10px;' layout='column' flex='')
-              div(ng-include='"finance/controllers/BudgetOverviewChart.html"' flex='80')
+              div(ng-include='"finance/controllers/BudgetOverviewChart.html"' layout='column' flex='')
               
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' layout='column')
     div(ui-view = '' flex='' layout='column')
