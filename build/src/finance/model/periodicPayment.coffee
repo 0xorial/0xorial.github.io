@@ -7,8 +7,32 @@ class exports.PeriodicPayment extends exports.Payment
     if !@endDate
       @endDate = moment()
 
-  getTransactions: (context) ->
+  generateDates: ->
+    result = []
     date = @startDate.clone()
     while date.isBefore(@endDate)
-      context.transaction(date.clone(), -@amount, @account, @description, @)
+      result.push date.clone()
       date.add(@period.quantity, @period.units)
+    return result
+
+
+  getTransactions: (context) ->
+    currentState = {
+      startDate: @startDate.valueOf()
+      endDate: @endDate.valueOf()
+      period: @period.valueOf()
+    }
+    dates = null
+    p = if @lastState then @lastState.params else null
+    c = currentState
+    if @lastState and p.startDate == c.startDate and p.endDate == c.endDate and p.period == c.period
+      dates = @lastState.dates
+    else
+      dates = @generateDates()
+      @lastState = {
+        params: currentState
+        dates: dates
+      }
+
+    for date in dates
+      context.transaction(date, -@amount, @account, @description, @)

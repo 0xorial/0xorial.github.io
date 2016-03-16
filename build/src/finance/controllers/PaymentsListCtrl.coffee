@@ -145,6 +145,7 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     DataService.deletePayment(payment.payment)
 
   $scope.mute = (payment) ->
+    console.log 'muting...'
     payment.payment.isMuted = true
     DataService.notifyChanged()
     update()
