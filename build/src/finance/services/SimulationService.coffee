@@ -1,4 +1,4 @@
-app.service 'SimulationService', ($rootScope, DataService) ->
+app.service 'SimulationService', ($rootScope, DataService, PaymentEvaluationContextService) ->
 
   lastSimulation = null
 
@@ -16,11 +16,12 @@ app.service 'SimulationService', ($rootScope, DataService) ->
   runSimulation = (payments) ->
     accounts = DataService.getAccounts()
     context = new SimulationContext(accounts)
+    evaluationContext = PaymentEvaluationContextService.getContext()
     for p in payments
-      p.getTransactions(context)
+      p.getTransactions(context, evaluationContext)
 
     t = new BeTaxSystem()
-    t.calculate(null, payments, context)
+    t.calculate(null, payments, context, PaymentEvaluationContextService.getContext())
 
     context.executeTransactions()
 

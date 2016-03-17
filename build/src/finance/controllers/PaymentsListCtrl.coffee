@@ -1,4 +1,4 @@
-app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService) ->
+app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService, PaymentEvaluationContextService) ->
 
   $scope.payments = []
   $scope.visiblePayments = []
@@ -33,9 +33,10 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
       a = {}
 
     r.payment = p
-    if r.amount != p.amount
-      r.amountFormatted = numeral(p.amount).format('+0,0.00')
-    r.amount = p.amount
+    amount = p.getAmount(PaymentEvaluationContextService.getContext())
+    if r.amount != amount
+      r.amountFormatted = numeral(amount).format('+0,0.00')
+      r.amount = amount
     r.currency = a.currency
     r.accountName = a.accountName
     r.color = a.color

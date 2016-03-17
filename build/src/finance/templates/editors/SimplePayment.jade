@@ -6,7 +6,7 @@ div(layout='column')
     md-datepicker(ng-model='payment.dateJs')
     md-input-container
       label Amount
-      input(type='number' ng-model='payment.amount' style='width: 100px')
+      input(ng-model='payment.amount' style='width: 100px')
     accounts-drop-down(selected-account='payment.account')
   div(layout='row')
     md-checkbox(ng-model='payment.isDeductible') Is deductible expense

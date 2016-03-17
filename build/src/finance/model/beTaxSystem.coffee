@@ -1,7 +1,7 @@
 exports = window
 
 class exports.BeTaxSystem
-  calculate: (data, allPayments, context) ->
+  calculate: (data, allPayments, context, evaluationContext) ->
     isTaxableIncome = (p) -> p instanceof exports.TaxableIncomePayment
     payments = allPayments.filter(isTaxableIncome)
     if payments.length > 0
@@ -16,8 +16,8 @@ class exports.BeTaxSystem
       yearExpenses = deductibleExpensesByYear[year] or []
 
       #amount without VAT
-      totalYearIncome = _.sumBy0(yearPayments, (p) -> p.amount * (1 - (p.params.vatPercentage or 0)))
-      vatYearIncome = _.sumBy0(yearPayments, (p) -> p.amount * p.params.vatPercentage)
+      totalYearIncome = _.sumBy0(yearPayments, (p) -> p.getAmount(evaluationContext) * (1 - (p.params.vatPercentage or 0)))
+      vatYearIncome = _.sumBy0(yearPayments, (p) -> p.getAmount(evaluationContext) * p.params.vatPercentage)
 
       deductibleVat = _.sumBy0(yearExpenses, getDeductibaleVat)
       deductibleNonVat = _.sumBy0(yearExpenses, getDeductibaleNonVat)

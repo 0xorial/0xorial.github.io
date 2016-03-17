@@ -9,28 +9,28 @@ class exports.BorrowPayment extends exports.Payment
     if !@returnDate
       @returnDate = moment()
 
-  getReturnAmount: ->
+  getReturnMultiplier: ->
     diff = @returnDate.diff(@date)
     days = moment.duration(diff).asDays()
     fraction = days/365
     interest = fraction * @interest
-    returnAmount = @amount * (-1) * (1 + interest)
-    return returnAmount
+    return -(1 + interest)
 
-  getTransactions: (context) ->
+  getTransactions: (context, evaluationContext) ->
+    amount = @getAmount(evaluationContext)
     currentState = {
       startDate: @date.valueOf()
       endDate: @returnDate.valueOf()
     }
-    returnAmount = 0
+    returnMultiplier = 0
     if @lastState and @lastState.params.startDate == currentState.startDate and @lastState.params.endDate == currentState.endDate
-      returnAmount = @lastState.returnAmount
+      returnMultiplier = @lastState.returnMultiplier
     else
-      returnAmount = @getReturnAmount()
+      returnAmount = @getReturnMultiplier()
       @lastState = {
         params: currentState
-        returnAmount: returnAmount
+        returnMultiplier: returnMultiplier
       }
 
-    context.transaction(@date, @amount, @account, 'borrow ' + @description, @)
-    context.transaction(@returnDate, returnAmount, @account, 'return ' + @description, @)
+    context.transaction(@date, amount, @account, 'borrow ' + @description, @)
+    context.transaction(@returnDate, returnMultiplier * amount, @account, 'return ' + @description, @)
