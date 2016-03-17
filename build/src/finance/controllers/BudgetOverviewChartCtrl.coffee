@@ -42,7 +42,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
         data.push({
           transactions: dateTransactions,
           description: t.description,
-          amount: t.amount
+          amount: balance
           x: t.date.valueOf(),
           y: balance})
 
@@ -88,6 +88,12 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       transactions = SimulationService.getLastSimulation().transactions
       TransactionsPopupService.show transactions
 
+    $scope.balances = series.map (s) ->
+      amount = s.data[s.data.length - 2].amount
+      return {
+        name: s.name
+        amount: numeral(amount).format('+0,0.00')
+      }
 
     options =
       chart:

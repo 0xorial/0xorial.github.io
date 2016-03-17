@@ -9,3 +9,8 @@ div(ng-controller='BudgetOverviewChartCtrl' style='margin:10px' layout-padding='
       md-button.md-raised(ng-click='showAllTransactions()') Transactions
   div(layout='row' flex='')
     #chart(flex='')
+  div(layout='column')
+    div(ng-repeat='b in balances' layout='row')
+      div(flex='') {{b.name}}
+      div(style='width: 80px') {{b.amount}}
+    
