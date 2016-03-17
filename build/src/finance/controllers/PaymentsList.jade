@@ -7,7 +7,6 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
       button.icon-button(ng-click='unmuteAll()' title='Unmute all')
         ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
     div(layout='row')
-      div HACKER FILTER: 
       div (function(p) {
       input(ng-model='filterFunction' flex='')
       div ;})
@@ -18,19 +17,21 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
 
   div.payment(ng-repeat-start='p in visiblePayments track by p.payment.id' 
       ng-mouseenter='enteredPayment(p)' ng-mouseleave='leftPayment(p)' ng-hide='p.showEdit'
-      layout='row' layout-align='space-between center' 
-      style='border-top: solid 1px rgba(0, 0, 0, 0.117647); padding: 4px; padding-left:8px;'
+      layout='row' layout-align='start center' 
+      style='border-top: solid 1px rgba(0, 0, 0, 0.117647); padding: 4px; padding-left: 0'
       ng-class='{muted : p.payment.isMuted}')
     div(layout='row' ng-switch='p.payment.isMuted')
       button.icon-button(ng-click='unmute(p)' ng-switch-when='true')
         ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
       button.icon-button(ng-click='mute(p)' ng-switch-default)
         ng-md-icon(icon='volume_off' style="fill: #ff8c66; cursor:pointer;" size='20')
-    div(flex='') {{p.description}}
-    div(flex='10' style='max-width: 70px') {{p.type}}
-    div(flex='10' style='min-width: 70px') {{p.date | date : 'dd/MM/yyyy'}}
-    div(flex='15' style='min-width: 70px; text-align:right;') {{p.amountFormatted}}
-    div(flex='10' style='min-width: 70px; text-align:left;' layout='column') 
+    div(style='width: 10px') {{p.payment.id}}
+    div(layout='column' flex='')
+      div {{p.description}}
+      div(style='font-size: 8px; text-transform: lowercase;') {{p.type}}
+    div(style='min-width: 70px') {{p.date | date : 'dd/MM/yyyy'}}
+    div(style='min-width: 70px; text-align:right;') {{p.amountFormatted}}
+    div(style='min-width: 70px; text-align:left;' layout='column') 
       div.effect {{p.absoluteEffect}}
       div.effect {{p.chronoEffect}}
     div(flex='7') {{p.currency}}
