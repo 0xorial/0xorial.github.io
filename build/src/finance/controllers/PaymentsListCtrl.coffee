@@ -8,7 +8,11 @@ app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationS
     evaluator = -> true
     try
       if $scope.filterFunction and $scope.filterFunction.length > 0
-        predicate = eval('(function(p){' + $scope.filterFunction + ';})')
+        if $scope.filterFunction.includes('return ')
+          predicate = eval('(function(p){' + $scope.filterFunction + ';})')
+        else
+          re = new RegExp($scope.filterFunction)
+          predicate = (p) -> re.test(p.description) or re.test(p.amount)
         if _.isFunction predicate
           evaluator = predicate
     catch e

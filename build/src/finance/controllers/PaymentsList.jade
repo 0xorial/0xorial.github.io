@@ -25,7 +25,7 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
         ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
       button.icon-button(ng-click='mute(p)' ng-switch-default)
         ng-md-icon(icon='volume_off' style="fill: #ff8c66; cursor:pointer;" size='20')
-    div(style='width: 10px') {{p.payment.id}}
+    div(style='width: 14px') {{p.payment.id}}
     div(layout='column' flex='')
       div {{p.description}}
       div(style='font-size: 8px; text-transform: lowercase;') {{p.type}}
