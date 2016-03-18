@@ -11,6 +11,6 @@ class exports.TaxableIncomePayment extends exports.Payment
     # vatPercentage
     # paymentDate
     # description
-    
-  getTransactions: (context) ->
-    context.transaction(@params.paymentDate, @getAmount(context), @account, 'salary', @)
+
+  getTransactions: (context, evaluator) ->
+    context.transaction(@params.paymentDate, @getAmount(evaluator), @account, 'salary', @)

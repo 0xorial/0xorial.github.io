@@ -27,15 +27,17 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
 
   applyFromHistoryToDataService = (pointer) ->
     jsonState = HistoryService.peekState(pointer)
-    state = JsonSerializationService.deserialize({payments: jsonState.payments, accounts: jsonState.accounts})
+    state = JsonSerializationService.deserialize(jsonState)
     DataService.setAccounts(state.accounts)
     DataService.setPayments(state.payments)
+    DataService.setValues(state.values)
     DataService.notifyChanged()
 
   applyFromDataToHistoryService = (description) ->
     state = {
       payments: DataService.getAllPayments()
       accounts: DataService.getAccounts()
+      values: DataService.getValues()
       }
     jsonState = JsonSerializationService.serialize(state)
     HistoryService.acceptNewState(jsonState, description)
@@ -76,7 +78,10 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
 
     loadFile: (path, cb, progress) ->
       if path == 'demo'
-        jsonState = JsonSerializationService.serialize({payments: demoPayments, accounts: demoAccounts})
+        jsonState = JsonSerializationService.serialize({
+          payments: demoPayments,
+          accounts: demoAccounts,
+          values: demoValues})
         HistoryService.resetState()
         HistoryService.acceptNewState(jsonState)
         undoPointer = HistoryService.getStateHistoryCount() - 1
@@ -103,7 +108,7 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
       GoogleDriveSaveService.authorizeInDrive(cb, progress)
 
     newFile: ->
-      jsonState = JsonSerializationService.serialize({payments: [], accounts: []})
+      jsonState = JsonSerializationService.serialize({payments: [], accounts: [], values: {}})
       undoPointer = -1
       HistoryService.resetState()
       HistoryService.acceptNewState(jsonState)

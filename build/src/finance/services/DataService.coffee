@@ -85,6 +85,18 @@ app.service 'DataService', ($rootScope) ->
         throw new Error('payment not found')
       dataContainer.payments[existing] = payment
 
+    setValues: (values) ->
+      dataContainer.values = values
+
+    getValues: (values) ->
+      return dataContainer.values
+
+    setValue: (key, value) ->
+      dataContainer.values[key] = value
+
+    deleteValue: (key) ->
+      delete dataContainer[key]
+
     notifyChanged: ->
       $rootScope.$broadcast 'dataChanged'
 

@@ -4,13 +4,10 @@ class exports.Payment
   getTransactions: (context) ->
     throw new Error('abstract method')
 
-  getAmount: (context) ->
-    if !context
+  getAmount: (evaluator) ->
+    if !evaluator.evaluateAmount
       throw new Error()
-    amount = @amount
-    if _.isString(amount)
-      amount = eval(amount)
-    return amount
+    return evaluator.evaluateAmount(@amount)
 
   clone: ->
     c = new @constructor()

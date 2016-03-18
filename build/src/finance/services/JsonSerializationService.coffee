@@ -14,8 +14,9 @@ app.service 'JsonSerializationService', ->
       return json
 
     root = {
-      accounts: accounts,
+      accounts: accounts
       payments: payments
+      values: data.values
     }
     return root
 
@@ -47,6 +48,7 @@ app.service 'JsonSerializationService', ->
     return {
       accounts: accounts
       payments: payments
+      values: root.values ? {}
     }
 
 

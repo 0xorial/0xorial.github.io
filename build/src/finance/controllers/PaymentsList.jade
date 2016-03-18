@@ -13,6 +13,8 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
     
     div(flex='')
     div
+      md-button.md-raised(ng-click='showConstants()') Constants
+    div
       div(ng-include='"finance/controllers/NewPayment.html"')
 
   div.payment(ng-repeat-start='p in visiblePayments track by p.payment.id' 

@@ -173,3 +173,5 @@ exports.demoPayments = transactions.map (t) ->
   r.id = t.id
   return r
 exports.demoAccounts = allAccountsData
+
+exports.demoValues = {}
