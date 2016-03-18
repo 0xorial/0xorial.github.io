@@ -16,7 +16,7 @@ class exports.PeriodicPayment extends exports.Payment
     return result
 
 
-  getTransactions: (context) ->
+  getTransactions: (context, evaluator) ->
     currentState = {
       startDate: @startDate.valueOf()
       endDate: @endDate.valueOf()
@@ -34,5 +34,6 @@ class exports.PeriodicPayment extends exports.Payment
         dates: dates
       }
 
+    amount = @getAmount(evaluator)
     for date in dates
-      context.transaction(date, -@amount, @account, @description, @)
+      context.transaction(date, -amount, @account, @description, @)

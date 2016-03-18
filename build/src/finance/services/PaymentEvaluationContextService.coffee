@@ -1,36 +1,39 @@
 app.service 'FormulaEvaluationService', (DataService) ->
 
   class Context
-    constructor: () ->
+    constructor: (@evaluator) ->
 
     findPayment: (id) ->
       payments = DataService.getAllPayments()
-      return _.find(payments, {id: id})
+      payment = _.find(payments, {id: id})
+      amount = @evaluator.evaluateAmount(payment.amount)
+      return {a: amount}
 
     getFormulaValue: (name) ->
-      context = this
-      return eval(DataService.getValues()[name])
+      value = DataService.getValues()[name]
+      amount = @evaluator.evaluateFormula(value)
+      return {a: amount}
 
   class Evaluator
     constructor: ->
-      @context = new Context()
+      @context = new Context(@)
 
     evaluateAmount: (amount) ->
       if _.isNumber(amount)
         return amount
       if _.isString(amount)
-        p = @context.findPayment
-        v = @context.getFormulaValue
-        amount = eval(amount)
-      return amount
+        p = => @context.findPayment(arguments[0])
+        v = => @context.getFormulaValue(arguments[0])
+        result = eval(amount)
+      return result
 
     evaluateFormula: (formula) ->
-      if _.isNumber(amount)
-        return amount
-      if _.isString(amount)
-        p = @context.findPayment
-        v = @context.getFormulaValue
-        amount = eval(amount)
+      if _.isNumber(formula)
+        return formula
+      if _.isString(formula)
+        p = => @context.findPayment(arguments[0])
+        v = => @context.getFormulaValue(arguments[0])
+        amount = eval(formula)
       return amount
 
   return {

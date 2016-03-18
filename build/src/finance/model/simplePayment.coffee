@@ -6,5 +6,5 @@ class exports.SimplePayment extends exports.Payment
       @date = moment()
     @deductiblePercentage |= 0
 
-  getTransactions: (context) ->
-    context.transaction(@date, -@amount, @account, @description, @)
+  getTransactions: (context, evaluator) ->
+    context.transaction(@date, -@getAmount(evaluator), @account, @description, @)
