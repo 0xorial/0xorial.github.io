@@ -11,6 +11,9 @@ app.service 'FormulaEvaluationService', (DataService) ->
 
     getFormulaValue: (name) ->
       value = DataService.getValues()[name]
+      if !value
+        console.warn('value not found: ' + name)
+        return {a: 0}
       amount = @evaluator.evaluateFormula(value)
       return {a: amount}
 
@@ -24,7 +27,12 @@ app.service 'FormulaEvaluationService', (DataService) ->
       if _.isString(amount)
         p = => @context.findPayment(arguments[0])
         v = => @context.getFormulaValue(arguments[0])
-        result = eval(amount)
+        try
+          result = eval(amount)
+        catch e
+          result = 0
+          console.warn e
+      _.assertNumber(result)
       return result
 
     evaluateFormula: (formula) ->
@@ -33,7 +41,12 @@ app.service 'FormulaEvaluationService', (DataService) ->
       if _.isString(formula)
         p = => @context.findPayment(arguments[0])
         v = => @context.getFormulaValue(arguments[0])
-        amount = eval(formula)
+        try
+          amount = eval(formula)
+        catch e
+          amount = 0
+          console.warn e
+      _.assertNumber(amount)
       return amount
 
   return {

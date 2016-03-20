@@ -13,4 +13,6 @@ class exports.TaxableIncomePayment extends exports.Payment
     # description
 
   getTransactions: (context, evaluator) ->
+    amount = @getAmount(evaluator)
+    _.assertNumber(amount)
     context.transaction(@params.paymentDate, @getAmount(evaluator), @account, 'salary', @)

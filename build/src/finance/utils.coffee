@@ -14,6 +14,11 @@ Function::augmentDateDeep = (propertyName, getSetDate) ->
 exports = window
 
 _.mixin {
+
+  assertNumber: (n) ->
+    if !_.isNumber(n) or isNaN(n)
+      throw new Error()
+
   sumBy0: (c, i) ->
     r = _.sum(c.map(i))
     r = 0 if !r
