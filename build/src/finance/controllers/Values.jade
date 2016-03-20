@@ -1,0 +1,12 @@
+script(type='text/ng-template' id='values-dialog.html')
+  md-dialog#values(layout='column' layout-padding='')
+    div(ng-repeat='value in values' layout='row')
+      div(style='width: 100px') {{value.name}}
+      input(ng-model='value.value')
+    
+    div(layout='row')
+      md-button.md-raised(ng-click='cancel()') Cancel
+      md-button.md-raised(ng-click='ok()') Ok
+
+div(layout='column' ng-controller='ValuesCtrl')
+  md-button.md-raised(ng-click='showValues()') Values

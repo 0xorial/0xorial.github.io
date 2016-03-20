@@ -13,7 +13,7 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
     
     div(flex='')
     div
-      md-button.md-raised(ng-click='showConstants()') Constants
+      div(ng-include='"finance/controllers/Values.html"')
     div
       div(ng-include='"finance/controllers/NewPayment.html"')
 

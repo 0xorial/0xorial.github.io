@@ -86,6 +86,8 @@ app.service 'DataService', ($rootScope) ->
       dataContainer.payments[existing] = payment
 
     setValues: (values) ->
+      if !values
+        throw new Error()
       dataContainer.values = values
 
     getValues: (values) ->

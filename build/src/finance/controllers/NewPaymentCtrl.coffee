@@ -52,7 +52,7 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
               $mdDialog.cancel()
 
 
-          templateUrl: 'dialog.html',
+          templateUrl: 'new-payment-dialog.html',
           parent: angular.element(document.body),
           targetEvent: ev,
           clickOutsideToClose:true
