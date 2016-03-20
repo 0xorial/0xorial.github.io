@@ -7,6 +7,11 @@ app.controller 'ValuesCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
         for key, value of dataValues
           values.push {name: key, value: value}
         $scope.values = values
+        $scope.delete = (name) ->
+          _.remove($scope.values, (p) -> p.name == name)
+        $scope.new = ->
+          $scope.values.push({name: '', value: ''})
+
         $scope.ok = ->
           $mdDialog.hide()
           dataValues = {}

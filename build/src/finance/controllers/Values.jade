@@ -1,8 +1,13 @@
 script(type='text/ng-template' id='values-dialog.html')
   md-dialog#values(layout='column' layout-padding='')
     div(ng-repeat='value in values' layout='row')
-      div(style='width: 100px') {{value.name}}
-      input(ng-model='value.value')
+      input(style='width: 100px' ng-model='value.name')
+      input(style='width: 100px' ng-model='value.value')
+      div(style='padding-left: 0;')
+        button.icon-button
+          ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(value.name)')
+    div
+      md-button.md-raised(ng-click='new()') New
     
     div(layout='row')
       md-button.md-raised(ng-click='cancel()') Cancel
