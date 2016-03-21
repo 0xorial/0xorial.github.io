@@ -29,10 +29,10 @@ app.service 'FormulaEvaluationService', (DataService) ->
         v = => @context.getFormulaValue(arguments[0])
         try
           result = eval(amount)
+          _.assertNumber(result)
         catch e
           result = 0
           console.warn e
-      _.assertNumber(result)
       return result
 
     evaluateFormula: (formula) ->
@@ -43,10 +43,10 @@ app.service 'FormulaEvaluationService', (DataService) ->
         v = => @context.getFormulaValue(arguments[0])
         try
           amount = eval(formula)
+          _.assertNumber(amount)
         catch e
           amount = 0
           console.warn e
-      _.assertNumber(amount)
       return amount
 
   return {
