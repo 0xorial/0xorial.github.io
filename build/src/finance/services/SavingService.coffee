@@ -1,7 +1,10 @@
-app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSerializationService, GoogleDriveSaveService) ->
-
-  undoPointer = -1
-  possibleRedos = 0
+app.service 'SavingService', (
+  $rootScope,
+  DataService,
+  HistoryService,
+  JsonSerializationService,
+  PersistenceService,
+  UndoRedoService) ->
 
   throttledUpdate = null
 
@@ -61,15 +64,15 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
     getRawData: () -> return serialize()
     acceptChanges: ->
       applyFromDataToHistoryService()
-      undoPointer = HistoryService.getStateHistoryCount() - 1
+      UndoRedoService.reset()
       return
 
     saveDrive: (documentPath, done, progress) ->
       updateInDrive(documentPath, done, progress)
 
     openDrive: (done, progress) ->
-      GoogleDriveSaveService.showPicker(done, progress)
-      saveContinuously(null, done, progress)
+      # GoogleDriveSaveService.showPicker(done, progress)
+      # saveContinuously(null, done, progress)
 
     saveNewDrive: (name, done, progress) ->
       data = serialize()
@@ -96,12 +99,11 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
         console.log file
         jsonData = JSON.parse(jsonStringData)
         HistoryService.setData(jsonData)
-        undoPointer = HistoryService.getStateHistoryCount() - 1
         saveContinuously('drive:' + file.id, cb, progress)
         cb(null, file.title)
       else
         throw new Error('unknown path')
-
+      UndoRedoService.reset()
       applyFromHistoryToDataService()
 
     authorizeInDrive: -> (cb, progress) ->
@@ -109,31 +111,8 @@ app.service 'SavingService', ($rootScope, DataService, HistoryService, JsonSeria
 
     newFile: ->
       jsonState = JsonSerializationService.serialize({payments: [], accounts: [], values: {}})
-      undoPointer = -1
       HistoryService.resetState()
       HistoryService.acceptNewState(jsonState)
       applyFromHistoryToDataService()
-
-    canUndo: ->
-      return undoPointer > 0
-
-    undo: ->
-      undoPointer--
-      possibleRedos++
-      # take state from history and set it to data service
-      applyFromHistoryToDataService(undoPointer)
-      # append state to the end of history
-      applyFromDataToHistoryService('undo')
-
-    canRedo: ->
-      return possibleRedos > 0
-
-    redo: ->
-      undoPointer++
-      possibleRedos--
-      # take state from history and set it to data service
-      applyFromHistoryToDataService(undoPointer)
-      # append state to the end of history
-      applyFromDataToHistoryService('redo')
-
+      UndoRedoService.reset()
   }

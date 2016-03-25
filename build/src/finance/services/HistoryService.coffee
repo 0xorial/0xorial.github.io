@@ -1,4 +1,4 @@
-app.service 'HistoryService', ->
+app.service 'HistoryService', ($rootScope) ->
 
   currentStateWithHistory = null
 
@@ -18,6 +18,7 @@ app.service 'HistoryService', ->
           description: description
           })
         currentStateWithHistory.state = state
+      $rootScope.$broadcast('rawDataChanged')
 
     resetState: ->
       resetState()

@@ -1,6 +1,7 @@
 exports = window
 
 class exports.Payment
+
   getTransactions: (context) ->
     throw new Error('abstract method')
 
@@ -13,3 +14,14 @@ class exports.Payment
     c = new @constructor()
     @assignTo(c)
     return c
+
+  @property('id', {
+    get: ->
+      if @_id == undefined
+        @_id = -1
+      return @_id
+    set: (v) ->
+      if @id != -1 
+        throw new Error()
+      @_id = v
+    })

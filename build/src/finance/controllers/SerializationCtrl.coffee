@@ -4,6 +4,7 @@ app.controller 'SerializationCtrl', (
   $rootScope,
   DataService,
   SavingService,
+  UndoRedoService,
   $state,
   $stateParams,
   $location) ->
@@ -18,18 +19,18 @@ app.controller 'SerializationCtrl', (
     $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
 
   $scope.canUndo = ->
-    SavingService.canUndo()
+    UndoRedoService.canUndo()
 
   $scope.canRedo = ->
-    SavingService.canRedo()
+    UndoRedoService.canRedo()
 
   $scope.undo = ->
-    SavingService.undo()
+    UndoRedoService.undo()
 
   $scope.redo = ->
-    SavingService.redo()
+    UndoRedoService.redo()
 
-  $scope.$on 'dataChanged', ->
+  $scope.$on 'rawDataChanged', ->
     $scope.serializedData = SavingService.getRawData()
 
   $scope.copy = ->
