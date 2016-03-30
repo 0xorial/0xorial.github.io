@@ -11,7 +11,12 @@ app.service 'HistoryService', ($rootScope) ->
   return {
 
     acceptNewState: (state, description) ->
-      delta = new jsondiffpatch.DiffPatcher().diff(currentStateWithHistory.state, state)
+      delta = new jsondiffpatch.DiffPatcher({
+        objectHash: (o, i) ->
+          if o.id == undefined
+            throw new Error('no id on object: ' + JSON.stringify(o))
+          o.id
+        }).diff(currentStateWithHistory.state, state)
       if delta
         currentStateWithHistory.history.push({
           delta: delta
