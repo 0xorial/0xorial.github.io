@@ -8,16 +8,8 @@ app.service 'SavingService', (
 
   throttledUpdate = null
 
-  updateInDrive = (documentPath, done, progress) ->
-    if !_.startsWith(documentPath, 'drive:')
-      throw new Erorr()
-    id = documentPath.substring(6)
-    data = serialize()
-    GoogleDriveSaveService.updateFile(id, data, getIndex(), done, progress)
-
   $rootScope.$on 'dataEdited', ->
-    if throttledUpdate
-      throttledUpdate()
+    PersistenceService.invalidateFile()
 
   serialize = () ->
     currentData = HistoryService.getData()
@@ -28,13 +20,10 @@ app.service 'SavingService', (
     HistoryService.setData(parsed)
     applyFromHistoryToDataService()
 
-  applyFromHistoryToDataService = (pointer) ->
-    jsonState = HistoryService.peekState(pointer)
+  applyFromHistoryToDataService = () ->
+    jsonState = HistoryService.peekState()
     state = JsonSerializationService.deserialize(jsonState)
-    DataService.setAccounts(state.accounts)
-    DataService.setPayments(state.payments)
-    DataService.setValues(state.values)
-    DataService.notifyChanged()
+    DataService.setState(state)
 
   applyFromDataToHistoryService = (description) ->
     state = {
@@ -52,13 +41,6 @@ app.service 'SavingService', (
     paymentsText = payments.map((p) -> p.description).join(',')
     return accountsText + ',' + paymentsText
 
-  saveContinuously = (name, done, progress) ->
-    driveDocumentName = name
-    isDrive = true
-    update = ->
-      updateInDrive(name, done, progress)
-    throttledUpdate = _.throttle(update, 2000)
-
   return {
     loadJson: (json) -> deserialize(json)
     getRawData: () -> return serialize()
@@ -68,7 +50,7 @@ app.service 'SavingService', (
       return
 
     saveDrive: (documentPath, done, progress) ->
-      updateInDrive(documentPath, done, progress)
+      PersistenceService.invalidateFile()
 
     openDrive: (done, progress) ->
       # GoogleDriveSaveService.showPicker(done, progress)
@@ -76,8 +58,7 @@ app.service 'SavingService', (
 
     saveNewDrive: (name, done, progress) ->
       data = serialize()
-      GoogleDriveSaveService.newFile(name, data, getIndex(), done, progress)
-      saveContinuously(name, done, progress)
+      PersistenceService.saveNew({name: name, data: data, progress: progress, done: done})
 
     loadFile: (path, cb, progress) ->
       if path == 'demo'
@@ -87,10 +68,9 @@ app.service 'SavingService', (
           values: demoValues})
         HistoryService.resetState()
         HistoryService.acceptNewState(jsonState)
-        undoPointer = HistoryService.getStateHistoryCount() - 1
         cb(null, 'demo')
       else if _.startsWith(path, 'drive:')
-        await GoogleDriveSaveService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
+        await PersistenceService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
         if error
           progress('Error loading file.')
           console.log error

@@ -70,6 +70,35 @@ _.mixin {
     toRemove = _.differenceWith(dst, src, (x, y) -> equals(y, x))
     for i in toRemove
       _.remove(dst, i)
+
+  promiseWhile: (condition, body) ->
+    return new Promise (resolve, reject) ->
+      loop1 = ->
+        condition()
+        .then (value) ->
+          if value
+            bodyPromise = body()
+            if !bodyPromise.then
+              throw new Error('body must return promise')
+            return bodyPromise
+              .then ->
+                return loop1()
+          else
+            resolve()
+      loop1()
+
+  promiseFor: (collection, body) ->
+    length = collection.length
+    index = -1
+    shouldBreak = false
+    condition = ->
+      if collection.length != length
+        throw new Error('collection length changed while iterating')
+      index++
+      return Promise.resolve(not shouldBreak and index < length)
+    whileBody = ->
+      body(collection[index], index, -> shouldBreak = true)
+    promiseWhile(condition, whileBody)
   }
 
 console.realWarn = console.warn;

@@ -1,4 +1,4 @@
-app.service 'JsonSerializationService', ->
+app.service 'JsonSerializationService', (DataService) ->
 
   serializeStateToJson = (data) ->
     ctx = new SerializationContext()
