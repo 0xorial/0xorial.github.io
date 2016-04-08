@@ -11,88 +11,50 @@ SCOPES = [
 
 app.service 'GoogleDriveApiService', ->
 
-  gapiClientLoaded = false
-  gapiClientLoadedCb = ->
-  window.onGapiClientloaded = ->
-    gapiClientLoaded = true;
-    gapiClientLoadedCb()
+  progress = null
+  oauthToken = null
+  loadClient = ->
+    return new Promise (resolve, reject) ->
+      window.onGapiClientLoaded = ->
+        window.onGapiClientLoaded = null
+        resolve()
 
-
-  loadClient = (cb) ->
-    if gapiClientLoaded
-      cb(null)
-    else
-      gapiClientLoadedCb = ->
-        gapiClientLoaded = true
-        cb(null)
-        gapiClientLoadedCb = null
       $.ajax({
-        url: 'https://apis.google.com/js/client.js?onload=onGapiClientloaded'
+        url: 'https://apis.google.com/js/client.js?onload=onGapiClientLoaded'
         dataType: 'script'
         cache: true
       })
       .fail ->
+        window.onGapiClientLoaded = null
         console.log arguments
-        cb('Error loading drive client')
+        reject(arguments)
 
-  oauthToken = null
 
-  authAndLoadApi = (async, cb)->
+  authAndLoadApi = ->
     progress('Loading client...')
-    await loadClient(defer(error))
-    if error
-      cb(error)
-      return
-    progress('Authorizing...')
-    await gapi.auth.authorize {
-      'client_id': CLIENT_ID
-      'scope': SCOPES.join(' ')
-      'immediate': !async
-    }, defer(authResult)
+    loadClient()
+    .then ->
+      progress('Authorizing...')
+      return Promise.resolve (gapi.auth.authorize {
+          'client_id': CLIENT_ID
+          'scope': SCOPES.join(' ')
+          'immediate': true
+        })
+    .then (authResult) ->
+      if authResult.error
+        progress '', true
+        return
 
-    if !async and authResult.error
-      progress('', true)
-
-    oauthToken = authResult.access_token
-
-    if authResult and !authResult.error
+      oauthToken = authResult.access_token
       progress('Loading drive API...')
-      await gapi.client.load 'drive', 'v2', defer()
+      return Promise.resolve(gapi.client.load('drive', 'v2'))
+    .then ->
       progress('Loading picker API...')
-      await gapi.load('picker', {'callback': defer()})
-      cb()
-    else
-      progress('Authorize error: ' + authResult.error)
-      console.log('could not authorize')
-      console.log(authResult)
-    return
+      return Promise.resolve(gapi.load('picker'))
 
-  initWaiters = []
-  initFinished = false
-  waitForInit = (listener) ->
-    initWaiters.push listener
 
-  initStarted = false
-  init = (async) ->
-    if initStarted
-      return
-    initStarted = true
-    await authAndLoadApi(async, defer())
-    initFinished = true
-    for waiter in initWaiters
-      waiter.done()
-
-  progress = (m) ->
-    for waiter in initWaiters
-      waiter.progress(m)
-    return
-
-  ensureInitCompleted = (loadListener) ->
-    if initFinished
-      loadListener.done()
-    else
-      init(loadListener.async)
-      waitForInit(loadListener)
+  ensureInitCompleted = () ->
+    authAndLoadApi()
 
   insertFile = (name, fileData, index, callback) ->
     boundary = '-------314159265358979323846'
@@ -121,8 +83,8 @@ app.service 'GoogleDriveApiService', ->
         console.log file
         return
 
-    request.execute callback
-    return
+    return new Promise (resolve, reject) ->
+      request.execute -> resolve(arguments)
 
   doUpdateFile = (id, fileData, index, callback) ->
     boundary = '-------314159265358979323846'
@@ -202,13 +164,16 @@ app.service 'GoogleDriveApiService', ->
       await downloadFile(id, defer(error, file, data), progress)
       callback(error, file, data)
 
-    newFile: (name, data, index, done, progress) ->
-      await ensureInitCompleted({done: defer(), progress: progress})
-      progress('Saving file...')
-      await insertFile(name, data, index, defer(arg))
-      console.log arg
-      progress('File saved.')
-      done(arg)
+    newFile: (name, data, index, done, progress1) ->
+      progress = progress1
+      ensureInitCompleted()
+      .then ->
+        progress('Saving file...')
+        return insertFile(name, data, index)
+      .then (arg) ->
+        console.log arg
+        progress('File saved.')
+        done(arg)
 
     updateFile: (id, data, index, done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})
