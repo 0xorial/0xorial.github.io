@@ -4,17 +4,18 @@ app.service 'GoogleDriveSaveService', (GoogleDriveApiService) ->
 
   return {
     saveNew: (options) ->
-      await GoogleDriveApiService.newFile(options.name, options.data, options.index, defer(file), options.progress)
-      currentFile = file
-      options.done()
+      return GoogleDriveApiService.newFile(options.name, options.data, options.index, options.progress)
+      .then (file) ->
+        currentFile = file
     update: (options) ->
       if !currentFile
         throw new Error()
       await GoogleDriveApiService.updateFile(currentFile.id, options.data, options.index, options.done, options.progress)
     load: (options) ->
-      await GoogleDriveApiService.loadFile(options.id, defer(error, file, data))
-      currentFile = file
-      options.done(error, file, data)
+      return GoogleDriveApiService.loadFile({id: options.id, progress: options.progress})
+      .then (result) ->
+        currentFile = result.file
+        return Promise.resolve(result)
     showPicker: ->
       throw new Error('not implemented')
       await GoogleDriveApiService.showPicker(defer(file))

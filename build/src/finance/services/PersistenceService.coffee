@@ -11,6 +11,21 @@ app.service 'PersistenceService', (
   progressListener = null
   throttledUpdate = ->
 
+  startUpdating = ->
+    update = ->
+      data = serialize()
+      localStorage.setItem('data', data)
+      progressListener('Updated local storage.')
+      return GoogleDriveSaveService.update({
+        progress: progressListener
+        data: data
+        })
+    savingPromise = Promise.resolve()
+    waitAndUpdate = ->
+      savingPromise = savingPromise.then ->
+        update()
+    throttledUpdate = _.throttle(waitAndUpdate, 2000)
+
 
   return {
     setStatusListener: (listener) ->
@@ -21,28 +36,31 @@ app.service 'PersistenceService', (
 
     saveNew: (options) ->
       progressListener = options.progress
-      localStorage.setItem('data', options.done)
-      GoogleDriveSaveService.saveNew({
+      localStorage.setItem('data', options.data)
+      return GoogleDriveSaveService.saveNew({
         name: options.name
         progress: progressListener
         data: options.data
         index: options.index
-        done: options.done
         })
-      update = ->
-        data = serialize()
-        localStorage.setItem('data', data)
-        GoogleDriveSaveService.update({
-          progress: progressListener
-          data: data
-          done: ->
-          })
-      throttledUpdate = _.throttle(update, 2000)
+      .then (file) ->
+        localStorage.setItem('data', null)
+        localStorage.setItem('data:' + file[0].id, options.data)
+        startUpdating()
+        return Promise.resolve(file[0])
 
     loadFile: (options) ->
-      GoogleDriveSaveService.load({
+      return GoogleDriveSaveService.load({
         id: options.id,
-        done: options.done
-        progress: progressListener
+        progress: options.progress
         })
+      .catch () ->
+        existing = localStorage.getItem('data:' + option.id)
+        if existing
+          return Promise.resolve({data: data})
+        else
+          throw new Error()
+      .then (result) ->
+        startUpdating()
+        return Promise.resolve(result)
   }

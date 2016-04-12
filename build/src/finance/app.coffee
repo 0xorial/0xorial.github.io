@@ -14,3 +14,7 @@ app.config ($stateProvider, $urlRouterProvider) ->
       })
 
 window.app = app
+
+Promise.config({
+  cancellation: true
+  })

@@ -89,7 +89,7 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       TransactionsPopupService.show transactions
 
     $scope.balances = series.map (s) ->
-      amount = s.data[s.data.length - 1].amount
+      amount = if s.data.length then s.data[s.data.length - 1].amount else 0
       return {
         name: s.name
         amount: numeral(amount).format('+0,0.00')

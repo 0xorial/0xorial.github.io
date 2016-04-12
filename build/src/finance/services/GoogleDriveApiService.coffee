@@ -52,9 +52,14 @@ app.service 'GoogleDriveApiService', ->
       progress('Loading picker API...')
       return Promise.resolve(gapi.load('picker'))
 
-
+  initPromise = null
   ensureInitCompleted = () ->
-    authAndLoadApi()
+    if initPromise
+      return initPromise
+    initPromise = authAndLoadApi()
+    initPromise.catch ->
+      initPromise = null
+    return initPromise
 
   insertFile = (name, fileData, index, callback) ->
     boundary = '-------314159265358979323846'
@@ -118,27 +123,23 @@ app.service 'GoogleDriveApiService', ->
 
     return
 
-  downloadFile = (id, callback, progress) ->
-    request = gapi.client.drive.files.get('fileId': id)
+  downloadFile = (id) ->
+    file = null
+    requestPromise = Promise.resolve(gapi.client.drive.files.get('fileId': id))
     progress('Opening file...')
-    await request.then defer(result), (e) ->
+    requestPromise.catch (e) ->
       console.log(e)
-      callback(e)
-    file = result.result
-    url = file.downloadUrl
-    accessToken = gapi.auth.getToken().access_token
-    xhr = new XMLHttpRequest
-    xhr.open 'GET', url
-    xhr.setRequestHeader 'Authorization', 'Bearer ' + accessToken
-    progress('Downloading file...')
-    xhr.onload = ->
-      callback null, file, xhr.responseText
-      return
-    xhr.onerror = (e) ->
-      console.log(arguments)
-      callback(e)
-      return
-    xhr.send()
+    downloadPromise = requestPromise.then (result) ->
+      progress('Downloading file...')
+      file = result.result
+      url = file.downloadUrl
+      # accessToken = gapi.auth.getToken().access_token
+      headers = {'Authorization': 'Bearer ' + oauthToken }
+      return ajaxGet(url, headers)
+    .then (data) ->
+      return {file: file, data: data}
+
+    return downloadPromise
 
   pickerCallback = ->
     console.log arguments
@@ -159,12 +160,14 @@ app.service 'GoogleDriveApiService', ->
     picker.setVisible true
 
   return {
-    loadFile: (id, callback, progress) ->
-      await ensureInitCompleted({done: defer(), progress: progress})
-      await downloadFile(id, defer(error, file, data), progress)
-      callback(error, file, data)
+    loadFile: (options) ->
+      id = options.id
+      progress = options.progress
+      ensureInitCompleted()
+      .then ->
+        return downloadFile(id)
 
-    newFile: (name, data, index, done, progress1) ->
+    newFile: (name, data, index, progress1) ->
       progress = progress1
       ensureInitCompleted()
       .then ->
@@ -173,7 +176,7 @@ app.service 'GoogleDriveApiService', ->
       .then (arg) ->
         console.log arg
         progress('File saved.')
-        done(arg)
+        return arg
 
     updateFile: (id, data, index, done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})

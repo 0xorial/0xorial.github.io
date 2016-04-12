@@ -15,8 +15,9 @@ app.controller 'SerializationCtrl', (
   $scope.saveDriveNew = ->
     if !$scope.driveFileName
       progress('Enter file name.')
-    await SavingService.saveNewDrive($scope.driveFileName, defer(file), progress)
-    $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
+    SavingService.saveNewDrive($scope.driveFileName, progress)
+    .then (file) ->
+      $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
 
   $scope.canUndo = ->
     UndoRedoService.canUndo()
@@ -51,12 +52,12 @@ app.controller 'SerializationCtrl', (
     await SavingService.openDrive(defer(error, file), progress)
 
   loadCurrentFile = ->
-    await SavingService.loadFile($stateParams.documentPath, defer(error, name), progress)
-    $timeout ->
-      $scope.$apply ->
-        $scope.driveFileName = name
-        $scope.isLoading = false
-        if !error
+    SavingService.loadFile({path: $stateParams.documentPath, progress: progress})
+    .then (file) ->
+      $timeout ->
+        $scope.$apply ->
+          $scope.driveFileName = file.title
+          $scope.isLoading = false
           $scope.status = 'Ready'
 
   loadCurrentFile()

@@ -56,35 +56,36 @@ app.service 'SavingService', (
       # GoogleDriveSaveService.showPicker(done, progress)
       # saveContinuously(null, done, progress)
 
-    saveNewDrive: (name, done, progress) ->
+    saveNewDrive: (name, progress) ->
       data = serialize()
-      PersistenceService.saveNew({name: name, data: data, progress: progress, done: done})
+      return PersistenceService.saveNew({name: name, data: data, progress: progress})
 
-    loadFile: (path, cb, progress) ->
-      if path == 'demo'
+
+    loadFile: (options) ->
+      loadPromise = Promise.resolve()
+      if options.path == 'demo'
         jsonState = JsonSerializationService.serialize({
           payments: demoPayments,
           accounts: demoAccounts,
           values: demoValues})
         HistoryService.resetState()
         HistoryService.acceptNewState(jsonState)
-        cb(null, 'demo')
-      else if _.startsWith(path, 'drive:')
-        await PersistenceService.loadFile(path.substring(6), defer(error, file, jsonStringData), progress)
-        if error
-          progress('Error loading file.')
-          console.log error
-          cb(error)
-          return
-        console.log file
-        jsonData = JSON.parse(jsonStringData)
-        HistoryService.setData(jsonData)
-        saveContinuously('drive:' + file.id, cb, progress)
-        cb(null, file.title)
+        loadPromise = Promise.resolve('demo')
+      else if _.startsWith(options.path, 'drive:')
+        loadPromise = PersistenceService.loadFile({id: options.path.substring(6), progress: options.progress})
+        .then (result) ->
+          name = result.file.name
+          jsonStringData = result.data
+          console.log result.file
+          jsonData = JSON.parse(jsonStringData)
+          HistoryService.setData(jsonData)
+          Promise.resolve(result.file)
       else
         throw new Error('unknown path')
-      UndoRedoService.reset()
-      applyFromHistoryToDataService()
+      loadPromise.then (file) ->
+        UndoRedoService.reset()
+        applyFromHistoryToDataService()
+        return file
 
     authorizeInDrive: -> (cb, progress) ->
       GoogleDriveSaveService.authorizeInDrive(cb, progress)

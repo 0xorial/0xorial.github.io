@@ -127,4 +127,35 @@ class exports.SerializationContext
   resolveObject: (id) ->
     return @objects[id]
 
+exports.ajaxGet = (url, headers, body, timeout) ->
+  xhr = new XMLHttpRequest
+  promise = new Promise (resolve, reject) ->
+    xhr.onload = ->
+      if xhr.readyState != 4
+        return
+      if xhr.status == 200
+        resolve xhr.responseText
+      else
+        reject xhr.statusText
+      return
+
+    xhr.onerror = ->
+      reject xhr.statusText
+      return
+    return
+
+  xhr.open 'GET', url, true
+
+  Object.keys(headers).forEach (key) ->
+    xhr.setRequestHeader key, headers[key]
+    return
+  if timeout
+    promise.timeout timeout
+  if body
+    xhr.send JSON.stringify(body)
+  else
+    xhr.send()
+  return promise
+
+
 numeral.languageData().delimiters.thousands = ' '
