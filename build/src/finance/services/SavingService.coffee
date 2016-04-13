@@ -15,11 +15,6 @@ app.service 'SavingService', (
     currentData = HistoryService.getData()
     return JSON.stringify(currentData, null, '  ')
 
-  deserialize = (jsonString) ->
-    parsed = JSON.parse(jsonString)
-    HistoryService.setData(parsed)
-    applyFromHistoryToDataService()
-
   applyFromHistoryToDataService = () ->
     jsonState = HistoryService.peekState()
     state = JsonSerializationService.deserialize(jsonState)
@@ -42,14 +37,20 @@ app.service 'SavingService', (
     return accountsText + ',' + paymentsText
 
   return {
-    loadJson: (json) -> deserialize(json)
+    loadJson: (json) ->
+      # name = result.file.name
+      jsonStringData = json
+      jsonData = JSON.parse(jsonStringData)
+      HistoryService.setData(jsonData)
+      applyFromHistoryToDataService()
+      return Promise.resolve()
     getRawData: () -> return serialize()
     acceptChanges: ->
       applyFromDataToHistoryService()
       UndoRedoService.reset()
       return
 
-    saveDrive: (documentPath, done, progress) ->
+    save: () ->
       PersistenceService.invalidateFile()
 
     openDrive: (done, progress) ->

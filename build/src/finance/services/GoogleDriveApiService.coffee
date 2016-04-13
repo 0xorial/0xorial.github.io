@@ -91,7 +91,7 @@ app.service 'GoogleDriveApiService', ->
     return new Promise (resolve, reject) ->
       request.execute -> resolve(arguments)
 
-  doUpdateFile = (id, fileData, index, callback) ->
+  doUpdateFile = (id, fileData, index) ->
     boundary = '-------314159265358979323846'
     delimiter = '\r\n--' + boundary + '\r\n'
     close_delim = '\r\n--' + boundary + '--'
@@ -113,15 +113,7 @@ app.service 'GoogleDriveApiService', ->
       'headers': 'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
       'body': multipartRequestBody)
 
-    request.then(
-      (response) ->
-        callback()
-      (reason) ->
-        console.log reason
-        callback(reason)
-    )
-
-    return
+    return Promise.resolve(request)
 
   downloadFile = (id) ->
     file = null
@@ -167,8 +159,8 @@ app.service 'GoogleDriveApiService', ->
       .then ->
         return downloadFile(id)
 
-    newFile: (name, data, index, progress1) ->
-      progress = progress1
+    newFile: (options) ->
+      {name, data, index, progress1} = options
       ensureInitCompleted()
       .then ->
         progress('Saving file...')
@@ -178,13 +170,14 @@ app.service 'GoogleDriveApiService', ->
         progress('File saved.')
         return arg
 
-    updateFile: (id, data, index, done, progress) ->
-      await ensureInitCompleted({done: defer(), progress: progress})
-      progress('Saving file...')
-      await doUpdateFile(id, data, index, defer(error))
-      if !error
+    updateFile: (options) ->
+      {id, name, data, index, progress1} = options
+      ensureInitCompleted()
+      .then ->
+        progress('Saving file...')
+        return doUpdateFile(id, data, index)
+      .then ->
         progress('File saved.')
-      done()
 
     showPicker: (done, progress) ->
       await ensureInitCompleted({done: defer(), progress: progress})

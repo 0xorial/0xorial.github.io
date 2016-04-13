@@ -37,7 +37,8 @@
     "livereload-js": "~2.2.1",
     "ui-router-extras": "~0.1.0",
     "numeral": "numeraljs#~1.5.3",
-    "jsondiffpatch": "~0.1.41"
+    "jsondiffpatch": "~0.1.41",
+    "file-saver.js": "~1.20150507.2"
   },
   "resolutions": {
     "angular-material": "~1.0.1"

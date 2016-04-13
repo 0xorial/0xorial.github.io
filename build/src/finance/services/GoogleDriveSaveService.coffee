@@ -4,13 +4,13 @@ app.service 'GoogleDriveSaveService', (GoogleDriveApiService) ->
 
   return {
     saveNew: (options) ->
-      return GoogleDriveApiService.newFile(options.name, options.data, options.index, options.progress)
+      return GoogleDriveApiService.newFile(options)
       .then (file) ->
         currentFile = file
     update: (options) ->
       if !currentFile
         throw new Error()
-      await GoogleDriveApiService.updateFile(currentFile.id, options.data, options.index, options.done, options.progress)
+      return GoogleDriveApiService.updateFile({id: currentFile.id, data: options.data, index: options.index, progress: options.progress})
     load: (options) ->
       return GoogleDriveApiService.loadFile({id: options.id, progress: options.progress})
       .then (result) ->

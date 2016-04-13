@@ -48,5 +48,6 @@ app.service 'HistoryService', ($rootScope) ->
 
     setData: (state) ->
       currentStateWithHistory = state
+      $rootScope.$broadcast('rawDataChanged')
       return
     }

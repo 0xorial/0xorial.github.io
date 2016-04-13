@@ -157,5 +157,19 @@ exports.ajaxGet = (url, headers, body, timeout) ->
     xhr.send()
   return promise
 
+exports.readSingleFile = (e) ->
+  file = e.target.files[0]
+  if !file
+    return
+  reader = new FileReader
+
+  return new Promise (resolve, reject) ->
+    reader.onload = (e) ->
+      contents = e.target.result
+      resolve(contents)
+      return
+
+    reader.readAsText file
+    return
 
 numeral.languageData().delimiters.thousands = ' '

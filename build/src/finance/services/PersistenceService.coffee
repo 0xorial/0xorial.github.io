@@ -26,10 +26,12 @@ app.service 'PersistenceService', (
         update()
     throttledUpdate = _.throttle(waitAndUpdate, 2000)
 
-
   return {
     setStatusListener: (listener) ->
       progressListener = listener
+
+    stopUpdating:
+      throttledUpdate = ->
 
     invalidateFile: ->
       throttledUpdate()
@@ -50,12 +52,13 @@ app.service 'PersistenceService', (
         return Promise.resolve(file[0])
 
     loadFile: (options) ->
+      progressListener = options.progress
       return GoogleDriveSaveService.load({
         id: options.id,
         progress: options.progress
         })
       .catch () ->
-        existing = localStorage.getItem('data:' + option.id)
+        existing = localStorage.getItem('data:' + options.id)
         if existing
           return Promise.resolve({data: data})
         else

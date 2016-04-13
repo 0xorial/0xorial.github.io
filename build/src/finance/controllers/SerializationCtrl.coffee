@@ -10,7 +10,7 @@ app.controller 'SerializationCtrl', (
   $location) ->
 
   $scope.saveDrive = ->
-    await SavingService.saveDrive($stateParams.documentPath, defer(file), progress)
+    SavingService.save()
 
   $scope.saveDriveNew = ->
     if !$scope.driveFileName
@@ -35,13 +35,13 @@ app.controller 'SerializationCtrl', (
     $scope.serializedData = SavingService.getRawData()
 
   $scope.copy = ->
-    new Clipboard('#copy', {
-      text: -> $scope.serializedData
-      })
+    blob = new Blob([$scope.serializedData], {type: "text/json;charset=utf-8"});
+    saveAs(blob, $scope.title + '.json');
 
   $scope.authorizeInDrive = () ->
-    await SavingService.authorizeInDrive(defer(error), progress)
-    loadCurrentFile()
+    SavingService.authorizeInDrive(progress)
+    .then ->
+      loadCurrentFile()
 
   progress = (m, showButton) ->
     $timeout ->
@@ -62,8 +62,18 @@ app.controller 'SerializationCtrl', (
 
   loadCurrentFile()
 
-  $scope.loadData = ->
-    SavingService.loadJson($scope.serializedData)
+  onFileChanged = (file)->
+    readSingleFile(file)
+    .then (contents) ->
+      $scope.serializedData = contents
+      SavingService.loadJson(contents)
+    .then ->
+      document.getElementById('file-input').value = null
+      $scope.$apply()
+
+  document.getElementById('file-input').addEventListener 'change', onFileChanged, false
+  # $scope.loadData = ->
+
 
   $scope.$on 'dataEdited', ->
     SavingService.acceptChanges()
