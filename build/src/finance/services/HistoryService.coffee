@@ -8,25 +8,28 @@ app.service 'HistoryService', ($rootScope) ->
       history: []
     }
 
+  acceptNewState = (state, description) ->
+    delta = new jsondiffpatch.DiffPatcher({
+      objectHash: (o, i) ->
+        if o.id == undefined
+          throw new Error('no id on object: ' + JSON.stringify(o))
+        o.id
+      }).diff(currentStateWithHistory.state, state)
+    if delta
+      currentStateWithHistory.history.push({
+        delta: delta
+        description: description
+        })
+      currentStateWithHistory.state = state
+
   return {
 
     acceptNewState: (state, description) ->
-      delta = new jsondiffpatch.DiffPatcher({
-        objectHash: (o, i) ->
-          if o.id == undefined
-            throw new Error('no id on object: ' + JSON.stringify(o))
-          o.id
-        }).diff(currentStateWithHistory.state, state)
-      if delta
-        currentStateWithHistory.history.push({
-          delta: delta
-          description: description
-          })
-        currentStateWithHistory.state = state
-      $rootScope.$broadcast('rawDataChanged')
+      acceptNewState(state, description)
 
-    resetState: ->
+    setState: (state) ->
       resetState()
+      acceptNewState(state)
 
     peekState: (index) ->
       if index == undefined
@@ -43,11 +46,11 @@ app.service 'HistoryService', ($rootScope) ->
     getStateHistoryCount: ->
       return currentStateWithHistory.history.length
 
-    getData: ->
+    getStateWithHistory: ->
       return currentStateWithHistory
 
-    setData: (state) ->
+
+    setStateWithHistory: (state) ->
       currentStateWithHistory = state
-      $rootScope.$broadcast('rawDataChanged')
       return
     }

@@ -5,6 +5,7 @@ app.controller 'SerializationCtrl', (
   DataService,
   SavingService,
   UndoRedoService,
+  DocumentDataService,
   $state,
   $stateParams,
   $location) ->
@@ -31,12 +32,20 @@ app.controller 'SerializationCtrl', (
   $scope.redo = ->
     UndoRedoService.redo()
 
-  $scope.$on 'rawDataChanged', ->
-    $scope.serializedData = SavingService.getRawData()
-
-  $scope.copy = ->
-    blob = new Blob([$scope.serializedData], {type: "text/json;charset=utf-8"});
+  $scope.download = ->
+    blob = new Blob([DocumentDataService.getRawData()], {type: "text/json;charset=utf-8"});
     saveAs(blob, $scope.title + '.json');
+
+  onFileChanged = (file)->
+    readSingleFile(file)
+    .then (contents) ->
+      $scope.serializedData = contents
+      DocumentDataService.setRawData(contents)
+    .then ->
+      document.getElementById('file-input').value = null
+      $scope.$apply()
+
+  document.getElementById('file-input').addEventListener 'change', onFileChanged, false
 
   $scope.authorizeInDrive = () ->
     SavingService.authorizeInDrive(progress)
@@ -62,22 +71,10 @@ app.controller 'SerializationCtrl', (
 
   loadCurrentFile()
 
-  onFileChanged = (file)->
-    readSingleFile(file)
-    .then (contents) ->
-      $scope.serializedData = contents
-      SavingService.loadJson(contents)
-    .then ->
-      document.getElementById('file-input').value = null
-      $scope.$apply()
-
-  document.getElementById('file-input').addEventListener 'change', onFileChanged, false
-  # $scope.loadData = ->
-
-
   $scope.$on 'dataEdited', ->
     SavingService.acceptChanges()
     $scope.serializedData = SavingService.getRawData()
 
   $scope.new = ->
     SavingService.newFile()
+    $state.go('.', {documentPath: 'local'}, {notify: false})

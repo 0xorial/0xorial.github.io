@@ -11,6 +11,7 @@ app.service 'PersistenceService', (
   progressListener = null
   throttledUpdate = ->
 
+  savingPromise = null
   startUpdating = ->
     update = ->
       data = serialize()
@@ -30,7 +31,9 @@ app.service 'PersistenceService', (
     setStatusListener: (listener) ->
       progressListener = listener
 
-    stopUpdating:
+    stopUpdating: ->
+      if savingPromise
+        savingPromise.cancel()
       throttledUpdate = ->
 
     invalidateFile: ->
@@ -60,7 +63,7 @@ app.service 'PersistenceService', (
       .catch () ->
         existing = localStorage.getItem('data:' + options.id)
         if existing
-          return Promise.resolve({data: data})
+          return Promise.resolve({data: existing})
         else
           throw new Error()
       .then (result) ->

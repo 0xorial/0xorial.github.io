@@ -15,8 +15,8 @@ html(lang='en', ng-app='StarterApp')
             md-button.md-raised(ng-click='saveDrive()') Save
             md-button.md-raised(ng-click='saveDriveNew()') Save as:
             input(ng-model='driveFileName')
-            md-button.md-raised(ng-click='copy()') Copy Data
-            input.md-button.md-raised#file-input(ng-click='loadData()' type='file' accept='.json')
+            md-button.md-raised(ng-click='download()') Copy Data
+            input#file-input(type='file' accept='.json' class='custom-file-input')
             img(src='/finance/495.gif' ng-show='isLoading')
             div(ng-hide='needDriveAuthorization') {{status}}
             md-button.md-raised(ng-show='needDriveAuthorization', ng-click='authorizeInDrive()') 'Authorize in Drive'
@@ -87,6 +87,7 @@ html(lang='en', ng-app='StarterApp')
     script(src='./finance/services/FormulaEvaluationService.js')
     script(src='./finance/services/PersistenceService.js')
     script(src='./finance/services/UndoRedoService.js')
+    script(src='./finance/services/DocumentDataService.js')
     script(src='./finance/controllers/AccountsListCtrl.js')
     script(src='./finance/controllers/NewPaymentCtrl.js')
     script(src='./finance/controllers/PaymentsListCtrl.js')
