@@ -1,11 +1,7 @@
 app.service 'PersistenceService', (
+  DocumentDataService,
   GoogleDriveSaveService,
-  HistoryService,
   JsonSerializationService) ->
-
-  serialize = () ->
-    currentData = HistoryService.getData()
-    return JSON.stringify(currentData, null, '  ')
 
   currentDriveFile = null
   progressListener = null
@@ -14,7 +10,7 @@ app.service 'PersistenceService', (
   savingPromise = null
   startUpdating = ->
     update = ->
-      data = serialize()
+      data = DocumentDataService.getRawData()
       localStorage.setItem('data', data)
       progressListener('Updated local storage.')
       return GoogleDriveSaveService.update({
@@ -25,7 +21,7 @@ app.service 'PersistenceService', (
     waitAndUpdate = ->
       savingPromise = savingPromise.then ->
         update()
-    throttledUpdate = _.throttle(waitAndUpdate, 2000)
+    throttledUpdate = _.throttle(waitAndUpdate, 2000, {leading: false})
 
   return {
     setStatusListener: (listener) ->
@@ -37,20 +33,22 @@ app.service 'PersistenceService', (
       throttledUpdate = ->
 
     invalidateFile: ->
+      progressListener('Change pending...')
       throttledUpdate()
 
     saveNew: (options) ->
       progressListener = options.progress
-      localStorage.setItem('data', options.data)
+      data = DocumentDataService.getRawData()
+      localStorage.setItem('data', data)
       return GoogleDriveSaveService.saveNew({
         name: options.name
         progress: progressListener
-        data: options.data
+        data: data
         index: options.index
         })
       .then (file) ->
         localStorage.setItem('data', null)
-        localStorage.setItem('data:' + file[0].id, options.data)
+        localStorage.setItem('data:' + file[0].id, data)
         startUpdating()
         return Promise.resolve(file[0])
 

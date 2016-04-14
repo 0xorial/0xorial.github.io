@@ -105,10 +105,4 @@ app.service 'DataService', ($rootScope) ->
     notifyEdited: ->
       $rootScope.$broadcast 'dataChanged'
       $rootScope.$broadcast 'dataEdited'
-
-    setState: (state) ->
-      dataContainer.accounts = state.accounts
-      dataContainer.payments = state.payments
-      dataContainer.values = state.values
-      $rootScope.$broadcast 'dataChanged'
     }

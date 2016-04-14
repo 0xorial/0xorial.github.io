@@ -160,7 +160,7 @@ app.service 'GoogleDriveApiService', ->
         return downloadFile(id)
 
     newFile: (options) ->
-      {name, data, index, progress1} = options
+      {name, data, index, progress} = options
       ensureInitCompleted()
       .then ->
         progress('Saving file...')

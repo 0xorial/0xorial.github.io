@@ -8,9 +8,20 @@ app.service 'DocumentDataService', (
   initializeFromHistoryService = ->
     jsonState = HistoryService.peekState()
     state = JsonSerializationService.deserialize(jsonState)
-    DataService.setState(state)
+    DataService.setPayments(state.payments)
+    DataService.setAccounts(state.accounts)
+    DataService.setValues(state.values)
+    DataService.notifyChanged()
     UndoRedoService.reset()
 
+  acceptNewHistoryState = ->
+    state = {
+      payments: DataService.getAllPayments()
+      accounts: DataService.getAccounts()
+      values: DataService.getValues()
+    }
+    jsonState = JsonSerializationService.serialize(state)
+    HistoryService.acceptNewState(jsonState)
 
   setRawData = (jsonData) ->
     data = jsonData
@@ -18,6 +29,9 @@ app.service 'DocumentDataService', (
     initializeFromHistoryService()
 
   return {
+
+    acceptNewHistoryState: ->
+      acceptNewHistoryState()
 
     # for new file and demo data
     setData: (payments, accounts, values) ->
@@ -35,6 +49,9 @@ app.service 'DocumentDataService', (
     setRawData: (stringData) ->
       json = JSON.parse(stringData)
       setRawData(json)
+
+    addStateToHistory: ->
+      DataService.getstate
 
     getIndex: ->
       accounts = DataService.getAccounts()

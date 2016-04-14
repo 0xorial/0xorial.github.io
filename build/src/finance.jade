@@ -15,7 +15,7 @@ html(lang='en', ng-app='StarterApp')
             md-button.md-raised(ng-click='saveDrive()') Save
             md-button.md-raised(ng-click='saveDriveNew()') Save as:
             input(ng-model='driveFileName')
-            md-button.md-raised(ng-click='download()') Copy Data
+            md-button.md-raised(ng-click='download()') Download
             input#file-input(type='file' accept='.json' class='custom-file-input')
             img(src='/finance/495.gif' ng-show='isLoading')
             div(ng-hide='needDriveAuthorization') {{status}}

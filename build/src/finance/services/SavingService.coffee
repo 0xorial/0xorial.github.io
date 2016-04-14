@@ -1,10 +1,13 @@
 app.service 'SavingService', (
   DocumentDataService,
-  PersistenceService) ->
+  PersistenceService,
+  UndoRedoService) ->
 
   return {
     acceptChanges: ->
+      DocumentDataService.acceptNewHistoryState()
       UndoRedoService.reset()
+      PersistenceService.invalidateFile()
       return
 
     save: () ->
@@ -15,8 +18,7 @@ app.service 'SavingService', (
       # saveContinuously(null, done, progress)
 
     saveNewDrive: (name, progress) ->
-      data = DocumentDataService.getRawData()
-      return PersistenceService.saveNew({name: name, data: data, progress: progress})
+      return PersistenceService.saveNew({name: name, progress: progress})
 
     loadFile: (options) ->
       loadPromise = Promise.resolve()
@@ -34,10 +36,10 @@ app.service 'SavingService', (
         id = options.path.substring(6)
         loadPromise = PersistenceService.loadFile({id: id, progress: options.progress})
         .then (result) ->
-          name = result.file.name
+          name = result.file.title
           jsonStringData = result.data
           DocumentDataService.setRawData(jsonStringData)
-
+          return Promise.resolve(name)
       else
         throw new Error('unknown path')
       return loadPromise

@@ -39,7 +39,6 @@ app.controller 'SerializationCtrl', (
   onFileChanged = (file)->
     readSingleFile(file)
     .then (contents) ->
-      $scope.serializedData = contents
       DocumentDataService.setRawData(contents)
     .then ->
       document.getElementById('file-input').value = null
@@ -65,7 +64,7 @@ app.controller 'SerializationCtrl', (
     .then (file) ->
       $timeout ->
         $scope.$apply ->
-          $scope.driveFileName = file.title
+          $scope.driveFileName = file
           $scope.isLoading = false
           $scope.status = 'Ready'
 
@@ -73,7 +72,6 @@ app.controller 'SerializationCtrl', (
 
   $scope.$on 'dataEdited', ->
     SavingService.acceptChanges()
-    $scope.serializedData = SavingService.getRawData()
 
   $scope.new = ->
     SavingService.newFile()
