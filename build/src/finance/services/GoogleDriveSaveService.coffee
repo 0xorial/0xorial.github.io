@@ -16,9 +16,9 @@ app.service 'GoogleDriveSaveService', (GoogleDriveApiService) ->
       .then (result) ->
         currentFile = result.file
         return Promise.resolve(result)
-    showPicker: ->
-      throw new Error('not implemented')
-      await GoogleDriveApiService.showPicker(defer(file))
-      currentFile = file
-      return 'data'
+    showPicker: (options) ->
+      GoogleDriveApiService.showPicker(options.progress)
+      .then (result) ->
+        currentFile = result.file
+        return Promise.resolve(result)
   }

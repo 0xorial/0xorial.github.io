@@ -67,4 +67,12 @@ app.service 'PersistenceService', (
       .then (result) ->
         startUpdating()
         return Promise.resolve(result)
+
+    openFileInPicker: (progress) ->
+      progressListener = progress
+      return GoogleDriveSaveService.showPicker({progress: progress})
+      .then (file) ->
+        startUpdating()
+        return Promise.resolve(file)
+
   }

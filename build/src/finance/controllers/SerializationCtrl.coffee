@@ -57,7 +57,13 @@ app.controller 'SerializationCtrl', (
       $scope.needDriveAuthorization = showButton
 
   $scope.openDrive = ->
-    await SavingService.openDrive(defer(error, file), progress)
+    SavingService.openDrive(progress)
+    .then (file) ->
+      $timeout ->
+        $scope.$apply ->
+          $scope.driveFileName = file
+          $scope.isLoading = false
+          $scope.status = 'Ready'
 
   loadCurrentFile = ->
     SavingService.loadFile({path: $stateParams.documentPath, progress: progress})

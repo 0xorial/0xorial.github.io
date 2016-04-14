@@ -1,7 +1,7 @@
 CLIENT_ID = '738883605733-b6bc7deeulg034sncifk1upknib3b0n0.apps.googleusercontent.com'
 APP_ID = '738883605733'
 API_KEY = 'AIzaSyDbiOruHeMzOa2K32MVMnK7q0WVxv-AZQY'
-MIME_BASE = 'application/vnd.google-apps.drive-sdk.'
+MIME_BASE = 'application/json, application/vnd.google-apps.drive-sdk.'
 MIME = MIME_BASE + APP_ID
 SCOPES = [
   'https://www.googleapis.com/auth/drive'
@@ -69,7 +69,7 @@ app.service 'GoogleDriveApiService', ->
     contentType = 'application/json'
     metadata =
       'title': name
-      'mimeType': 'application/json,' + MIME
+      'mimeType': MIME
       'indexableText':
         'text': index
     base64Data = btoa(fileData)
@@ -83,10 +83,6 @@ app.service 'GoogleDriveApiService', ->
       'params': 'uploadType': 'multipart'
       'headers': 'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
       'body': multipartRequestBody)
-    if !callback
-      callback = (file) ->
-        console.log file
-        return
 
     return new Promise (resolve, reject) ->
       request.execute -> resolve(arguments)
@@ -133,23 +129,24 @@ app.service 'GoogleDriveApiService', ->
 
     return downloadPromise
 
-  pickerCallback = ->
-    console.log arguments
-
   createPicker = ->
-    view = new (google.picker.View)(google.picker.ViewId.DOCS)
-    view.setMimeTypes MIME
-    picker = (new (google.picker.PickerBuilder))
-      .enableFeature(google.picker.Feature.NAV_HIDDEN)
-      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-      .setAppId('738883605733')
-      .setOAuthToken(oauthToken)
-      .addView(view)
-      .addView(new (google.picker.DocsUploadView))
-      .setDeveloperKey(API_KEY)
-      .setCallback(pickerCallback)
-      .build()
-    picker.setVisible true
+    return new Promise (resolve, reject) ->
+      callback = (state) ->
+        if state.action == 'picked'
+          resolve(state.docs[0])
+      view = new (google.picker.View)(google.picker.ViewId.DOCS)
+      view.setMimeTypes MIME
+      picker = (new (google.picker.PickerBuilder))
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        # .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+        .setAppId('738883605733')
+        .setOAuthToken(oauthToken)
+        .addView(view)
+        .addView(new (google.picker.DocsUploadView))
+        .setDeveloperKey(API_KEY)
+        .setCallback(callback)
+        .build()
+      picker.setVisible true
 
   return {
     loadFile: (options) ->
@@ -171,7 +168,7 @@ app.service 'GoogleDriveApiService', ->
         return arg
 
     updateFile: (options) ->
-      {id, name, data, index, progress1} = options
+      {id, name, data, index, progress} = options
       ensureInitCompleted()
       .then ->
         progress('Saving file...')
@@ -179,9 +176,13 @@ app.service 'GoogleDriveApiService', ->
       .then ->
         progress('File saved.')
 
-    showPicker: (done, progress) ->
-      await ensureInitCompleted({done: defer(), progress: progress})
-      createPicker()
+    showPicker: (progress1) ->
+      progress = progress1
+      ensureInitCompleted()
+      .then ->
+        return createPicker()
+      .then (result) ->
+        downloadFile(result.id)
 
     authorizeInDrive: (cb, progress) ->
 

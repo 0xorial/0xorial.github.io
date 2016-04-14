@@ -13,9 +13,13 @@ app.service 'SavingService', (
     save: () ->
       PersistenceService.invalidateFile()
 
-    openDrive: (done, progress) ->
-      # GoogleDriveSaveService.showPicker(done, progress)
-      # saveContinuously(null, done, progress)
+    openDrive: (progress) ->
+      return PersistenceService.openFileInPicker(progress)
+        .then (result)->
+          name = result.file.title
+          jsonStringData = result.data
+          DocumentDataService.setRawData(jsonStringData)
+          return Promise.resolve(name)
 
     saveNewDrive: (name, progress) ->
       return PersistenceService.saveNew({name: name, progress: progress})
@@ -45,7 +49,7 @@ app.service 'SavingService', (
       return loadPromise
 
     authorizeInDrive: -> (cb, progress) ->
-      GoogleDriveSaveService.authorizeInDrive(cb, progress)
+      PersistenceService.authorizeInDrive(cb, progress)
 
     newFile: ->
       DocumentDataService.setData([], [], {})
