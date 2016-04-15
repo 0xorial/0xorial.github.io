@@ -11,15 +11,19 @@ app.service 'PersistenceService', (
   startUpdating = ->
     update = ->
       data = DocumentDataService.getRawData()
+      index = DocumentDataService.getIndex()
+      thumbnail = DocumentDataService.getThumbnail()
       localStorage.setItem('data', data)
       progressListener('Updated local storage.')
       return GoogleDriveSaveService.update({
         progress: progressListener
         data: data
+        index: index
+        thumbnail: thumbnail
         })
     savingPromise = Promise.resolve()
     waitAndUpdate = ->
-      savingPromise = savingPromise.then ->
+      savingPromise = savingPromise.finally ->
         update()
     throttledUpdate = _.throttle(waitAndUpdate, 2000, {leading: false})
 
@@ -39,12 +43,13 @@ app.service 'PersistenceService', (
     saveNew: (options) ->
       progressListener = options.progress
       data = DocumentDataService.getRawData()
+      index = DocumentDataService.getIndex()
       localStorage.setItem('data', data)
       return GoogleDriveSaveService.saveNew({
         name: options.name
         progress: progressListener
         data: data
-        index: options.index
+        index: index
         })
       .then (file) ->
         localStorage.setItem('data', null)

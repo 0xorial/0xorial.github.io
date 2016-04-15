@@ -59,4 +59,7 @@ app.service 'DocumentDataService', (
       accountsText = accounts.map((a) -> a.name).join(',')
       paymentsText = payments.map((p) -> p.description).join(',')
       return accountsText + ',' + paymentsText
+
+    getThumbnail: ->
+      return DataService.getThumbnail()
   }

@@ -61,7 +61,7 @@ app.service 'GoogleDriveApiService', ->
       initPromise = null
     return initPromise
 
-  insertFile = (name, fileData, index, callback) ->
+  insertFile = (name, fileData, index, thumbnail) ->
     boundary = '-------314159265358979323846'
     delimiter = '\r\n--' + boundary + '\r\n'
     close_delim = '\r\n--' + boundary + '--'
@@ -72,6 +72,8 @@ app.service 'GoogleDriveApiService', ->
       'mimeType': MIME
       'indexableText':
         'text': index
+      'thumbnail':
+        'image': thumbnail
     base64Data = btoa(fileData)
     multipartRequestBody = delimiter +
       'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter +

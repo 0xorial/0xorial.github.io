@@ -10,7 +10,7 @@ app.service 'GoogleDriveSaveService', (GoogleDriveApiService) ->
     update: (options) ->
       if !currentFile
         throw new Error()
-      return GoogleDriveApiService.updateFile({id: currentFile.id, data: options.data, index: options.index, progress: options.progress})
+      return GoogleDriveApiService.updateFile(options)
     load: (options) ->
       return GoogleDriveApiService.loadFile({id: options.id, progress: options.progress})
       .then (result) ->

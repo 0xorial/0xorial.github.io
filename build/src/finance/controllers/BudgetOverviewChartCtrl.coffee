@@ -142,6 +142,15 @@ app.controller 'BudgetOverviewChartCtrl', ($scope, SimulationService, DataServic
       theChart.destroy()
     theChart = new Highcharts.StockChart(options)
 
+    svg = theChart.getSVG()
+    canvas = document.createElement('canvas')
+    ctx = canvas.getContext('2d')
+    imageWidth = svg.match(/^<svg[^>]*width\s*=\s*\"?(\d+)\"?[^>]*>/)[1]
+    imageHeight = svg.match(/^<svg[^>]*height\s*=\s*\"?(\d+)\"?[^>]*>/)[1]
+    ctx.drawImage(svg, 0, 0, imageWidth, imageHeight)
+    data = canvas.toDataURL('image/png')
+    DataService.setThumbnail(data)
+
   update()
 
   $scope.$on 'simulationRan', (__, c) ->

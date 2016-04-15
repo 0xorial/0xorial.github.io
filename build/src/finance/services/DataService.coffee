@@ -5,6 +5,8 @@ dataContainer = {
   usedIds: {}
 }
 
+thumbnail = null
+
 app.service 'DataService', ($rootScope) ->
 
   takeIdFor = (o) ->
@@ -105,4 +107,11 @@ app.service 'DataService', ($rootScope) ->
     notifyEdited: ->
       $rootScope.$broadcast 'dataChanged'
       $rootScope.$broadcast 'dataEdited'
+
+    setThumbnail: (value) ->
+      thumbnail = value
+
+    getThumbnail: ->
+      return thumbnail
+
     }
