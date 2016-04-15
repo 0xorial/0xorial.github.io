@@ -18,10 +18,10 @@ class exports.Payment
   @property('id', {
     get: ->
       if @_id == undefined
-        @_id = -1
+        @_id = 0
       return @_id
     set: (v) ->
-      if @id != -1 
+      if @id != 0 
         throw new Error()
       @_id = v
     })
