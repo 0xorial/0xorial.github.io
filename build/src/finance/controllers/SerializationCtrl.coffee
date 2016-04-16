@@ -59,9 +59,10 @@ app.controller 'SerializationCtrl', (
   $scope.openDrive = ->
     SavingService.openDrive(progress)
     .then (file) ->
+      $state.go('.', {documentPath: 'drive:' + file.id}, {notify: false})
       $timeout ->
         $scope.$apply ->
-          $scope.driveFileName = file
+          $scope.driveFileName = file.title
           $scope.isLoading = false
           $scope.status = 'Ready'
 

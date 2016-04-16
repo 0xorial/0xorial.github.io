@@ -50,7 +50,9 @@ app.service 'GoogleDriveApiService', ->
       return Promise.resolve(gapi.client.load('drive', 'v2'))
     .then ->
       progress('Loading picker API...')
-      return Promise.resolve(gapi.load('picker'))
+      return new Promise (resolve, reject) ->
+        load = gapi.load('picker', {callback: (r)->
+          resolve()})
 
   initPromise = null
   ensureInitCompleted = () ->
@@ -175,11 +177,12 @@ app.service 'GoogleDriveApiService', ->
       .then ->
         progress('Saving file...')
         return doUpdateFile(id, data, index)
-      .then ->
+      .then (result) ->
         progress('File saved.')
+        return result.result
 
-    showPicker: (progress1) ->
-      progress = progress1
+    showPicker: (options) ->
+      progress = options.progress
       ensureInitCompleted()
       .then ->
         return createPicker()

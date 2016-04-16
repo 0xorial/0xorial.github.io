@@ -19,7 +19,7 @@ app.service 'SavingService', (
           name = result.file.title
           jsonStringData = result.data
           DocumentDataService.setRawData(jsonStringData)
-          return Promise.resolve(name)
+          return Promise.resolve(result.file)
 
     saveNewDrive: (name, progress) ->
       return PersistenceService.saveNew({name: name, progress: progress})
