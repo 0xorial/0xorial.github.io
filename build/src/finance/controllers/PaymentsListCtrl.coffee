@@ -1,4 +1,20 @@
-app.controller 'PaymentsListCtrl', ($scope, $rootScope, DataService, SimulationService, FormulaEvaluationService) ->
+app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, SimulationService, FormulaEvaluationService) ->
+
+  $(document).on 'keydown', (e) ->
+    console.log e
+    if e.keyCode == 27 # Escape
+      for p in $scope.visiblePayments
+        if p.showEdit
+          $scope.cancelEdit(p)
+      $timeout ->
+        $scope.$apply()
+
+      return
+
+  $scope.onKeyDown = (p, e) ->
+    console.log e
+    if e.keyCode == 113 
+      $scope.edit(p)
 
   $scope.payments = []
   $scope.visiblePayments = []

@@ -112,3 +112,10 @@ md-checkbox {
 .custom-file-input:active::before {
   background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
 }
+
+[kb-item] {
+    cursor: pointer;
+}
+[kb-item].kb-selected {
+    background: lightblue;
+}

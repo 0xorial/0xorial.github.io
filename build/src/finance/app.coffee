@@ -3,6 +3,7 @@ app = angular.module('StarterApp', [
   'ngMdIcons'
   'mdColorPicker'
   'ui.router'
+  'keyboard'
 ])
 
 app.config ($stateProvider, $urlRouterProvider) ->

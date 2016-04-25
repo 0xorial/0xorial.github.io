@@ -1,7 +1,17 @@
 app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
 
   $(document).on 'keydown', 'input', (e) ->
-    e.stopPropagation()
+    keycode = e.keyCode;
+
+    valid =
+        (keycode > 47 && keycode < 58)   or # number keys
+        keycode == 32 or keycode == 13   or # spacebar & return key(s) (if you want to allow carriage returns)
+        (keycode > 64 && keycode < 91)   or # letter keys
+        (keycode > 95 && keycode < 112)  or # numpad keys
+        (keycode > 185 && keycode < 193) or # ;=,-./` (in order)
+        (keycode > 218 && keycode < 223)
+    if valid
+      e.stopPropagation()
     return
 
   $(document).on 'keydown', (e) ->
