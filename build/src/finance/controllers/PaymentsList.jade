@@ -8,7 +8,7 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
         ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
     div(layout='row')
       div (function(p) {
-      input(ng-model='filterFunction' flex='')
+      input#filterInput(ng-model='filterFunction' flex='')
       div ;})
     
     div(flex='')

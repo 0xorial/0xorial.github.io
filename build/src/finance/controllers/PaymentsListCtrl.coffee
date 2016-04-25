@@ -8,12 +8,15 @@ app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, S
           $scope.cancelEdit(p)
       $timeout ->
         $scope.$apply()
+    if e.keyCode == 190 and e.ctrlKey
+      $('#filterInput').focus()
+      $('#filterInput').select()
 
       return
 
   $scope.onKeyDown = (p, e) ->
     console.log e
-    if e.keyCode == 113 
+    if e.keyCode == 113
       $scope.edit(p)
 
   $scope.payments = []

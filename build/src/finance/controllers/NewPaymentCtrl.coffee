@@ -10,7 +10,7 @@ app.controller 'NewPaymentCtrl', ($scope, $rootScope, DataService, $mdDialog) ->
         (keycode > 95 && keycode < 112)  or # numpad keys
         (keycode > 185 && keycode < 193) or # ;=,-./` (in order)
         (keycode > 218 && keycode < 223)
-    if valid
+    if valid and !e.ctrlKey and !e.altKey
       e.stopPropagation()
     return
 
