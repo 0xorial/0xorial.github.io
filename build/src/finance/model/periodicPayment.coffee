@@ -1,7 +1,7 @@
 exports = window
 
 class exports.PeriodicPayment extends exports.Payment
-  constructor: (@account, @startDate, @endDate, @period, @amount, @description) ->
+  constructor: (@account, @startDate, @endDate, @period, @amount, @description, @tags) ->
     if !@startDate
       @startDate = moment()
     if !@endDate

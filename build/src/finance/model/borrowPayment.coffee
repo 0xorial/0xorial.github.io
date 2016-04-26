@@ -1,7 +1,7 @@
 exports = window
 
 class exports.BorrowPayment extends exports.Payment
-  constructor: (@account, @date, @returnDate, @amount, @description, @interest) ->
+  constructor: (@account, @date, @returnDate, @amount, @description, @interest, @tags) ->
     if !@interest
       @interest = 0
     if !@date

@@ -53,7 +53,7 @@ deserializePayment = (p) ->
         vatPercentage: 0.21
         description: p.description
         paymentDate: date
-      return new TaxableIncomePayment(account, p.amount, params)
+      return new TaxableIncomePayment(account, p.amount, '', params)
 
 
 exports.demoPayments = transactions.map (t) ->

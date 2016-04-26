@@ -1,7 +1,7 @@
 exports = window
 
 class exports.TaxableIncomePayment extends exports.Payment
-  constructor: (@account, @amount, @params) ->
+  constructor: (@account, @amount, @tags, @params) ->
     if !@params
       @params = {
         vatPercentage: 0.21

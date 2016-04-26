@@ -1,7 +1,7 @@
 exports = window
 
 class exports.SimplePayment extends exports.Payment
-  constructor: (@account, @date, @amount, @description, @isDeductible, @deductiblePercentage) ->
+  constructor: (@account, @date, @amount, @description, @isDeductible, @deductiblePercentage, @tags) ->
     if !@date
       @date = moment()
     @deductiblePercentage |= 0

@@ -31,7 +31,7 @@ app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, S
           predicate = eval('(function(p){' + $scope.filterFunction + ';})')
         else
           re = new RegExp($scope.filterFunction)
-          predicate = (p) -> re.test(p.description) or re.test(p.amount)
+          predicate = (p) -> re.test(p.description) or re.test(p.amount) or re.test(p.payment.tags)
         if _.isFunction predicate
           evaluator = predicate
     catch e

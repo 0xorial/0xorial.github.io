@@ -17,6 +17,7 @@ payments.SimplePayment.prototype.toJson = (context) ->
     description: @description
     isDeductible: @isDeductible
     deductiblePercentage: @deductiblePercentage
+    tags: @tags
   }
 
 payments.SimplePayment.fromJson = (json, context) ->
@@ -26,7 +27,8 @@ payments.SimplePayment.fromJson = (json, context) ->
     json.amount,
     json.description,
     json.isDeductible,
-    json.deductiblePercentage)
+    json.deductiblePercentage,
+    json.tags)
 
 payments.BorrowPayment.prototype.toJson = (context) ->
   return {
@@ -37,6 +39,7 @@ payments.BorrowPayment.prototype.toJson = (context) ->
     amount: @amount
     description: @description
     interest: @interest
+    tags: @tags
   }
 payments.BorrowPayment.fromJson = (json, context) ->
   return new exports.BorrowPayment(
@@ -56,6 +59,7 @@ payments.PeriodicPayment.prototype.toJson = (context) ->
     period: @period
     amount: @amount
     description : @description
+    tags: @tags
   }
 
 payments.PeriodicPayment.fromJson = (json, context) ->
@@ -65,7 +69,8 @@ payments.PeriodicPayment.fromJson = (json, context) ->
     moment(json.endDate),
     json.period,
     json.amount,
-    json.description)
+    json.description,
+    json.tags)
 
 payments.TaxableIncomePayment.prototype.toJson = (context) ->
   params = _.clone(@params)
@@ -75,6 +80,7 @@ payments.TaxableIncomePayment.prototype.toJson = (context) ->
     accountId: context.getObjectId(@account)
     params: params
     amount: @amount
+    tags: @tags
   }
 payments.TaxableIncomePayment.fromJson = (json, context) ->
   params = _.clone(json.params)
@@ -82,4 +88,5 @@ payments.TaxableIncomePayment.fromJson = (json, context) ->
   return new exports.TaxableIncomePayment(
     context.resolveObject(json.accountId),
     json.amount,
+    json.tags,
     params)

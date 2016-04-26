@@ -16,3 +16,4 @@ div.md-inline-form(layout='column')
     md-select(ng-model='payment.period.units' )
       md-option(ng-repeat='a in ["days", "weeks", "months"]' ng-value='a') 
         span {{a}}
+  tags-selector(payment='payment')
