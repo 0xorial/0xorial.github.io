@@ -1,4 +1,12 @@
-app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, SimulationService, FormulaEvaluationService) ->
+app.controller 'PaymentsListCtrl', (
+  $timeout,
+  $scope,
+  $rootScope,
+  DataService,
+  SimulationService,
+  FormulaEvaluationService,
+  kbFocus
+  $mdUtil) ->
 
   $(document).on 'keydown', (e) ->
     console.log e
@@ -18,6 +26,12 @@ app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, S
     console.log e
     if e.keyCode == 113
       $scope.edit(p)
+    if e.keyCode == 13 and e.ctrlKey
+      if p.showEdit
+        $scope.saveEdit(p)
+      else
+        $scope.edit(p)
+
 
   $scope.payments = []
   $scope.visiblePayments = []
@@ -171,6 +185,7 @@ app.controller 'PaymentsListCtrl', ($timeout, $scope, $rootScope, DataService, S
     payment.showEdit = false
     DataService.updatePayment(payment.payment)
     DataService.notifyEdited()
+    kbFocus(payment.id.toString())
 
   $scope.delete = (payment) ->
     DataService.deletePayment(payment.payment)

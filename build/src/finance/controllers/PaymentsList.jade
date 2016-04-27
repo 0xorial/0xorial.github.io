@@ -24,12 +24,13 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
         style='border-top: solid 1px rgba(0, 0, 0, 0.117647); padding: 4px; padding-left: 0'
         ng-class='{muted : p.payment.isMuted}'
         kb-item='p'
+        kb-focus='{{p.id}}'
         ng-keydown='onKeyDown(p, $event)'
         ng-dblclick='edit(p)')
       div(layout='row' ng-switch='p.payment.isMuted')
-        button.icon-button(ng-click='unmute(p)' ng-switch-when='true')
+        button.icon-button(ng-click='unmute(p)' ng-switch-when='true' tabIndex='-1')
           ng-md-icon(icon='volume_up' style="fill: #ff8c66; cursor:pointer;" size='20')
-        button.icon-button(ng-click='mute(p)' ng-switch-default)
+        button.icon-button(ng-click='mute(p)' ng-switch-default tabIndex='-1')
           ng-md-icon(icon='volume_off' style="fill: #ff8c66; cursor:pointer;" size='20')
       div(style='width: 14px') {{p.payment.id}}
       div(layout='column' flex='')
@@ -46,12 +47,12 @@ md-content.payments-list(layout='column' ng-controller='PaymentsListCtrl' )
         div {{p.accountName}}
       div(layout='row' layout-align='end center')
         div(style='padding-right: 0;' flex='')
-          button.icon-button(ng-click='edit(p)')
+          button.icon-button(ng-click='edit(p)' tabIndex='-1')
             ng-md-icon(icon='edit' style="fill: #99c2ff; cursor:pointer;" size='24')
         div(style='padding-left: 0;')
-          button.icon-button
-            ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24' ng-click='delete(p)')
-    div.edit(ng-repeat-end='' ng-show='p.showEdit')
+          button.icon-button(ng-click='delete(p)' tabIndex='-1')
+            ng-md-icon(icon='delete' style="fill: #ff8c66; cursor:pointer;" size='24')
+    div.edit(ng-repeat-end='' ng-show='p.showEdit' ng-keydown='onKeyDown(p, $event)')
       div(layout='row' layout-align='end center')
         button.icon-button(ng-click='saveEdit(p)')
           ng-md-icon(icon='save' style="fill: #99c2ff; cursor:pointer;" size='24')
