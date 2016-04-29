@@ -108,24 +108,6 @@ console.warn = (message) ->
   console.realWarn.apply(console, arguments);
 
 
-class exports.SerializationContext
-  constructor: ->
-    @objects = {}
-
-  # registerObject: (object) ->
-  #   @objects.push(object)
-  #   return @objects.length - 1
-  #
-  registerObjectWithId: (id, object) ->
-    @objects[id] = object
-
-  getObjectId: (object) ->
-    if !object.id
-      throw new Error()
-    return object.id
-
-  resolveObject: (id) ->
-    return @objects[id]
 
 exports.ajaxGet = (url, headers, body, timeout) ->
   xhr = new XMLHttpRequest

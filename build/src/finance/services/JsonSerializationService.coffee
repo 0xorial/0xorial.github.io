@@ -1,16 +1,47 @@
+class SerializationContext
+  constructor: ->
+    @objects = {}
+
+  registerObjectWithId: (id, object) ->
+    @objects[id] = object
+
+  getObjectId: (object) ->
+    if !object.id
+      throw new Error()
+    return object.id
+
+  resolveObject: (id) ->
+    return @objects[id]
+
+
 app.service 'JsonSerializationService', (DataService) ->
 
   serializeStateToJson = (data) ->
-    ctx = new SerializationContext()
-
     accounts = data.accounts
     payments = data.payments
 
-    accounts = accounts.map (a) -> a.toJson(ctx)
+    accounts = accounts.map (a) ->
+      json = a.toJson()
+      if !a.id
+        throw new Error('no id')
+      json.id = a.id
+      return json
     payments = payments.map (p) ->
-      json = p.toJson(ctx)
-      if !json.id
-        json.id = p.id
+      json = p.toJson()
+      json.id = p.id
+      if !p.id
+        throw new Error('no id')
+      if p instanceof SimplePayment
+        json.type = 'SimplePayment'
+      else if p instanceof BorrowPayment
+        json.type = 'BorrowPayment'
+      else if p instanceof PeriodicPayment
+        json.type = 'PeriodicPayment'
+      else if p instanceof TaxableIncomePayment
+        json.type = 'TaxableIncomePayment'
+      else
+        throw new Error()
+
       return json
 
     root = {
@@ -24,8 +55,9 @@ app.service 'JsonSerializationService', (DataService) ->
     ctx = new SerializationContext()
     accounts = []
     for a in root.accounts
-      account = Account.fromJson(a, ctx)
+      account = Account.fromJson(a)
       account.id = a.id
+      ctx.registerObjectWithId(account.id, account)
       accounts.push account
 
     payments = []
@@ -33,17 +65,23 @@ app.service 'JsonSerializationService', (DataService) ->
       payment = null
       switch p.type
         when 'SimplePayment'
-          payment = SimplePayment.fromJson(p, ctx)
+          payment = new SimplePayment()
         when 'BorrowPayment'
-          payment = BorrowPayment.fromJson(p, ctx)
+          payment = new BorrowPayment()
         when 'PeriodicPayment'
-          payment = PeriodicPayment.fromJson(p, ctx)
+          payment = new PeriodicPayment()
         when 'TaxableIncomePayment'
-          payment = TaxableIncomePayment.fromJson(p, ctx)
+          payment = new TaxableIncomePayment()
         else
           throw new Error()
       payment.id = p.id
-      payments.push payment
+      ctx.registerObjectWithId(payment.id, payment)
+      payments.push {payment: payment, json: p}
+
+    for p in payments
+      p.payment.fromJson(p.json, ctx)
+
+    payments = payments.map (p) -> p.payment
 
     return {
       accounts: accounts
