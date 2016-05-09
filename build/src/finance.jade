@@ -20,7 +20,7 @@ html(lang='en', ng-app='StarterApp')
             img(src='/finance/495.gif' ng-show='isLoading')
             div(ng-hide='needDriveAuthorization') {{status}}
             md-button.md-raised(ng-show='needDriveAuthorization', ng-click='authorizeInDrive()') 'Authorize in Drive'
-                        
+
         div(flex='' layout='row' )
           md-content(flex='50' layout='column')
             div(flex='100')
@@ -33,7 +33,7 @@ html(lang='en', ng-app='StarterApp')
           div(flex='50' layout='column')
             .md-whiteframe-z1(style='margin:10px;' layout='column' flex='')
               div(ng-include='"finance/controllers/BudgetOverviewChart.html"' layout='column' flex='')
-              
+
   body.md-default-theme(style='overflow: hidden; height:100% width:100%' layout='column')
     div(ui-view = '' flex='' layout='column')
 
@@ -94,7 +94,6 @@ html(lang='en', ng-app='StarterApp')
     script(src='./finance/controllers/NewPaymentCtrl.js')
     script(src='./finance/controllers/PaymentsListCtrl.js')
     script(src='./finance/controllers/SerializationCtrl.js')
-    script(src='./finance/controllers/TransactionsListCtrl.js')
     script(src='./finance/controllers/BudgetOverviewChartCtrl.js')
     script(src='./finance/controllers/ValuesCtrl.js')
     script(src='./finance/templates/utils/AccountsDropDown.js')
@@ -102,5 +101,5 @@ html(lang='en', ng-app='StarterApp')
     script(src='./finance/templates/utils/TagsArray.js')
     script(src='./finance/templates/utils/DirectiveSwitch.js')
     script(src='./finance/templates/editors/editorBase.js')
-    
+
     script(src='http://localhost:3003/livereload.js')

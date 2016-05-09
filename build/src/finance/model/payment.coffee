@@ -2,6 +2,10 @@ exports = window
 
 class exports.Payment
 
+  constructor: ->
+    @links = []
+    @tags = ''
+
   getTransactions: (context) ->
     throw new Error('abstract method')
 
@@ -21,7 +25,7 @@ class exports.Payment
         @_id = 0
       return @_id
     set: (v) ->
-      if @id != 0 
+      if @id != 0
         throw new Error()
       @_id = v
     })

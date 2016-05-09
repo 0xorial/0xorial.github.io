@@ -1,16 +1,19 @@
 exports = window
-
 payments = window
 
 payments.Payment.prototype.toJson = () ->
+  links = @links ? []
   json = {
     tags: @tags
+    links: links.map (l) -> l.id
   }
   @toJsonImpl(json)
   return json
 
 payments.Payment.prototype.fromJson = (json, ctx) ->
-  @tags = json.tags
+  @tags = json.tags ? ''
+  jsonLinks = json.links ? []
+  @links = jsonLinks.map (l) -> ctx.resolveObject(l)
   @fromJsonImpl(json, ctx)
 
 payments.SimplePayment.prototype.toJsonImpl = (json) ->
@@ -69,7 +72,7 @@ payments.TaxableIncomePayment.prototype.toJsonImpl = (json) ->
   json.params = params
   json.amount = @amount
 
-payments.TaxableIncomePayment.prototype.fromJson = (json, context) ->
+payments.TaxableIncomePayment.prototype.fromJsonImpl = (json, context) ->
   params = _.clone(json.params)
   params.paymentDate = moment(params.paymentDate)
   @account = context.resolveObject(json.accountId)
