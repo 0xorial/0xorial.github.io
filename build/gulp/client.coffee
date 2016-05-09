@@ -28,12 +28,12 @@ module.exports = (gulp, $, options) ->
 
 
   gulp.task 'client-coffee', ->
-    x = gulp.src(['./src/**/*.coffee'])
-      .pipe($.changed(dst))
+    return gulp.src(['./src/**/*.coffee'])
+      .pipe($.changed(dst, {extension: '.js'}))
       .pipe($.plumber())
       .pipe($.sourcemaps.init({identityMap: true}))
       .pipe($.coffee())
-      .pipe($.sourcemaps.write({mapSources: (f) -> 'build/src/' + f}))
+      .pipe($.sourcemaps.write({mapSources: (f) -> '/build/src/' + f}))
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-coffee-watch', ->
@@ -45,7 +45,7 @@ module.exports = (gulp, $, options) ->
 
   gulp.task 'client-jade', ->
     return gulp.src(['./src/**/*.jade'])
-      .pipe($.changed(dst))
+      .pipe($.changed(dst, {extension: '.html' }))
       .pipe($.plumber())
       .pipe($.jade())
       # .pipe(inlinesource({rootpath: './', compress: options.compress}))
