@@ -3,10 +3,13 @@ app.service 'UndoRedoService', ($rootScope, HistoryService, JsonSerializationSer
   undoPointer = -1
   possibleRedos = 0
 
-  applyStateAtIndex = (index, hint) ->
+  applyStateAtIndex = (index) ->
     jsonState = HistoryService.peekState(index)
     state = JsonSerializationService.deserialize(jsonState)
-    DataService.setState(state, hint)
+    DataService.setPayments(state.payments)
+    DataService.setAccounts(state.accounts)
+    DataService.setValues(state.values)
+    DataService.notifyChanged()
     HistoryService.acceptNewState(jsonState)
 
   return {
