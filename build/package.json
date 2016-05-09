@@ -29,6 +29,7 @@
     "gulp-processhtml": "^1.1.0",
     "gulp-sass": "^2.0.4",
     "gulp-shell": "^0.4.2",
+    "gulp-sourcemaps": "^2.0.0-alpha",
     "gulp-sqlite3": "0.0.1",
     "gulp-watch": "^4.3.5",
     "gulp-webserver": "^0.9.1",

@@ -28,10 +28,12 @@ module.exports = (gulp, $, options) ->
 
 
   gulp.task 'client-coffee', ->
-    return gulp.src(['./src/**/*.coffee'])
+    x = gulp.src(['./src/**/*.coffee'])
       .pipe($.changed(dst))
       .pipe($.plumber())
-      .pipe($.iced({runtime: 'inline'}))
+      .pipe($.sourcemaps.init({identityMap: true}))
+      .pipe($.coffee())
+      .pipe($.sourcemaps.write({mapSources: (f) -> 'build/src/' + f}))
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-coffee-watch', ->
