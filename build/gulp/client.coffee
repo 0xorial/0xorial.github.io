@@ -26,10 +26,21 @@ module.exports = (gulp, $, options) ->
         $.livereload.reload("*.css")
     return
 
-
   gulp.task 'client-coffee', ->
     return gulp.src(['./src/**/*.coffee'])
       .pipe($.changed(dst, {extension: '.js'}))
+      .pipe($.filelog())
+      .pipe($.plumber())
+      .pipe($.sourcemaps.init({identityMap: true}))
+      .pipe($.coffee())
+      .pipe($.sourcemaps.write({mapSources: (f) -> '/build/src/' + f}))
+      .pipe(gulp.dest(dst))
+
+  createCoffeeTask = (file, base) ->
+    gulp.task 'client-coffee-temp', ->
+    return gulp.src(file, {base: base})
+#      .pipe($.changed(dst, {extension: '.coffee'}))
+      .pipe($.filelog())
       .pipe($.plumber())
       .pipe($.sourcemaps.init({identityMap: true}))
       .pipe($.coffee())
@@ -37,40 +48,42 @@ module.exports = (gulp, $, options) ->
       .pipe(gulp.dest(dst))
 
   gulp.task 'client-coffee-watch', ->
-    $.watch ['./src/**/*.coffee'], () ->
-      gulp.start 'client-coffee', ->
+    $.watch ['./src/**/*.coffee'], (file) ->
+      createCoffeeTask file.history[file.history.length - 1], file.base
+      gulp.start 'client-coffee-temp', ->
         $.livereload.reload()
     return
 
 
   gulp.task 'client-jade', ->
     return gulp.src(['./src/**/*.jade'])
-      .pipe($.changed(dst, {extension: '.html' }))
+      .pipe($.changed(dst, {extension: '.html'}))
       .pipe($.plumber())
+      .pipe($.filelog())
       .pipe($.jade())
       # .pipe(inlinesource({rootpath: './', compress: options.compress}))
       .pipe(gulp.dest(dst))
 
-  createJadeTask = (taskName, file, base, rootpath) ->
-    gulp.task taskName, ->
+  createJadeTask = (file, base) ->
+    gulp.task 'client-jade-temp', ->
       return gulp.src([file], {base: base})
-        .pipe($.changed(dst))
+        .pipe($.changed(dst, {extension: '.html'}))
+        .pipe($.filelog())
         .pipe($.plumber())
         .pipe($.jade())
-        # .pipe(inlinesource({rootpath: rootpath, compress: options.compress}))
+#        .pipe(inlinesource({rootpath: rootpath, compress: options.compress}))
         .pipe(gulp.dest(dst))
     return undefined
 
   gulp.task 'client-jade-watch', ->
     $.watch ['./src/**/*.jade'], (file) ->
-      tn = 'client-jade-temp'
-      createJadeTask tn, file.history[file.history.length - 1], file.base, file.cwd
+      createJadeTask file.history[file.history.length - 1], file.base
 
       # console.log Object.keys(file)
       # for k in Object.keys(file)
       #   console.log(file[k])
 
-      gulp.start tn, ->
+      gulp.start 'client-jade-temp', ->
         $.livereload.reload()
     return
 
