@@ -33,8 +33,9 @@ transactions = [
   {"id": 1, "type": Types.Borrow, "date": "3/12/2015", "returnDate": "11/12/2015", "amount": 'p(5).a', "description": "Tom", "account": account1},
   {"id": 4, "type": Types.Simple, "date": "1/12/2015", "amount": 1000, "description": "initial money", "account": account1},
   {"id": 5, "type": Types.SimpleExpense, "date": "3/12/2015", "amount": 'v("bikePrice").a', "description": "bought bike", "account": account1}
+  {"id": 9, "type": Types.SimpleExpense, "date": "15/12/2015", "amount": '100', "description": "paid some tax", "account": account1, tags: ['vat']}
   {"id": 6, "type": Types.PeriodicPayment, "startDate": "14/1/2015", "endDate": "25/2/2016", "period":{quantity: 1, units: "months"}, "amount": -100, "description": "alimony", "account": account1}
-  {"id": 7, "type": Types.TaxableIncome, "date": "10/12/2015", "amount": 'v("rate").a * 22', "description": "payment for hard work", "account": account3}
+  {"id": 7, "type": Types.TaxableIncome, "date": "10/12/2015", "amount": 'v("rate").a * 22', "description": "payment for hard work", "account": account3, "links": [9]}
   {"id": 8, "type": Types.Borrow, "date": "4/12/2015", "returnDate": "11/12/2015",  "amount": 150, "description": "Wim", "account": account1},
 ]
 
@@ -55,11 +56,33 @@ deserializePayment = (p) ->
         paymentDate: date
       return new TaxableIncomePayment(account, p.amount, '', params)
 
+deserializeTempPayment = (p) ->
+  payment = deserializePayment(p)
+  return {
+    payment: payment
+    json: p
+  }
 
-exports.demoPayments = transactions.map (t) ->
-  r = deserializePayment(t)
-  r.id = t.id
+
+tempPayments = transactions.map (t) ->
+  r = deserializeTempPayment(t)
+  r.payment.id = t.id
   return r
+
+for p in tempPayments
+  p.payment.tags = p.json.tags || []
+  links = p.json.links || []
+  p.links = []
+  for linkId in links
+    payment = _.find(tempPayments, (t) -> t.json.id == linkId)
+    if !payment
+      throw new Error()
+    p.links.push payment
+
+exports.demoPayments = tempPayments.map (p) -> p.payment
+
+console.log demoPayments
+
 exports.demoAccounts = allAccountsData
 
 exports.demoValues = constants

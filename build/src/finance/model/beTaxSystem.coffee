@@ -121,4 +121,4 @@ class exports.BeTaxSystem
       personalIncomeTax = @getPersonalIncomeTaxAmount(totalYearPersonalIncome, 7090)
       personalTaxPayDate = moment({year: year + 1, month: 6})
       t = context.transaction(personalTaxPayDate, -personalIncomeTax.amount, account, 'personal income tax', undefined)
-      t.additionalInfo = 'Total income was: ' + totalYearPersonalIncome + '. Taxable personal income was: ' + personalIncomeTax.taxablePersonalIncome + '. Tax rate applied was: ' + personalIncomeTax.rate
+      t.additionalInfo = 'Total income was: ' + totalYearPersonalIncome + '. Taxable personal income was: ' + personalIncomeTax.taxableAmount + '. Tax rate applied was: ' + personalIncomeTax.rate
