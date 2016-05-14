@@ -50,9 +50,6 @@ app.service 'DocumentDataService', (
       json = JSON.parse(stringData)
       setRawData(json)
 
-    addStateToHistory: ->
-      DataService.getstate
-
     getIndex: ->
       accounts = DataService.getAccounts()
       payments = DataService.getAllPayments()
