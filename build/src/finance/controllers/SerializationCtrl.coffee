@@ -10,8 +10,13 @@ app.controller 'SerializationCtrl', (
   $stateParams,
   $location) ->
 
-  $scope.saveDrive = ->
-    SavingService.save()
+  progress = (m, showButton) ->
+    $timeout ->
+      $scope.$apply -> $scope.status = m
+      $scope.needDriveAuthorization = showButton
+
+  $scope.save = ->
+    SavingService.save(progress)
 
   $scope.saveDriveNew = ->
     if !$scope.driveFileName
@@ -51,11 +56,6 @@ app.controller 'SerializationCtrl', (
     .then ->
       loadCurrentFile()
 
-  progress = (m, showButton) ->
-    $timeout ->
-      $scope.$apply -> $scope.status = m
-      $scope.needDriveAuthorization = showButton
-
   $scope.openDrive = ->
     SavingService.openDrive(progress)
     .then (file) ->
@@ -74,6 +74,7 @@ app.controller 'SerializationCtrl', (
           $scope.driveFileName = file
           $scope.isLoading = false
           $scope.status = 'Ready'
+          $rootScope.$broadcast 'dataLoaded'
 
   loadCurrentFile()
 

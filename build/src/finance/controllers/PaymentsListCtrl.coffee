@@ -159,7 +159,9 @@ app.controller 'PaymentsListCtrl', (
   update()
 
   $scope.$watch 'filterFunction', ->
-    updateVisible()
+    if $scope.filterFunction != undefined
+      updateVisible()
+      DataService.setFilter($scope.filterFunction)
 
   $scope.enteredPayment = (payment) ->
     $rootScope.$broadcast('enterPayment', payment.payment)
@@ -216,3 +218,6 @@ app.controller 'PaymentsListCtrl', (
 
   $scope.$on 'simulationRan', (__, c) ->
     update()
+
+  $scope.$on 'dataLoaded', ->
+    $scope.filterFunction = DataService.getFilter()

@@ -4,6 +4,7 @@ app.service 'PersistenceService', (
   JsonSerializationService) ->
 
   currentDriveFile = null
+  savedLocal = false
   progressListener = null
   throttledUpdate = ->
 
@@ -42,9 +43,21 @@ app.service 'PersistenceService', (
         savingPromise.cancel()
       throttledUpdate = ->
 
-    save: ->
-      throttledUpdate()
-      throttledUpdate.flush()
+    save: (options) ->
+      progressListener = options.progress
+      if currentDriveFile
+        throttledUpdate()
+        throttledUpdate.flush()
+      else
+        if !savedLocal
+          throttledUpdate = ->
+            data = DocumentDataService.getRawData()
+            localStorage.setItem('local', JSON.stringify({file: 'local', data: data}))
+            progressListener('Saved on ' + moment().format())
+
+        throttledUpdate()
+        throttledUpdate.flush()
+
 
 
     invalidateFile: ->
@@ -90,6 +103,13 @@ app.service 'PersistenceService', (
         startUpdating()
         return Promise.resolve(result)
 
+    tryLoadLocal: ->
+      unsaved = localStorage.getItem 'local'
+      if !unsaved
+        return null
+      existing = JSON.parse(unsaved)
+      return existing.data
+
     openFileInPicker: (progress) ->
       progressListener = progress
       return GoogleDriveApiService.showPicker({progress: progress})
@@ -98,5 +118,4 @@ app.service 'PersistenceService', (
         localStorage.setItem('data:' + currentDriveFile.id, JSON.stringify(result))
         startUpdating()
         return Promise.resolve(result)
-
   }

@@ -2,6 +2,12 @@ body {
   font-size: 13px;
 }
 
+md-toolbar {
+  .md-button {
+    min-width: 0;
+  }
+}
+
 .account-list {
   md-input-container {
     padding: 0;

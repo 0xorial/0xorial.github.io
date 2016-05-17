@@ -23,9 +23,27 @@ app.service 'DocumentDataService', (
     jsonState = JsonSerializationService.serialize(state)
     HistoryService.acceptNewState(jsonState)
 
-  setRawData = (jsonData) ->
-    data = jsonData
-    HistoryService.setStateWithHistory(data)
+  getRawData = () ->
+    currentData = HistoryService.getStateWithHistory()
+    filterText = DataService.getFilter()
+    nonHistoricalData = {
+      filterText: filterText
+    }
+    return {
+      historicalData: currentData
+      nonHistoricalData: nonHistoricalData
+    }
+
+
+  setRawData = (data) ->
+    if data.nonHistoricalData == undefined
+      data = {
+        historicalData: data
+        nonHistoricalData: {}
+      }
+    HistoryService.setStateWithHistory(data.historicalData)
+    nonHistoricalData = data.nonHistoricalData
+    DataService.setFilter(nonHistoricalData.filterText)
     initializeFromHistoryService()
 
   return {
@@ -43,7 +61,7 @@ app.service 'DocumentDataService', (
       initializeFromHistoryService()
 
     getRawData: () ->
-      currentData = HistoryService.getStateWithHistory()
+      currentData = getRawData()
       return JSON.stringify(currentData, null, '  ')
 
     setRawData: (stringData) ->

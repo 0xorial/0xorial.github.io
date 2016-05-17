@@ -10,8 +10,8 @@ app.service 'SavingService', (
       PersistenceService.invalidateFile()
       return
 
-    save: () ->
-      PersistenceService.invalidateFile()
+    save: (progress) ->
+      PersistenceService.save({progress: progress})
 
     openDrive: (progress) ->
       return PersistenceService.openFileInPicker(progress)
@@ -26,15 +26,19 @@ app.service 'SavingService', (
 
     loadFile: (options) ->
       loadPromise = Promise.resolve()
-      if options.path == 'demo'
+      setDemoData = ->
         DocumentDataService.setData(demoPayments, demoAccounts, demoValues)
         loadPromise = Promise.resolve('demo')
+
+      if options.path == 'demo'
+        setDemoData()
       else if options.path == 'local'
-        existingData = localStorage.getItem 'loal'
+        existingData = PersistenceService.tryLoadLocal()
         if existingData
-          DocumentDataService.setRawData(jsonStringData)
+          DocumentDataService.setRawData(existingData)
+          loadPromise = Promise.resolve('local')
         else
-          DocumentDataService.setData([], [], {})
+          setDemoData()
         loadPromise = Promise.resolve('local')
       else if _.startsWith(options.path, 'drive:')
         id = options.path.substring(6)

@@ -3,6 +3,7 @@ dataContainer = {
   payments: []
   nextId: 1
   usedIds: {}
+  filter: ''
 }
 
 thumbnail = null
@@ -101,6 +102,12 @@ app.service 'DataService', ($rootScope) ->
     deleteValue: (key) ->
       delete dataContainer[key]
 
+    getFilter: ->
+      return dataContainer.filter
+
+    setFilter: (f) ->
+      dataContainer.filter = f
+
     notifyChanged: ->
       $rootScope.$broadcast 'dataChanged'
 
@@ -113,5 +120,4 @@ app.service 'DataService', ($rootScope) ->
 
     getThumbnail: ->
       return thumbnail
-
     }

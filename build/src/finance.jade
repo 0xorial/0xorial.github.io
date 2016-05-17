@@ -8,11 +8,13 @@ html(lang='en', ng-app='StarterApp')
       div(layout='column' flex='')
         md-toolbar
           .md-toolbar-tools(ng-controller='SerializationCtrl')
-            md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()') Undo
-            md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()') Redo
+            md-button.md-raised(ng-click='undo()' ng-disabled='!canUndo()')
+              ng-md-icon(icon='undo' style="" size='30')
+            md-button.md-raised(ng-click='redo()' ng-disabled='!canRedo()')
+              ng-md-icon(icon='redo' style="" size='30')
             md-button.md-raised(ng-click='new()') New
             md-button.md-raised(ng-click='openDrive()') Open
-            md-button.md-raised(ng-click='saveDrive()') Save
+            md-button.md-raised(ng-click='save()') Save/save local
             md-button.md-raised(ng-click='saveDriveNew()') Save as:
             input(ng-model='driveFileName')
             md-button.md-raised(ng-click='download()') Download
