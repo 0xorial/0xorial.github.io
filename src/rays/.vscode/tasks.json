@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "start",
+            "problemMatcher": {
+                // The problem is owned by the cpp language service.
+                "owner": "ts",
+                // The file name for reported problems is relative to the opened folder.
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                // The actual pattern to match problems in the output.
+                "pattern": {
+                    // The regular expression. Example to match: helloWorld.c:5:3: warning: implicit declaration of function ‘printf’ [-Wimplicit-function-declaration]
+                    "regexp": "^ERROR in(.*)\\((.*),(.*)\\):$",
+                    // "regexp": "^ERROR in (.*)\\((.*),(.*)\\))$",
+                    // The first match group matches the file name which is relative.
+                    "file": 1,
+                    // The second match group matches the line on which the problem occurred.
+                    "line": 2,
+                    // The third match group matches the column at which the problem occurred.
+                    "column": 3
+                }
+            }
+        }
+    ]
+}

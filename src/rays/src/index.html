@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <style type="text/css">
+         * {
+            /* this was changed in css spec recently and behavior is different across browsers.
+            use old value, because it is more convenient to use with flexbox - in particular when using 'flex: 1 1 0' */
+            min-width: 0;
+            min-height: 0;
+
+            /* common practice */
+            box-sizing: border-box;
+         }
+
+         html,
+         body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
+               'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+            color: #666;
+         }
+
+         input, textarea, select, button {
+             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
+             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+         }
+
+         #root {
+            height: 100%;
+         }
+      </style>
+   </head>
+   <!--set tabindex=0 to allow hotkeys-->
+   <body tabindex="0">
+      <div id="root"></div>
+   </body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "module": "esnext",
+    "target": "es5",
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    "allowJs": true,
+    "rootDir": "./src",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "strictFunctionTypes": true,
+    "allowSyntheticDefaultImports": true,
+    // todo - make stricter
+    "strictNullChecks": true,
+//    "strictPropertyInitialization": true,
+   //  "noUnusedLocals": true,
+    "strictBindCallApply": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "jsx": "react"
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+    "build",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "jest",
+    "src/setupTests.ts",
+    "webpack.dev.config.js",
+    "webpack.prod.config.js",
+    "utils",
+    "ts-loader"
+  ]
+}
