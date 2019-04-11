@@ -1,0 +1,123 @@
+<html>
+  <head>
+    <style>
+      body {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 0;
+      }
+      .image {
+        position: absolute;
+        margin: 0;
+        width: 1000px;
+        height: 700px;
+      }
+      input {
+      }
+      #controls {
+        display: flex;
+        position: absolute;
+        bottom: 0;
+        align-self: stretch;
+        width: 1000px;
+      }
+
+      #slider1 {
+        flex: 1 1 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div id="div1"></div> -->
+    <img id="image1" src="image1.jpg" class="image" />
+    <img id="image2" src="image2.jpg" class="image" />
+    <div id="controls">
+      <input
+        id="slider1"
+        type="range"
+        min="0"
+        max="100000"
+        step="1"
+        value="0"
+      />
+      <button id="button" type="range" min="0" max="100000" step="1" value="0">
+        Start/stop
+      </button>
+    </div>
+  </body>
+
+  <script>
+    function setImageOpacity(v) {
+      const element = document.getElementById("image2");
+      element.style.opacity = v;
+    }
+    const selectElement = document.getElementById("slider1");
+
+    selectElement.addEventListener("input", event => {
+      setImageOpacity(event.target.value / 100000);
+
+      //   const result = document.querySelector("#div1");
+      //   result.textContent = `You like ${event.target.value}`;
+    });
+
+    const button = document.getElementById("button");
+    button.addEventListener("click", event => {
+      if (isRunning) {
+          shouldStop = true;
+      } else {
+          requestAnimationFrame(animate);
+      }
+
+      //   const result = document.querySelector("#div1");
+      //   result.textContent = `You like ${event.target.value}`;
+    });
+
+    let shouldStop = false;
+    let isRunning = false;
+
+    let increasing = true;
+    let lastAnimateTime = undefined;
+
+    const animationSpeed = 20;
+
+    requestAnimationFrame(animate);
+
+    function animate(timestamp) {
+      isRunning = true;
+      if (lastAnimateTime === undefined) {
+        lastAnimateTime = timestamp;
+        requestAnimationFrame(animate);
+        return;
+      }
+
+      const delta = timestamp - lastAnimateTime;
+      lastAnimateTime = timestamp;
+
+      let selectElement = document.querySelector("#slider1");
+
+      let increment = delta * animationSpeed;
+      if (!increasing) increment = -increment;
+
+      let v = parseFloat(selectElement.value) + increment;
+      selectElement.value = v;
+      setImageOpacity(v / 100000);
+
+      if (selectElement.value >= 100000) {
+        increasing = false;
+      }
+      if (selectElement.value <= 0) {
+        increasing = true;
+      }
+
+      if (shouldStop) {
+          isRunning = false;
+          shouldStop = false;
+          lastAnimateTime = undefined;
+      } else {
+        requestAnimationFrame(animate);
+      }
+    }
+  </script>
+</html>
