@@ -33,6 +33,7 @@
     <!-- <div id="div1"></div> -->
     <img id="image1" src="image1.jpg" class="image" />
     <img id="image2" src="image2.jpg" class="image" />
+    <img id="image3" src="image3.jpg" class="image" />
     <div id="controls">
       <input
         id="slider1"
@@ -42,24 +43,33 @@
         step="1"
         value="0"
       />
-      <button id="button" type="range" min="0" max="100000" step="1" value="0">
+      <button id="button" type="range" min="0" max="1" step="1" value="0">
         Start/stop
       </button>
     </div>
   </body>
 
   <script>
-    function setImageOpacity(v) {
-      const element = document.getElementById("image2");
-      element.style.opacity = v;
+    const maxProgress = 100000;
+
+    function setImageOpacityFromProgress(v) {
+      const iamge2 = document.getElementById("image2");
+      const image3 = document.getElementById("image3");
+
+      const halfProgress = maxProgress / 2;
+      if (v < halfProgress) {
+        image2.style.opacity = v / halfProgress;
+        image3.style.opacity = 0;       
+      } else {
+        iamge2.style.opacity = 1;
+        image3.style.opacity = (v - halfProgress) / halfProgress;
+      }
     }
     const selectElement = document.getElementById("slider1");
+    selectElement.max = maxProgress;
 
     selectElement.addEventListener("input", event => {
-      setImageOpacity(event.target.value / 100000);
-
-      //   const result = document.querySelector("#div1");
-      //   result.textContent = `You like ${event.target.value}`;
+      setImageOpacityFromProgress(event.target.value);
     });
 
     const button = document.getElementById("button");
@@ -69,9 +79,6 @@
       } else {
           requestAnimationFrame(animate);
       }
-
-      //   const result = document.querySelector("#div1");
-      //   result.textContent = `You like ${event.target.value}`;
     });
 
     let shouldStop = false;
@@ -102,9 +109,9 @@
 
       let v = parseFloat(selectElement.value) + increment;
       selectElement.value = v;
-      setImageOpacity(v / 100000);
+      setImageOpacityFromProgress(v);
 
-      if (selectElement.value >= 100000) {
+      if (selectElement.value >= maxProgress) {
         increasing = false;
       }
       if (selectElement.value <= 0) {
