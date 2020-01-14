@@ -1,0 +1,11 @@
+{
+  "useTestApi": true,
+  "apiUrl": "http://localhost:5000",
+  "useMsal": true,
+  "msalConfig": {
+    "auth": {
+      "clientId": "6afecd7f-36c7-4d06-a164-b8b352688568",
+      "authority": "https://login.microsoftonline.com/tfp/odotb2c.onmicrosoft.com/B2C_1_signin/V2.0"
+    }
+  }
+}
