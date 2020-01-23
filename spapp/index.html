@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f2720a" />
+    <link rel="manifest" href="/public/manifest.json" />
 
     <script async src="https://apis.google.com/js/api.js"></script>
 
@@ -13,6 +14,17 @@
       href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap&subset=latin-ext"
       rel="stylesheet"
     />
+
+    <script>
+      // Check that service workers are supported
+      if ('serviceWorker' in navigator) {
+        // Use the window load event to keep the page load performant
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js');
+        });
+      }
+    </script>
+
     <style type="text/css">
       * {
         /* this was changed in css spec recently and behavior is different across browsers.
@@ -74,7 +86,7 @@
         border: 6px solid #fff;
         border-radius: 50%;
         animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        border-color: #cccccc transparent transparent transparent;
+        border-color: #f2720a transparent transparent transparent;
       }
       .lds-ring div:nth-child(1) {
         animation-delay: -0.45s;
@@ -107,7 +119,5 @@
         </div>
       </div>
     </div>
-    <script type="text/javascript" src="vendor.js"></script
-    ><script type="text/javascript" src="index.js"></script>
-  </body>
+  <script type="text/javascript" src="vendor.js"></script><script type="text/javascript" src="index.js"></script></body>
 </html>
