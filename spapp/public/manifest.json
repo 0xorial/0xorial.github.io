@@ -3,7 +3,7 @@
   "short_name": "SR app",
   "icons": [
     {
-      "src": "/public/icon.png",
+      "src": "/spapp/public/icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
