@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f2720a" />
-    <link rel="manifest" href="/public/manifest.json" />
+    <link rel="manifest" href="/spapp/public/manifest.json" />
 
     <script async src="https://apis.google.com/js/api.js"></script>
 
@@ -20,7 +20,7 @@
       if ('serviceWorker' in navigator) {
         // Use the window load event to keep the page load performant
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js');
+          navigator.serviceWorker.register('/spapp/service-worker.js');
         });
       }
     </script>
