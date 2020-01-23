@@ -1,4 +1,4 @@
-importScripts("precache-manifest.c405e458693647a3c6140857fae45bac.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
+importScripts("precache-manifest.b823efbe0c87b2762abcf890b0c24be6.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 // Cache the Google Fonts stylesheets with a stale-while-revalidate strategy.
 workbox.routing.registerRoute(
