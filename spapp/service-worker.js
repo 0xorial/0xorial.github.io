@@ -1,6 +1,8 @@
-importScripts("precache-manifest.7bec7c8b321c26eade37c73ffe433672.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
+importScripts("precache-manifest.4be244d5737174239ceb0239de30f853.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
+
+workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
 // Cache the Google Fonts stylesheets with a stale-while-revalidate strategy.
 workbox.routing.registerRoute(
@@ -27,9 +29,9 @@ workbox.routing.registerRoute(
   })
 );
 
-// Updating SW lifecycle to update the app after user triggered refresh
-workbox.core.skipWaiting();
-workbox.core.clientsClaim();
-
-workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    skipWaiting();
+  }
+});
 
