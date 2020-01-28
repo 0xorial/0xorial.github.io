@@ -19,16 +19,16 @@
       window.onWbShouldRefresh = cb => {
         window.__wbRefreshCb = cb;
       };
-    </script>
 
-    <script type="module">
-      function createUIPrompt(callbacks) {
+      window.createUIPrompt = (callbacks) => {
         window.onWbAccept = callbacks.onAccept;
         if (window.__wbRefreshCb) {
           window.__wbRefreshCb();
         }
       }
+    </script>
 
+    <script type="module">
       import {Workbox} from 'https://storage.googleapis.com/workbox-cdn/releases/4.1.0/workbox-window.prod.mjs';
 
       if ('serviceWorker' in navigator) {
@@ -45,7 +45,7 @@
 
           // Assumes your app has some sort of prompt UI element
           // that a user can either accept or reject.
-          createUIPrompt({
+          window.createUIPrompt({
             onAccept: async () => {
               // Assuming the user accepted the update, set up a listener
               // that will reload the page as soon as the previously waiting
