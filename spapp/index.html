@@ -15,11 +15,13 @@
       rel="stylesheet"
     />
 
-    <script type="module">
+    <script lang="JavaScript">
       window.onWbShouldRefresh = cb => {
         window.__wbRefreshCb = cb;
       };
+    </script>
 
+    <script type="module">
       function createUIPrompt(callbacks) {
         window.onWbAccept = callbacks.onAccept;
         if (window.__wbRefreshCb) {
