@@ -22,7 +22,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "index.html"
   },
   {
-    "revision": "a5574825f953a4ebeca4",
+    "revision": "f10758c95c9f4fec1b71",
     "url": "index.js"
   },
   {
@@ -38,7 +38,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "public/manifest.json"
   },
   {
-    "revision": "beb141f4dd27867a0c42",
+    "revision": "ec3e203ae39b239bd60e",
     "url": "vendor.js"
   }
 ]);
