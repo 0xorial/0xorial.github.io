@@ -1,6 +1,74 @@
 <html lang="en">
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Crypto</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+      }
+
+      input,
+      textarea,
+      select,
+      button {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      }
+
+      html {
+        box-sizing: border-box;
+      }
+
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+
+      body {
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #input,
+      #output,
+      #passwordParts {
+        height: 200px;
+      }
+
+      #partsRequired,
+      #partsTotal {
+        width: 30px;
+      }
+
+      .buttons {
+        display: flex;
+      }
+
+      .fxRow {
+        display: flex;
+      }
+
+      .fxColumn {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .fxScale {
+        flex: 1 1 0;
+      }
+    </style>
+    <script src="dictionary.js"></script>
+    <script src="BigInteger.js"></script>
     <script src="secrets.js"></script>
     <script src="base64.js"></script>
     <script type="text/javascript">
@@ -79,68 +147,93 @@
           document.getElementById("output").value = outputText;
         } catch (e) {
           console.log(e);
-          document.getElementById("output").value = "Error during decoding. Password incorrect?";
+          document.getElementById("output").value =
+            "Error during decoding. Password incorrect?";
         }
       }
+
+      async function onGetPasswordClick() {
+        try {
+          const passwordParts = document.getElementById("passwordParts").value;
+          const partsArray = passwordParts
+            .split("\n")
+            .filter((x) => x.length !== 0)
+            .map(toHexString);
+          const secret = secrets.combine(partsArray);
+          document.getElementById("password").value = secrets.hex2str(secret);
+        } catch (e) {
+          document.getElementById("password").value =
+            "Error! Password parts incorrect?";
+        }
+      }
+
+      async function onGeneratePasswordPartsClick() {
+        const passwordText = document.getElementById("password").value;
+        const totalParts = parseInt(
+          document.getElementById("partsTotal").value,
+          10
+        );
+        const requiredParts = parseInt(
+          document.getElementById("partsRequired").value,
+          10
+        );
+        if (isNaN(totalParts) || isNaN(requiredParts)) {
+          document.getElementById("passwordParts").value =
+            "Invalid parts count.";
+          return;
+        }
+        const pwHex = secrets.str2hex(passwordText);
+        const shares = secrets.share(pwHex, 5, 3);
+        document.getElementById("passwordParts").value = shares
+          .map(toWords)
+          .join("\n");
+      }
+
+      function toWords(hexString) {
+        const n = bigInt(hexString, 16);
+        const array = n.toArray(words.length);
+        return array.value.map((x) => words[x]).join(" ");
+      }
+
+      function toHexString(wordsString) {
+        const array = wordsString.split(" ").map((x) => wordsDictionary.get(x));
+        const n = bigInt.fromArray(array, words.length);
+        return n.toString(16);
+      }
     </script>
-    <style>
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont,
-          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
-          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-          "Noto Color Emoji";
-      }
-
-      input,
-      textarea,
-      select,
-      button {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      }
-
-      html {
-        box-sizing: border-box;
-      }
-
-      *,
-      *:before,
-      *:after {
-        box-sizing: inherit;
-      }
-
-      body {
-        margin: 0;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-      }
-
-      #input,
-      #output {
-        height: 200px;
-      }
-
-      #buttons {
-        display: flex;
-      }
-    </style>
   </head>
   <body>
-    <div>Input:</div>
-    <textarea id="input"></textarea>
-    <div>
-      Password (iv is zero so never use password more than once - see AES-CBC
-      for details):
+    <div class="fxRow">
+      <div class="fxColumn fxScale">
+        <div>Input:</div>
+        <textarea id="input"></textarea>
+      </div>
+      <div style="width: 20px;"></div>
+      <div class="fxColumn fxScale">
+        <div>Password parts (1 per line):</div>
+        <textarea id="passwordParts"></textarea>
+        <div class="buttons">
+          <button type="button" onclick="onGetPasswordClick()">
+            Recover password from parts ⭣
+          </button>
+          <button type="button" onclick="onGeneratePasswordPartsClick()">
+            Generate password parts ↑
+          </button>
+          <div>Require</div>
+          <input id="partsRequired" value="3" />
+          <div>passwords out of</div>
+          <input id="partsTotal" value="5" />
+        </div>
+        <div>
+          Password (iv is zero so never use password more than once - see
+          AES-CBC for details):
+        </div>
+        <input id="password" />
+      </div>
     </div>
-    <input id="password" />
-    <div id="buttons">
-      <button type="button" onclick="onEncodeClick()">Encode</button>
-      <button type="button" onclick="onDecodeClick()">Decode</button>
+    <div class="buttons">
+      <button type="button" onclick="onEncodeClick()">Encode input</button>
+      <button type="button" onclick="onDecodeClick()">Decode input</button>
     </div>
     <div>Output:</div>
     <textarea id="output" readonly="true"></textarea>
