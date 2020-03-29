@@ -1,0 +1,148 @@
+<html lang="en">
+  <head>
+    <title>Crypto</title>
+    <script src="secrets.js"></script>
+    <script src="base64.js"></script>
+    <script type="text/javascript">
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+
+      async function onEncodeClick() {
+        const inputText = document.getElementById("input").value;
+        const passwordText = document.getElementById("password").value;
+        const passwordData = encoder.encode(passwordText);
+        const passwordDigest = await crypto.subtle.digest(
+          "SHA-256",
+          passwordData
+        );
+
+        const inputData = encoder.encode(inputText);
+        const iv = new Uint8Array(16);
+
+        const key = await crypto.subtle.importKey(
+          "raw",
+          passwordDigest,
+          "AES-CBC",
+          false,
+          ["encrypt"]
+        );
+
+        const encodedData = await crypto.subtle.encrypt(
+          {
+            name: "AES-CBC",
+            iv,
+          },
+          key,
+          inputData
+        );
+
+        const base64String = base64js.fromByteArray(
+          new Uint8Array(encodedData)
+        );
+        document.getElementById("output").value = base64String;
+      }
+
+      async function onDecodeClick() {
+        const inputTextBase64 = document.getElementById("input").value;
+        const passwordText = document.getElementById("password").value;
+        const passwordData = encoder.encode(passwordText);
+        try {
+          const passwordDigest = await crypto.subtle.digest(
+            "SHA-256",
+            passwordData
+          );
+
+          const inputData = base64js.toByteArray(inputTextBase64);
+
+          // empty iv. do not reuse password!
+          const iv = new Uint8Array(16);
+
+          const key = await crypto.subtle.importKey(
+            "raw",
+            passwordDigest,
+            "AES-CBC",
+            false,
+            ["decrypt"]
+          );
+
+          const decodedData = await crypto.subtle.decrypt(
+            {
+              name: "AES-CBC",
+              iv,
+            },
+            key,
+            inputData
+          );
+
+          const outputText = decoder.decode(decodedData);
+
+          document.getElementById("output").value = outputText;
+        } catch (e) {
+          console.log(e);
+          document.getElementById("output").value = "Error during decoding. Password incorrect?";
+        }
+      }
+    </script>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+      }
+
+      input,
+      textarea,
+      select,
+      button {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      }
+
+      html {
+        box-sizing: border-box;
+      }
+
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+
+      body {
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #input,
+      #output {
+        height: 200px;
+      }
+
+      #buttons {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div>Input:</div>
+    <textarea id="input"></textarea>
+    <div>
+      Password (iv is zero so never use password more than once - see AES-CBC
+      for details):
+    </div>
+    <input id="password" />
+    <div id="buttons">
+      <button type="button" onclick="onEncodeClick()">Encode</button>
+      <button type="button" onclick="onDecodeClick()">Decode</button>
+    </div>
+    <div>Output:</div>
+    <textarea id="output" readonly="true"></textarea>
+  </body>
+</html>
