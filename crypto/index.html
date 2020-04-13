@@ -86,6 +86,7 @@
 
         const inputData = encoder.encode(inputText);
         const iv = new Uint8Array(16);
+        crypto.getRandomValues(iv);
 
         const key = await crypto.subtle.importKey(
           "raw",
@@ -105,7 +106,7 @@
         );
 
         const base64String = base64js.fromByteArray(
-          new Uint8Array(encodedData)
+          new Uint8Array(concatBuffers(iv, encodedData))
         );
         document.getElementById("output").value = base64String;
       }
@@ -120,10 +121,10 @@
             passwordData
           );
 
-          const inputData = base64js.toByteArray(inputTextBase64);
+          const fullByteArray = base64js.toByteArray(inputTextBase64);
+          const inputDataBuffer = typedArrayToBuffer(fullByteArray);
 
-          // empty iv. do not reuse password!
-          const iv = new Uint8Array(16);
+          const iv = new Uint8Array(inputDataBuffer, 0, 16);
 
           const key = await crypto.subtle.importKey(
             "raw",
@@ -133,6 +134,7 @@
             ["decrypt"]
           );
 
+          const inputData = new Uint8Array(inputDataBuffer, 16);
           const decodedData = await crypto.subtle.decrypt(
             {
               name: "AES-CBC",
@@ -160,7 +162,8 @@
             .filter((x) => x.length !== 0)
             .map(toHexString);
           const secret = secrets.combine(partsArray);
-          document.getElementById("password").value = secrets.hex2str(secret);
+          const useDictionaryPassword = document.getElementById("useDictionaryPassword").checked;
+          document.getElementById("password").value =  useDictionaryPassword ? toWords(secret) : secrets.hex2str(secret);
         } catch (e) {
           document.getElementById("password").value =
             "Error! Password parts incorrect?";
@@ -182,11 +185,19 @@
             "Invalid parts count.";
           return;
         }
-        const pwHex = secrets.str2hex(passwordText);
+
+        const useDictionaryPassword = document.getElementById("useDictionaryPassword").checked;
+        const pwHex = useDictionaryPassword ?  toHexString(passwordText) : secrets.str2hex(passwordText);
         const shares = secrets.share(pwHex, 5, 3);
         document.getElementById("passwordParts").value = shares
           .map(toWords)
           .join("\n");
+      }
+
+      async function onGenerateDictionaryPassword() {
+        // we are exporting password anyway, so crypto.subtle.generateKey is not necessary
+        const key = secrets.random(128);
+        document.getElementById("password").value = toWords(key);
       }
 
       function toWords(hexString) {
@@ -199,6 +210,24 @@
         const array = wordsString.split(" ").map((x) => wordsDictionary.get(x));
         const n = bigInt.fromArray(array, words.length);
         return n.toString(16);
+      }
+
+      function concatTypedArrays(a, b) { // a, b TypedArray of same type
+        var c = new (a.constructor)(a.length + b.length);
+        c.set(a, 0);
+        c.set(b, a.length);
+        return c;
+      }
+
+      function concatBuffers(a, b) {
+        return concatTypedArrays(
+                new Uint8Array(a.buffer || a),
+                new Uint8Array(b.buffer || b)
+        ).buffer;
+      }
+
+      function typedArrayToBuffer(array) {
+        return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset)
       }
     </script>
   </head>
@@ -213,20 +242,22 @@
         <div>Password parts (1 per line):</div>
         <textarea id="passwordParts"></textarea>
         <div class="buttons">
-          <button type="button" onclick="onGetPasswordClick()">
+          <button onclick="onGetPasswordClick()">
             Recover password from parts ⭣
           </button>
-          <button type="button" onclick="onGeneratePasswordPartsClick()">
+          <button onclick="onGeneratePasswordPartsClick()">
             Generate password parts ↑
           </button>
           <div>Require</div>
           <input id="partsRequired" value="3" />
           <div>passwords out of</div>
           <input id="partsTotal" value="5" />
+          <input id="useDictionaryPassword" type="checkbox">
+          <label for="useDictionaryPassword">Interpret password as dictionary-based baseN number</label>
+          <button onclick="onGenerateDictionaryPassword()">Generate dictionary password (128 bits length)</button>
         </div>
         <div>
-          Password (iv is zero so never use password more than once - see
-          AES-CBC for details):
+          Password:
         </div>
         <input id="password" />
       </div>
@@ -235,7 +266,7 @@
       <button type="button" onclick="onEncodeClick()">Encode input</button>
       <button type="button" onclick="onDecodeClick()">Decode input</button>
     </div>
-    <div>Output:</div>
+    <div>Output (random IV is generated each time and prepended to message, see AES-CBC for details):</div>
     <textarea id="output" readonly="true"></textarea>
   </body>
 </html>

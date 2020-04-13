@@ -1,3 +1,5 @@
+// https://github.com/peterolson/BigInteger.js
+
 var bigInt = (function (undefined) {
     "use strict";
 
