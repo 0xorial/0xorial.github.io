@@ -5636,10 +5636,10 @@ terser@^3.16.1:
     source-map "~0.6.1"
     source-map-support "~0.5.9"
 
-three@^0.102.0:
-  version "0.102.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.102.0.tgz#b26a7212d95f1ea043ab94598d55973ebe110cbb"
-  integrity sha512-ZszcMfos5uPugmf7svZshEIh/oncVAtnxpPqrFFj6hrh6SMyQ1qQBCY8QE0Lah1C5gXTx837rn2ikt0VLGqQ9g==
+three@^0.137.0:
+  version "0.137.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.137.0.tgz#0ebd6ba66637a332c31f234bcdd35aeec071a6e3"
+  integrity sha512-rzSDhia6cU35UCy6y+zEEws6vSgytfHqFMSaBvUcySgzwvDO6vETyswtSNi/+aVqJw8WLMwyT1mlQQ1T/dxxOA==
 
 through2@0.6.3:
   version "0.6.3"
